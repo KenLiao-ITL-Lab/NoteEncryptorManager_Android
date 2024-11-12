@@ -7,10 +7,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.itl.kglab.noteEncryptorManager.ui.component.MainBottomNavigationBar
+import com.itl.kglab.noteEncryptorManager.ui.route.MainBottomNavigationItem
+import com.itl.kglab.noteEncryptorManager.ui.screen.ConverterScreen
+import com.itl.kglab.noteEncryptorManager.ui.screen.NoteListScreen
+import com.itl.kglab.noteEncryptorManager.ui.screen.SettingScreen
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +24,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NoteEncryptorManagerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        MainBottomNavigationBar(navController = navController)
+                    }
+                ) { innerPadding ->
+                    NavHost(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        navController = navController,
+                        startDestination = MainBottomNavigationItem.Converter.route
+                    ) {
+                        composable(MainBottomNavigationItem.Converter.route) {
+                            ConverterScreen()
+                        }
+                        composable(MainBottomNavigationItem.NoteList.route) {
+                            NoteListScreen()
+                        }
+                        composable(MainBottomNavigationItem.Setting.route) {
+                            SettingScreen()
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NoteEncryptorManagerTheme {
-        Greeting("Android")
     }
 }
