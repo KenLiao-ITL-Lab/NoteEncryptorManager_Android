@@ -10,11 +10,13 @@ import androidx.navigation.compose.composable
 import com.itl.kglab.noteEncryptorManager.ui.screen.ConverterScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.NoteListScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.SettingScreen
+import com.itl.kglab.noteEncryptorManager.viewmodel.MainViewModel
 
 @Composable
 fun MainRoute(
     modifier: Modifier = Modifier,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    viewModel: MainViewModel
 ) {
     NavHost(
         modifier = modifier,
@@ -26,7 +28,20 @@ fun MainRoute(
 
         composable(MainBottomNavigationItem.Converter.route) {
             ConverterScreen(
-                modifier = screenModifier
+                modifier = screenModifier,
+                resultText = viewModel.resultState,
+                onConvertClicked = { input ->
+                    viewModel.convertInput(input)
+                },
+                onDuplicateClicked = {
+                    viewModel.duplicateResult()
+                },
+                onSaveClicked = {
+                    viewModel.saveResult()
+                },
+                onClearClicked = {
+                    viewModel.clear()
+                }
             )
         }
         composable(MainBottomNavigationItem.NoteList.route) {
