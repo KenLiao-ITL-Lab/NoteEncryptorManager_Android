@@ -70,4 +70,8 @@ class HashTools(
         return resultByte
     }
 
+    fun getHashTypeList(): List<HashAlgorithmType> {
+        return HashAlgorithmType.getList()
+    }
+
 }

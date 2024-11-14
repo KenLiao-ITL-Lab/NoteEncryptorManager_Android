@@ -28,4 +28,9 @@ class MainViewModel : ViewModel() {
     fun clear() {
         resultState = ""
     }
+
+
+    fun getHashTypeList(): List<String> {
+        return hashTools.getHashTypeList().map { it.algorithmName }
+    }
 }

@@ -51,7 +51,8 @@ fun MainRoute(
         }
         composable(MainBottomNavigationItem.Setting.route) {
             SettingScreen(
-                modifier = screenModifier
+                modifier = screenModifier,
+                hashTypeList = viewModel.getHashTypeList()
             )
         }
     }

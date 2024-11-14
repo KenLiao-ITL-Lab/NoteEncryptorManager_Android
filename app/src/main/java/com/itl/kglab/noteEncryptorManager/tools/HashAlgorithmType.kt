@@ -7,4 +7,12 @@ sealed class HashAlgorithmType(
     data object Sha256 : HashAlgorithmType("SHA-256")
     data object Sha512 : HashAlgorithmType("SHA-512")
 
+    companion object {
+        fun getList(): List<HashAlgorithmType> {
+            return listOf(
+                Sha256,
+                Sha512
+            )
+        }
+    }
 }
