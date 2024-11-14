@@ -4,14 +4,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.itl.kglab.noteEncryptorManager.tools.HashTools
 
 class MainViewModel : ViewModel() {
+
+    private val hashTools = HashTools()
 
     var resultState by mutableStateOf("")
         private set
 
     fun convertInput(input: String) {
-        resultState = "Result message -> $input"
+        resultState = hashTools.hashMessage(input)
     }
 
     fun duplicateResult() {
