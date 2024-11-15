@@ -43,8 +43,8 @@ fun MainRoute(
                         clipboardManager.setText(AnnotatedString(viewModel.resultState))
                     }
                 },
-                onSaveClicked = {
-                    viewModel.saveResult()
+                onSaveClicked = { data ->
+                    viewModel.saveResult(data)
                 },
                 onClearClicked = {
                     viewModel.clear()

@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
+import com.itl.kglab.noteEncryptorManager.ui.data.SaveNoteEventData
 
 class MainViewModel : ViewModel() {
 
@@ -17,11 +18,7 @@ class MainViewModel : ViewModel() {
         resultState = hashTools.hashMessage(input)
     }
 
-    fun duplicateResult() {
-        // 複製結果
-    }
-
-    fun saveResult() {
+    fun saveResult(data: SaveNoteEventData) {
         // 儲存結果
     }
 
