@@ -3,6 +3,8 @@ package com.itl.kglab.noteEncryptorManager.ui.route
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -27,6 +29,9 @@ fun MainRoute(
         val screenModifier = Modifier.padding(horizontal = 16.dp)
 
         composable(MainBottomNavigationItem.Converter.route) {
+
+            val clipboardManager = LocalClipboardManager.current
+
             ConverterScreen(
                 modifier = screenModifier,
                 resultText = viewModel.resultState,
@@ -34,7 +39,9 @@ fun MainRoute(
                     viewModel.convertInput(input)
                 },
                 onDuplicateClicked = {
-                    viewModel.duplicateResult()
+                    if (viewModel.resultState.isNotBlank()) {
+                        clipboardManager.setText(AnnotatedString(viewModel.resultState))
+                    }
                 },
                 onSaveClicked = {
                     viewModel.saveResult()

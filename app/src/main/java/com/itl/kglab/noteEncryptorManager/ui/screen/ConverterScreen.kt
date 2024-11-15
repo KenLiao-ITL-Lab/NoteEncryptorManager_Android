@@ -31,7 +31,6 @@ fun ConverterScreen(
     onSaveClicked: () -> Unit,
     onClearClicked: () -> Unit
 ) {
-
     var inputValue by rememberSaveable { mutableStateOf("") }
 
     Column(
