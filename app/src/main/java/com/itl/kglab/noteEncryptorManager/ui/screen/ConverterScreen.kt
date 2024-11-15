@@ -1,7 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
@@ -89,13 +87,7 @@ fun ConverterInputSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp, horizontal = 16.dp),
-            onClick = onConvertClicked,
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 2.dp
-            ),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.White,
-            )
+            onClick = onConvertClicked
         ) {
             Text(text = "轉換")
         }
@@ -139,13 +131,7 @@ fun ConverterFunctionalButtonGroup(
             modifier = Modifier
                 .weight(buttonWeight)
                 .padding(horizontal = 16.dp),
-            onClick = onDuplicateClicked,
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 2.dp
-            ),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.White,
-            )
+            onClick = onDuplicateClicked
         ) {
             Text(
                 text = "複製"
@@ -156,13 +142,7 @@ fun ConverterFunctionalButtonGroup(
             modifier = Modifier
                 .weight(buttonWeight)
                 .padding(horizontal = 16.dp),
-            onClick = onSaveClicked,
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 2.dp
-            ),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.White,
-            )
+            onClick = onSaveClicked
         ) {
             Text(text = "儲存")
         }
@@ -171,13 +151,7 @@ fun ConverterFunctionalButtonGroup(
             modifier = Modifier
                 .weight(buttonWeight)
                 .padding(horizontal = 16.dp),
-            onClick = onClearClicked,
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 2.dp
-            ),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.White,
-            )
+            onClick = onClearClicked
         ) {
             Text(text = "清除")
         }

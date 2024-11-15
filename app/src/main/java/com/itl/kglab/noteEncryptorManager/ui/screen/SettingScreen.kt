@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -67,10 +65,7 @@ fun SettingScreen(
 
         OutlinedCard(
             modifier = Modifier
-                .padding(8.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            )
+                .padding(8.dp)
         ) {
             SettingTable(
                 hashTypeList = hashTypeList,
@@ -210,13 +205,7 @@ fun SettingButtonGroup(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
-            onClick = onConfirmClicked,
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 2.dp
-            ),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.White,
-            )
+            onClick = onConfirmClicked
         ) {
             Text(text = "儲存")
         }
@@ -225,13 +214,7 @@ fun SettingButtonGroup(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
-            onClick = onCancelClicked,
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 2.dp
-            ),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.White,
-            )
+            onClick = onCancelClicked
         ) {
             Text(text = "取消")
         }
