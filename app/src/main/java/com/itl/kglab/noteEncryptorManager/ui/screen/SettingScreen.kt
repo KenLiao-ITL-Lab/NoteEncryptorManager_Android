@@ -14,7 +14,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,10 +25,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 
 @Composable
 fun SettingScreen(
@@ -102,6 +101,7 @@ fun SettingScreen(
         ) {
             SettingButtonGroup(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
         }
@@ -201,23 +201,23 @@ fun SettingButtonGroup(
         horizontalArrangement = Arrangement.Center
     ) {
 
-        OutlinedButton(
+        OutlinedStyleButton(
             modifier = Modifier
+                .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 8.dp),
-            onClick = onConfirmClicked
-        ) {
-            Text(text = "儲存")
-        }
+            onClick = onConfirmClicked,
+            buttonText = "儲存"
+        )
 
-        OutlinedButton(
+        OutlinedStyleButton(
             modifier = Modifier
+                .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 8.dp),
-            onClick = onCancelClicked
-        ) {
-            Text(text = "取消")
-        }
+            onClick = onCancelClicked,
+            buttonText = "取消"
+        )
     }
 }
 
