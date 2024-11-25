@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,13 @@ fun SettingScreen(
         Regex("^[a-zA-Z]{0,10}\$")
     }
 
+    val sampleSizeRegex = remember {
+        Regex("^[0-9]?\$")
+    }
+
+    val indexRegex = remember {
+        Regex("^[0-9]{0,2}$")
+    }
 
     Column(
         modifier = modifier,
@@ -82,13 +90,13 @@ fun SettingScreen(
                 },
                 sampleSizeValue = sampleSizeInput,
                 onSampleSizeChange = {
-                    if (it.length <= 1) {
+                    if (sampleSizeRegex.matches(it)) {
                         sampleSizeInput = it
                     }
                 },
                 indexValue = indexInput,
                 onIndexChange = {
-                    if (it.length <= 2) {
+                    if (indexRegex.matches(it)) {
                         indexInput = it
                     }
                 }
@@ -145,7 +153,8 @@ fun SettingTable(
             onValueChange = onPrefixChange,
             supportingText = "長度限制為10",
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
             )
         )
 
@@ -158,7 +167,8 @@ fun SettingTable(
             onValueChange = onSuffixChange,
             supportingText = "長度限制為10",
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
             )
         )
 
@@ -171,7 +181,8 @@ fun SettingTable(
             onValueChange = onSampleSizeChange,
             supportingText = "請輸入0~9數字",
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Next
             )
         )
 
@@ -184,7 +195,8 @@ fun SettingTable(
             onValueChange = onIndexChange,
             supportingText = "請輸入0~99數字",
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Done
             )
         )
     }
