@@ -14,8 +14,11 @@ import com.itl.kglab.noteEncryptorManager.ui.component.MainBottomNavigationBar
 import com.itl.kglab.noteEncryptorManager.ui.route.MainRoute
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
