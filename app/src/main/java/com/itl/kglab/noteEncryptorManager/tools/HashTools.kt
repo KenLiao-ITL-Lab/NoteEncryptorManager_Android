@@ -56,9 +56,9 @@ class HashTools(
         val builder = StringBuilder()
 
         builder.apply {
-            append(settingInfo.prefix)
+            append(settingInfo.prefixText)
             append(message)
-            append(settingInfo.suffix)
+            append(settingInfo.suffixText)
         }
 
         messageDigest.update(builder.toString().toByteArray())

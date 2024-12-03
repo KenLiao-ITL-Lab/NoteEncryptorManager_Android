@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.ui.data.SaveNoteEventData
 
-class MainViewModel : ViewModel() {
+class MainViewModel() : ViewModel() {
 
     private val hashTools = HashTools()
 
@@ -26,8 +26,8 @@ class MainViewModel : ViewModel() {
         resultState = ""
     }
 
-
     fun getHashTypeList(): List<String> {
         return hashTools.getHashTypeList().map { it.algorithmName }
     }
+
 }
