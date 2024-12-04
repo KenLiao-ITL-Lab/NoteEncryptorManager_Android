@@ -8,7 +8,11 @@ class HashTools(
     private var settingInfo: SettingInfo
 ) {
 
-    private var messageDigest: MessageDigest = MessageDigest.getInstance(settingInfo.algorithmName)
+    private val algorithmName: String = settingInfo.algorithmName.ifBlank {
+        HashAlgorithmType.Sha256.algorithmName
+    }
+
+    private var messageDigest: MessageDigest = MessageDigest.getInstance(algorithmName)
 
     fun hashMessage(message: String): String {
         val hashArray = hash(message)
