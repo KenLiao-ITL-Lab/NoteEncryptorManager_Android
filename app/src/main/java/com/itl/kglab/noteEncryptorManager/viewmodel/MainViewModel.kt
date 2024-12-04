@@ -6,14 +6,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
+import com.itl.kglab.noteEncryptorManager.tools.HashAlgorithmType
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
+import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.data.SaveNoteEventData
+import com.itl.kglab.noteEncryptorManager.ui.screen.SettingScreenInfo
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class MainViewModel @Inject constructor(
-    val repository: MainRepository
+    private val repository: MainRepository
 ) : ViewModel() {
 
     private val hashTools = HashTools()
@@ -22,6 +27,10 @@ class MainViewModel @Inject constructor(
 
     var resultState by mutableStateOf("")
         private set
+
+    init {
+        getSettingInfo()
+    }
 
     fun convertInput(input: String) {
         resultState = hashTools.hashMessage(input)
@@ -42,10 +51,38 @@ class MainViewModel @Inject constructor(
     fun getSettingInfo() {
         viewModelScope.launch {
             val info = repository.getSettingInfo().stateIn(viewModelScope).value
+
+            val screenInfo = SettingScreenInfo(
+                algorithmName = info.algorithm.algorithmName,
+                prefixText = info.prefixText,
+                suffixText = info.suffixText,
+                samplingSize = info.samplingSize,
+                sampleIndex = info.sampleIndex
+            )
             state = state.copy(
-                settingInfo = info
+                settingInfo = screenInfo
             )
         }
+    }
+
+    fun saveSettingInfo(info: SettingScreenInfo) {
+        viewModelScope.launch {
+            repository.setSettingInfo(
+                SettingInfo(
+                    algorithm = HashAlgorithmType.getTypeByName(info.algorithmName),
+                    prefixText = info.prefixText,
+                    suffixText = info.suffixText,
+                    sampleIndex = info.sampleIndex,
+                    samplingSize = info.samplingSize
+                )
+            )
+
+            getSettingInfo()
+        }
+    }
+
+    fun clearSettingInfo() {
+        getSettingInfo()
     }
 
 }

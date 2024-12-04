@@ -1,7 +1,7 @@
 package com.itl.kglab.noteEncryptorManager.viewmodel
 
-import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
+import com.itl.kglab.noteEncryptorManager.ui.screen.SettingScreenInfo
 
 data class ScreenState(
-    val settingInfo: SettingInfo? = null
+    val settingInfo: SettingScreenInfo = SettingScreenInfo()
 )
