@@ -40,43 +40,45 @@ fun SettingScreen(
     settingInfo: SettingScreenInfo,
     onSaveSettingClicked: (SettingScreenInfo) -> Unit
 ) {
+    var prefixInput by rememberSaveable { mutableStateOf(settingInfo.prefixText) }
+    var suffixInput by rememberSaveable { mutableStateOf(settingInfo.prefixText) }
+    var sampleSizeInput by rememberSaveable { mutableIntStateOf(settingInfo.samplingSize) }
+    var indexInput by rememberSaveable { mutableIntStateOf(settingInfo.sampleIndex) }
+    var selectedItemIndex by rememberSaveable { mutableIntStateOf(settingInfo.algorithmIndex) }
 
-    var prefixInput by rememberSaveable {
-        mutableStateOf(settingInfo.prefixText)
-    }
-
-    var suffixInput by rememberSaveable {
-        mutableStateOf(settingInfo.suffixText)
-    }
-
-    var sampleSizeInput by rememberSaveable {
-        mutableIntStateOf(settingInfo.samplingSize)
-    }
-
-    var indexInput by rememberSaveable {
-        mutableIntStateOf(settingInfo.sampleIndex)
-    }
-
-    val decorateRegex = remember {
-        Regex("^[a-zA-Z]{0,10}\$")
-    }
-
-    val sampleSizeRegex = remember {
-        Regex("^[0-9]?\$")
-    }
-
-    val indexRegex = remember {
-        Regex("^[0-9]{0,2}$")
-    }
-
-    var selectedItemIndex by remember {
-        mutableIntStateOf(settingInfo.algorithmIndex)
-    }
+    val regex = remember { SettingInputRegex() }
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        val config = SettingTableConfig(
+            prefixValue = prefixInput,
+            onPrefixChange = {
+                if (regex.decorateRegex.matches(it)) {
+                    prefixInput = it
+                }
+            },
+            suffixValue = suffixInput,
+            onSuffixChange = {
+                if (regex.decorateRegex.matches(it)) {
+                    suffixInput = it
+                }
+            },
+            sampleSizeValue = sampleSizeInput.toString(),
+            onSampleSizeChange = {
+                if (regex.sampleSizeRegex.matches(it)) {
+                    sampleSizeInput = if (it.isBlank()) 0 else it.toInt()
+                }
+            },
+            indexValue = indexInput.toString(),
+            onIndexChange = {
+                if (regex.indexRegex.matches(it)) {
+                    indexInput = if (it.isBlank()) 0 else it.toInt()
+                }
+            }
+        )
 
         OutlinedCard(
             modifier = Modifier
@@ -84,30 +86,7 @@ fun SettingScreen(
         ) {
             SettingTable(
                 hashTypeList = hashTypeList,
-                prefixValue = prefixInput,
-                onPrefixChange = {
-                    if (decorateRegex.matches(it)) {
-                        prefixInput = it
-                    }
-                },
-                suffixValue = suffixInput,
-                onSuffixChange = {
-                    if (decorateRegex.matches(it)) {
-                        suffixInput = it
-                    }
-                },
-                sampleSizeValue = sampleSizeInput.toString(),
-                onSampleSizeChange = {
-                    if (sampleSizeRegex.matches(it)) {
-                        sampleSizeInput = if (it.isBlank()) 0 else it.toInt()
-                    }
-                },
-                indexValue = indexInput.toString(),
-                onIndexChange = {
-                    if (indexRegex.matches(it)) {
-                        indexInput = if (it.isBlank()) 0 else it.toInt()
-                    }
-                },
+                tableConfig = config,
                 onSelectedItemIndex = { index ->
                     selectedItemIndex = index
                 },
@@ -150,14 +129,7 @@ fun SettingScreen(
 @Composable
 fun SettingTable(
     hashTypeList: List<String>,
-    prefixValue: String = "",
-    onPrefixChange: (String) -> Unit = {},
-    suffixValue: String = "",
-    onSuffixChange: (String) -> Unit = {},
-    sampleSizeValue: String = "",
-    onSampleSizeChange: (String) -> Unit = {},
-    indexValue: String = "",
-    onIndexChange: (String) -> Unit = {},
+    tableConfig: SettingTableConfig,
     selectedItemIndex: Int,
     onSelectedItemIndex: (Int) -> Unit,
 ) {
@@ -183,9 +155,9 @@ fun SettingTable(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
-            value = prefixValue,
+            value = tableConfig.prefixValue,
             label = "前綴",
-            onValueChange = onPrefixChange,
+            onValueChange = tableConfig.onPrefixChange,
             supportingText = "長度限制為10",
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
@@ -197,9 +169,9 @@ fun SettingTable(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
-            value = suffixValue,
+            value = tableConfig.suffixValue,
             label = "後綴",
-            onValueChange = onSuffixChange,
+            onValueChange = tableConfig.onSuffixChange,
             supportingText = "長度限制為10",
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
@@ -211,9 +183,9 @@ fun SettingTable(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
-            value = sampleSizeValue,
+            value = tableConfig.sampleSizeValue,
             label = "取樣長度",
-            onValueChange = onSampleSizeChange,
+            onValueChange = tableConfig.onSampleSizeChange,
             supportingText = "請輸入0~9數字",
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
@@ -225,9 +197,9 @@ fun SettingTable(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
-            value = indexValue,
+            value = tableConfig.indexValue,
             label = "起始位置",
-            onValueChange = onIndexChange,
+            onValueChange = tableConfig.onIndexChange,
             supportingText = "請輸入0~99數字",
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
@@ -240,8 +212,8 @@ fun SettingTable(
 @Composable
 fun SettingButtonGroup(
     modifier: Modifier = Modifier,
-    onConfirmClicked: () -> Unit = {},
-    onCancelClicked: () -> Unit = {}
+    onConfirmClicked: () -> Unit,
+    onCancelClicked: () -> Unit
 ) {
     Row(
         modifier = modifier,
@@ -271,10 +243,10 @@ fun SettingButtonGroup(
 @Composable
 fun SettingInputItem(
     modifier: Modifier = Modifier,
-    value: String = "",
-    label: String = "",
+    value: String,
+    label: String,
     supportingText: String = "",
-    onValueChange: (String) -> Unit = {},
+    onValueChange: (String) -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     OutlinedTextField(
@@ -304,7 +276,7 @@ fun SettingInputItem(
 fun DropMenuItem(
     modifier: Modifier = Modifier,
     label: String,
-    list: List<String> = emptyList(),
+    list: List<String>,
     selectedItemIndex: Int,
     onSelectedItemIndex: (Int) -> Unit
 ) {
@@ -370,6 +342,23 @@ fun DropMenuItem(
     }
 }
 
+class SettingInputRegex {
+    val decorateRegex = Regex("^[a-zA-Z0-9]{0,10}\$")
+    val sampleSizeRegex = Regex("^[0-9]?\$")
+    val indexRegex = Regex("^[0-9]{0,2}$")
+}
+
+class SettingTableConfig(
+    val prefixValue: String = "",
+    val onPrefixChange: (String) -> Unit = {},
+    val suffixValue: String = "",
+    val onSuffixChange: (String) -> Unit = {},
+    val sampleSizeValue: String = "",
+    val onSampleSizeChange: (String) -> Unit = {},
+    val indexValue: String = "",
+    val onIndexChange: (String) -> Unit = {},
+)
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewSettingScreen() {
@@ -386,6 +375,7 @@ fun PreviewSettingScreen() {
 fun PreviewDropMenu() {
     DropMenuItem(
         label = "選項說明",
+        list = emptyList(),
         selectedItemIndex = 0,
         onSelectedItemIndex = {}
     )
@@ -397,6 +387,7 @@ fun PreviewInputItem() {
     SettingInputItem(
         value = "Preview Input",
         label = "Preview Label",
-        supportingText = "Preview SupportingText"
+        supportingText = "Preview SupportingText",
+        onValueChange = {}
     )
 }
