@@ -10,7 +10,7 @@ import com.itl.kglab.noteEncryptorManager.tools.HashAlgorithmType
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.data.SaveNoteEventData
-import com.itl.kglab.noteEncryptorManager.ui.screen.SettingScreenInfo
+import com.itl.kglab.noteEncryptorManager.ui.screen.data.SettingScreenInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -54,6 +54,7 @@ class MainViewModel @Inject constructor(
 
             val screenInfo = SettingScreenInfo(
                 algorithmName = info.algorithm.algorithmName,
+                algorithmIndex = getAlgorithmListIndexByName(info.algorithm.algorithmName),
                 prefixText = info.prefixText,
                 suffixText = info.suffixText,
                 samplingSize = info.samplingSize,
@@ -63,6 +64,11 @@ class MainViewModel @Inject constructor(
                 settingInfo = screenInfo
             )
         }
+    }
+
+    private fun getAlgorithmListIndexByName(algorithmName: String): Int {
+        val index = getHashTypeList().indexOf(algorithmName)
+        return if (index == -1) 0 else index
     }
 
     fun saveSettingInfo(info: SettingScreenInfo) {

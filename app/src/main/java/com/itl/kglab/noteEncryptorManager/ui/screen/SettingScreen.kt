@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -30,27 +31,30 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
+import com.itl.kglab.noteEncryptorManager.ui.screen.data.SettingScreenInfo
 
 @Composable
 fun SettingScreen(
     modifier: Modifier = Modifier,
-    hashTypeList: List<String>
+    hashTypeList: List<String>,
+    settingInfo: SettingScreenInfo,
+    onSaveSettingClicked: (SettingScreenInfo) -> Unit
 ) {
 
     var prefixInput by rememberSaveable {
-        mutableStateOf("")
+        mutableStateOf(settingInfo.prefixText)
     }
 
     var suffixInput by rememberSaveable {
-        mutableStateOf("")
+        mutableStateOf(settingInfo.suffixText)
     }
 
     var sampleSizeInput by rememberSaveable {
-        mutableStateOf("")
+        mutableIntStateOf(settingInfo.samplingSize)
     }
 
     var indexInput by rememberSaveable {
-        mutableStateOf("")
+        mutableIntStateOf(settingInfo.sampleIndex)
     }
 
     val decorateRegex = remember {
@@ -63,6 +67,10 @@ fun SettingScreen(
 
     val indexRegex = remember {
         Regex("^[0-9]{0,2}$")
+    }
+
+    var selectedItemIndex by remember {
+        mutableIntStateOf(settingInfo.algorithmIndex)
     }
 
     Column(
@@ -88,18 +96,22 @@ fun SettingScreen(
                         suffixInput = it
                     }
                 },
-                sampleSizeValue = sampleSizeInput,
+                sampleSizeValue = sampleSizeInput.toString(),
                 onSampleSizeChange = {
                     if (sampleSizeRegex.matches(it)) {
-                        sampleSizeInput = it
+                        sampleSizeInput = if (it.isBlank()) 0 else it.toInt()
                     }
                 },
-                indexValue = indexInput,
+                indexValue = indexInput.toString(),
                 onIndexChange = {
                     if (indexRegex.matches(it)) {
-                        indexInput = it
+                        indexInput = if (it.isBlank()) 0 else it.toInt()
                     }
-                }
+                },
+                onSelectedItemIndex = { index ->
+                    selectedItemIndex = index
+                },
+                selectedItemIndex = selectedItemIndex
             )
         }
 
@@ -110,7 +122,26 @@ fun SettingScreen(
             SettingButtonGroup(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                onConfirmClicked = {
+                    onSaveSettingClicked(
+                        SettingScreenInfo(
+                            algorithmName = hashTypeList[selectedItemIndex],
+                            algorithmIndex = selectedItemIndex,
+                            prefixText = prefixInput,
+                            suffixText = suffixInput,
+                            samplingSize = sampleSizeInput,
+                            sampleIndex = indexInput
+                        )
+                    )
+                },
+                onCancelClicked = {
+                    selectedItemIndex = settingInfo.algorithmIndex
+                    prefixInput = settingInfo.prefixText
+                    suffixInput = settingInfo.suffixText
+                    sampleSizeInput = settingInfo.samplingSize
+                    indexInput = settingInfo.sampleIndex
+                }
             )
         }
     }
@@ -126,7 +157,9 @@ fun SettingTable(
     sampleSizeValue: String = "",
     onSampleSizeChange: (String) -> Unit = {},
     indexValue: String = "",
-    onIndexChange: (String) -> Unit = {}
+    onIndexChange: (String) -> Unit = {},
+    selectedItemIndex: Int,
+    onSelectedItemIndex: (Int) -> Unit,
 ) {
 
     val itemPadding = 8.dp
@@ -141,7 +174,9 @@ fun SettingTable(
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
             list = hashTypeList,
-            label = "選擇演算法"
+            label = "選擇演算法",
+            selectedItemIndex = selectedItemIndex,
+            onSelectedItemIndex = onSelectedItemIndex
         )
 
         SettingInputItem(
@@ -268,15 +303,17 @@ fun SettingInputItem(
 @Composable
 fun DropMenuItem(
     modifier: Modifier = Modifier,
+    label: String,
     list: List<String> = emptyList(),
-    label: String = "",
+    selectedItemIndex: Int,
+    onSelectedItemIndex: (Int) -> Unit
 ) {
 
-    val default = if (list.isEmpty()) "" else list.first()
+    val defaultItemName = if (list.isEmpty()) "" else list[selectedItemIndex]
+
     var expanded by remember { mutableStateOf(false) }
 
-    val textFieldState = rememberTextFieldState(default)
-    var textSelected by rememberSaveable { mutableStateOf(default) }
+    val textFieldState = rememberTextFieldState(defaultItemName)
 
     Column(
         modifier = modifier
@@ -291,7 +328,7 @@ fun DropMenuItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
-                value = textSelected,
+                value = defaultItemName,
                 label = { Text(text = label) },
                 onValueChange = {},
                 readOnly = true,
@@ -317,12 +354,12 @@ fun DropMenuItem(
                     expanded = false
                 }
             ) {
-                list.forEach { item ->
+                list.forEachIndexed { index, item ->
                     DropdownMenuItem(
                         text = { Text(text = item) },
                         onClick = {
                             textFieldState.setTextAndPlaceCursorAtEnd(item)
-                            textSelected = item
+                            onSelectedItemIndex(index)
                             expanded = false
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -338,14 +375,20 @@ fun DropMenuItem(
 fun PreviewSettingScreen() {
     SettingScreen(
         modifier = Modifier.fillMaxSize(),
-        hashTypeList = emptyList()
+        hashTypeList = emptyList(),
+        settingInfo = SettingScreenInfo(),
+        onSaveSettingClicked = {}
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewDropMenu() {
-    DropMenuItem()
+    DropMenuItem(
+        label = "選項說明",
+        selectedItemIndex = 0,
+        onSelectedItemIndex = {}
+    )
 }
 
 @Preview(showBackground = true)

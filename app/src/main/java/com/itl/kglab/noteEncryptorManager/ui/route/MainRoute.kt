@@ -59,7 +59,11 @@ fun MainRoute(
         composable(MainBottomNavigationItem.Setting.route) {
             SettingScreen(
                 modifier = screenModifier,
-                hashTypeList = viewModel.getHashTypeList()
+                hashTypeList = viewModel.getHashTypeList(),
+                settingInfo = viewModel.state.settingInfo,
+                onSaveSettingClicked = { info ->
+                    viewModel.saveSettingInfo(info)
+                }
             )
         }
     }
