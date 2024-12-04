@@ -5,10 +5,10 @@ import java.security.MessageDigest
 
 
 class HashTools(
-    private var settingInfo: SettingInfo = SettingInfo()
+    private var settingInfo: SettingInfo
 ) {
 
-    private var messageDigest: MessageDigest = MessageDigest.getInstance(settingInfo.algorithm.algorithmName)
+    private var messageDigest: MessageDigest = MessageDigest.getInstance(settingInfo.algorithmName)
 
     fun hashMessage(message: String): String {
         val hashArray = hash(message)
@@ -70,8 +70,11 @@ class HashTools(
         return resultByte
     }
 
-    fun getHashTypeList(): List<HashAlgorithmType> {
-        return HashAlgorithmType.getList()
-    }
 
+
+    companion object {
+        fun getHashTypeList(): List<HashAlgorithmType> {
+            return HashAlgorithmType.getList()
+        }
+    }
 }

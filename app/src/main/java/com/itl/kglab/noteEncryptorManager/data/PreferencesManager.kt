@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.itl.kglab.noteEncryptorManager.tools.HashAlgorithmType
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,9 +19,9 @@ class PreferencesManager(
 
     fun getSettingInfo(): Flow<SettingInfo> {
         return dataStore.data.map { pref ->
-            val algorithm = HashAlgorithmType.getTypeByName(pref[SETTING_ALGORITHM] ?: "")
+            val algorithm = pref[SETTING_ALGORITHM] ?: ""
             SettingInfo(
-                algorithm = algorithm,
+                algorithmName = algorithm,
                 prefixText = pref[SETTING_PREFIX] ?: "",
                 suffixText = pref[SETTING_SUFFIX] ?: "",
                 sampleIndex = pref[SETTING_SAMPLE_INDEX] ?: 0,
@@ -35,7 +34,7 @@ class PreferencesManager(
         settingInfo: SettingInfo
     ) {
         dataStore.edit { pref ->
-            pref[SETTING_ALGORITHM] = settingInfo.algorithm.algorithmName
+            pref[SETTING_ALGORITHM] = settingInfo.algorithmName
             pref[SETTING_PREFIX] = settingInfo.prefixText
             pref[SETTING_SUFFIX] = settingInfo.suffixText
             pref[SETTING_SAMPLE_INDEX] = settingInfo.sampleIndex

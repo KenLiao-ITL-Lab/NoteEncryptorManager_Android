@@ -14,11 +14,5 @@ sealed class HashAlgorithmType(
                 Sha512
             )
         }
-
-        fun getTypeByName(name: String): HashAlgorithmType {
-            val list = getList()
-
-            return list.find { it.algorithmName == name } ?: Sha256
-        }
     }
 }

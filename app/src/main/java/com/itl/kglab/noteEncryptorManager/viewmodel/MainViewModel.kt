@@ -21,7 +21,7 @@ class MainViewModel @Inject constructor(
     private val repository: MainRepository
 ) : ViewModel() {
 
-    private val hashTools = HashTools()
+    private lateinit var hashTools: HashTools
 
     var state by mutableStateOf(ScreenState())
 
@@ -45,7 +45,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun getHashTypeList(): List<String> {
-        return hashTools.getHashTypeList().map { it.algorithmName }
+        return HashTools.getHashTypeList().map { it.algorithmName }
     }
 
     fun getSettingInfo() {
@@ -53,16 +53,14 @@ class MainViewModel @Inject constructor(
             val info = repository.getSettingInfo().stateIn(viewModelScope).value
 
             val screenInfo = SettingScreenInfo(
-                algorithmName = info.algorithm.algorithmName,
-                algorithmIndex = getAlgorithmListIndexByName(info.algorithm.algorithmName),
-                prefixText = info.prefixText,
-                suffixText = info.suffixText,
-                samplingSize = info.samplingSize,
-                sampleIndex = info.sampleIndex
+                algorithmIndex = getAlgorithmListIndexByName(info.algorithmName),
+                info = info,
             )
             state = state.copy(
                 settingInfo = screenInfo
             )
+
+            hashTools = HashTools(state.settingInfo.info)
         }
     }
 
@@ -71,17 +69,9 @@ class MainViewModel @Inject constructor(
         return if (index == -1) 0 else index
     }
 
-    fun saveSettingInfo(info: SettingScreenInfo) {
+    fun saveSettingInfo(screenInfo: SettingScreenInfo) {
         viewModelScope.launch {
-            repository.setSettingInfo(
-                SettingInfo(
-                    algorithm = HashAlgorithmType.getTypeByName(info.algorithmName),
-                    prefixText = info.prefixText,
-                    suffixText = info.suffixText,
-                    sampleIndex = info.sampleIndex,
-                    samplingSize = info.samplingSize
-                )
-            )
+            repository.setSettingInfo(screenInfo.info)
 
             getSettingInfo()
         }

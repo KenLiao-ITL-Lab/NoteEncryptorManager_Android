@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.screen.data.SettingScreenInfo
 
@@ -40,10 +41,10 @@ fun SettingScreen(
     settingInfo: SettingScreenInfo,
     onSaveSettingClicked: (SettingScreenInfo) -> Unit
 ) {
-    var prefixInput by rememberSaveable { mutableStateOf(settingInfo.prefixText) }
-    var suffixInput by rememberSaveable { mutableStateOf(settingInfo.prefixText) }
-    var sampleSizeInput by rememberSaveable { mutableIntStateOf(settingInfo.samplingSize) }
-    var indexInput by rememberSaveable { mutableIntStateOf(settingInfo.sampleIndex) }
+    var prefixInput by rememberSaveable { mutableStateOf(settingInfo.info.prefixText) }
+    var suffixInput by rememberSaveable { mutableStateOf(settingInfo.info.suffixText) }
+    var sampleSizeInput by rememberSaveable { mutableIntStateOf(settingInfo.info.samplingSize) }
+    var indexInput by rememberSaveable { mutableIntStateOf(settingInfo.info.sampleIndex) }
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(settingInfo.algorithmIndex) }
 
     val regex = remember { SettingInputRegex() }
@@ -105,21 +106,23 @@ fun SettingScreen(
                 onConfirmClicked = {
                     onSaveSettingClicked(
                         SettingScreenInfo(
-                            algorithmName = hashTypeList[selectedItemIndex],
                             algorithmIndex = selectedItemIndex,
-                            prefixText = prefixInput,
-                            suffixText = suffixInput,
-                            samplingSize = sampleSizeInput,
-                            sampleIndex = indexInput
+                            info = SettingInfo(
+                                algorithmName = hashTypeList[selectedItemIndex],
+                                prefixText = prefixInput,
+                                suffixText = suffixInput,
+                                samplingSize = sampleSizeInput,
+                                sampleIndex = indexInput
+                            ),
                         )
                     )
                 },
                 onCancelClicked = {
                     selectedItemIndex = settingInfo.algorithmIndex
-                    prefixInput = settingInfo.prefixText
-                    suffixInput = settingInfo.suffixText
-                    sampleSizeInput = settingInfo.samplingSize
-                    indexInput = settingInfo.sampleIndex
+                    prefixInput = settingInfo.info.prefixText
+                    suffixInput = settingInfo.info.suffixText
+                    sampleSizeInput = settingInfo.info.samplingSize
+                    indexInput = settingInfo.info.sampleIndex
                 }
             )
         }
@@ -365,7 +368,7 @@ fun PreviewSettingScreen() {
     SettingScreen(
         modifier = Modifier.fillMaxSize(),
         hashTypeList = emptyList(),
-        settingInfo = SettingScreenInfo(),
+        settingInfo = SettingScreenInfo(info = SettingInfo()),
         onSaveSettingClicked = {}
     )
 }
