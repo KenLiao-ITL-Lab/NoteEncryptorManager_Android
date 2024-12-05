@@ -26,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -161,6 +162,7 @@ fun SettingTable(
                 .padding(vertical = itemPadding),
             value = tableConfig.prefixValue,
             label = "前綴",
+            labelColor = Color.Gray,
             onValueChange = tableConfig.onPrefixChange,
             supportingText = "長度限制為10，空白預設為0",
             keyboardOptions = KeyboardOptions(
@@ -175,6 +177,7 @@ fun SettingTable(
                 .padding(vertical = itemPadding),
             value = tableConfig.suffixValue,
             label = "後綴",
+            labelColor = Color.Gray,
             onValueChange = tableConfig.onSuffixChange,
             supportingText = "長度限制為10，空白預設為0",
             keyboardOptions = KeyboardOptions(
@@ -189,6 +192,7 @@ fun SettingTable(
                 .padding(vertical = itemPadding),
             value = tableConfig.sampleSizeValue,
             label = "取樣長度",
+            labelColor = Color.Gray,
             onValueChange = tableConfig.onSampleSizeChange,
             supportingText = "請輸入0~9數字",
             keyboardOptions = KeyboardOptions(
@@ -203,6 +207,7 @@ fun SettingTable(
                 .padding(vertical = itemPadding),
             value = tableConfig.indexValue,
             label = "起始位置",
+            labelColor = Color.Gray,
             onValueChange = tableConfig.onIndexChange,
             supportingText = "請輸入0~99數字",
             keyboardOptions = KeyboardOptions(
@@ -249,6 +254,7 @@ fun SettingInputItem(
     modifier: Modifier = Modifier,
     value: String,
     label: String,
+    labelColor: Color = Color.Unspecified,
     supportingText: String = "",
     onValueChange: (String) -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
@@ -256,7 +262,10 @@ fun SettingInputItem(
     OutlinedTextField(
         modifier = modifier,
         value = value,
-        label = { Text(text = label)},
+        label = { Text(
+            text = label,
+            color = labelColor
+        )},
         supportingText = if (supportingText.isBlank()) {
             null
         } else {
