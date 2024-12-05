@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.screen.data.SettingScreenInfo
+import com.itl.kglab.noteEncryptorManager.ui.screen.tools.SettingInputRegex
 
 @Composable
 fun SettingScreen(
@@ -43,8 +44,8 @@ fun SettingScreen(
 ) {
     var prefixInput by rememberSaveable { mutableStateOf(settingInfo.info.prefixText) }
     var suffixInput by rememberSaveable { mutableStateOf(settingInfo.info.suffixText) }
-    var sampleSizeInput by rememberSaveable { mutableIntStateOf(settingInfo.info.samplingSize) }
-    var indexInput by rememberSaveable { mutableIntStateOf(settingInfo.info.sampleIndex) }
+    var sampleSizeInput by rememberSaveable { mutableStateOf(settingInfo.info.samplingSize.toString()) }
+    var indexInput by rememberSaveable { mutableStateOf(settingInfo.info.sampleIndex.toString()) }
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(settingInfo.algorithmIndex) }
 
     val regex = remember { SettingInputRegex() }
@@ -70,13 +71,13 @@ fun SettingScreen(
             sampleSizeValue = sampleSizeInput.toString(),
             onSampleSizeChange = {
                 if (regex.sampleSizeRegex.matches(it)) {
-                    sampleSizeInput = if (it.isBlank()) 0 else it.toInt()
+                    sampleSizeInput = it
                 }
             },
             indexValue = indexInput.toString(),
             onIndexChange = {
                 if (regex.indexRegex.matches(it)) {
-                    indexInput = if (it.isBlank()) 0 else it.toInt()
+                    indexInput = it
                 }
             }
         )
@@ -111,8 +112,8 @@ fun SettingScreen(
                                 algorithmName = hashTypeList[selectedItemIndex],
                                 prefixText = prefixInput,
                                 suffixText = suffixInput,
-                                samplingSize = sampleSizeInput,
-                                sampleIndex = indexInput
+                                samplingSize = if (sampleSizeInput.isBlank()) 0 else sampleSizeInput.toInt(),
+                                sampleIndex = if (indexInput.isBlank()) 0 else indexInput.toInt()
                             ),
                         )
                     )
@@ -121,8 +122,8 @@ fun SettingScreen(
                     selectedItemIndex = settingInfo.algorithmIndex
                     prefixInput = settingInfo.info.prefixText
                     suffixInput = settingInfo.info.suffixText
-                    sampleSizeInput = settingInfo.info.samplingSize
-                    indexInput = settingInfo.info.sampleIndex
+                    sampleSizeInput = settingInfo.info.samplingSize.toString()
+                    indexInput = settingInfo.info.sampleIndex.toString()
                 }
             )
         }
@@ -161,7 +162,7 @@ fun SettingTable(
             value = tableConfig.prefixValue,
             label = "前綴",
             onValueChange = tableConfig.onPrefixChange,
-            supportingText = "長度限制為10",
+            supportingText = "長度限制為10，空白預設為0",
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next
@@ -175,7 +176,7 @@ fun SettingTable(
             value = tableConfig.suffixValue,
             label = "後綴",
             onValueChange = tableConfig.onSuffixChange,
-            supportingText = "長度限制為10",
+            supportingText = "長度限制為10，空白預設為0",
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next
@@ -343,12 +344,6 @@ fun DropMenuItem(
             }
         }
     }
-}
-
-class SettingInputRegex {
-    val decorateRegex = Regex("^[a-zA-Z0-9]{0,10}\$")
-    val sampleSizeRegex = Regex("^[0-9]?\$")
-    val indexRegex = Regex("^[0-9]{0,2}$")
 }
 
 class SettingTableConfig(
