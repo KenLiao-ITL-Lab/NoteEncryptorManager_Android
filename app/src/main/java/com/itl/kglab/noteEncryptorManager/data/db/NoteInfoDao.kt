@@ -19,9 +19,9 @@ interface NoteInfoDao {
     fun deleteInfo(info: NoteInfo)
 
     @Query("SELECT * FROM noteInfoTable")
-    fun getInfoList(list: List<NoteInfo>)
+    fun getInfoList(): List<NoteInfo>
 
     @Query("SELECT * FROM noteInfoTable WHERE id = :id")
-    fun getInfoFromList(id: Long)
+    fun getInfoFromList(id: Long): NoteInfo
 
 }

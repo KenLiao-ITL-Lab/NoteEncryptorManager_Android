@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import com.itl.kglab.noteEncryptorManager.tools.HashAlgorithmType
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
@@ -37,7 +38,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun saveResult(data: SaveNoteEventData) {
-        // 儲存結果
+//        repository.saveNoteInfo()
     }
 
     fun clear() {
