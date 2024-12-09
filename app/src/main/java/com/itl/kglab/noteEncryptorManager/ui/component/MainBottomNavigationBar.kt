@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.itl.kglab.noteEncryptorManager.ui.route.MainBottomNavigationItem
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.route.MainBottomNavigationItem
 
 @Composable
 fun MainBottomNavigationBar(navController: NavController) {

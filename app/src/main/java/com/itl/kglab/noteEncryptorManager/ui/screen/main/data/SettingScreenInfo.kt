@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.screen.data
+package com.itl.kglab.noteEncryptorManager.ui.screen.main.data
 
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 

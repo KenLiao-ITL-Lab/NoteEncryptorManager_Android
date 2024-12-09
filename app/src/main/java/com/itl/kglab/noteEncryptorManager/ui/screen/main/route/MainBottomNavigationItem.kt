@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.route
+package com.itl.kglab.noteEncryptorManager.ui.screen.main.route
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.IntegerRes

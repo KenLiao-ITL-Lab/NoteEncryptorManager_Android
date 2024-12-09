@@ -11,7 +11,7 @@ import com.itl.kglab.noteEncryptorManager.tools.HashAlgorithmType
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.data.SaveNoteEventData
-import com.itl.kglab.noteEncryptorManager.ui.screen.data.SettingScreenInfo
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch

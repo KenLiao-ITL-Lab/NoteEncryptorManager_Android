@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.screen
+package com.itl.kglab.noteEncryptorManager.ui.screen.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
-import com.itl.kglab.noteEncryptorManager.ui.screen.data.SettingScreenInfo
-import com.itl.kglab.noteEncryptorManager.ui.screen.tools.SettingInputRegex
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
+import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
 
 @Composable
 fun SettingScreen(

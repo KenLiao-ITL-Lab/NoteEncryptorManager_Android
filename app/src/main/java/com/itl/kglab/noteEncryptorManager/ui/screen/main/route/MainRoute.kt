@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.route
+package com.itl.kglab.noteEncryptorManager.ui.screen.main.route
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,9 +10,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.itl.kglab.noteEncryptorManager.ui.screen.ConverterScreen
-import com.itl.kglab.noteEncryptorManager.ui.screen.NoteListScreen
-import com.itl.kglab.noteEncryptorManager.ui.screen.SettingScreen
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreen
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.NoteListScreen
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.SettingScreen
 import com.itl.kglab.noteEncryptorManager.viewmodel.MainViewModel
 
 @Composable

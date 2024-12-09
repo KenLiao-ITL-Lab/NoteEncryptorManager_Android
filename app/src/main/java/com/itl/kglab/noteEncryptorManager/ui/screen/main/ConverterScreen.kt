@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.screen
+package com.itl.kglab.noteEncryptorManager.ui.screen.main
 
 
 import androidx.compose.foundation.layout.Arrangement

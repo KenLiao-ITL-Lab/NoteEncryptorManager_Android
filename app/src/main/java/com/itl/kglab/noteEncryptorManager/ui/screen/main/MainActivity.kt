@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager
+package com.itl.kglab.noteEncryptorManager.ui.screen.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.itl.kglab.noteEncryptorManager.ui.component.MainBottomNavigationBar
-import com.itl.kglab.noteEncryptorManager.ui.route.MainRoute
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.route.MainRoute
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint

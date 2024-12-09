@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.screen.tools
+package com.itl.kglab.noteEncryptorManager.tools
 
 class SettingInputRegex {
     val decorateRegex = Regex("^.{0,10}\$")

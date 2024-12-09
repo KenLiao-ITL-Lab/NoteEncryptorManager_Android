@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.screen
+package com.itl.kglab.noteEncryptorManager.ui.screen.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -119,7 +119,7 @@ fun NoteListItem(
                 modifier = Modifier
                     .height(60.dp)
                     .fillMaxWidth(),
-                text = info.note,
+                text = info.desc,
                 maxLines = 3
             )
 
@@ -233,7 +233,8 @@ fun NoteListItemPreview() {
         id = 0,
         title = "測試標題測試標題測試標題測試標題測試標題",
         timeDesc = "2024/12/25 16:40",
-        note = "Note內容"
+        desc = "Note內容",
+        contentText = "密語ContentText"
     )
 
     NoteListItem(
