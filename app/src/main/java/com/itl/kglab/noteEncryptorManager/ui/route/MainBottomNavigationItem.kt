@@ -16,8 +16,8 @@ sealed class MainBottomNavigationItem(
     )
 
     data object NoteList : MainBottomNavigationItem(
-        route = "NoteList",
-        label = "NoteList",
+        route = "List",
+        label = "List",
         icon = R.drawable.icon_list_24
     )
 

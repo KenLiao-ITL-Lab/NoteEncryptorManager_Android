@@ -1,5 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.ui.route
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,7 +27,9 @@ fun MainRoute(
         startDestination = MainBottomNavigationItem.Converter.route
     ) {
 
-        val screenModifier = Modifier.padding(horizontal = 16.dp)
+        val screenModifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
 
         composable(MainBottomNavigationItem.Converter.route) {
 
@@ -53,7 +56,8 @@ fun MainRoute(
         }
         composable(MainBottomNavigationItem.NoteList.route) {
             NoteListScreen(
-                modifier = screenModifier
+                modifier = screenModifier,
+                noteList = emptyList()
             )
         }
         composable(MainBottomNavigationItem.Setting.route) {
