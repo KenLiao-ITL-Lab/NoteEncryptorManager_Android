@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itl.kglab.noteEncryptorManager.R
-import com.itl.kglab.noteEncryptorManager.data.NoteInfo
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 
 @Composable
 fun NoteListScreen(

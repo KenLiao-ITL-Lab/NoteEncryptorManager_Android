@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.data
+package com.itl.kglab.noteEncryptorManager.data.db
 
 data class NoteInfo(
     val id: Long,

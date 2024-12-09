@@ -1,6 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.repository
 
-import com.itl.kglab.noteEncryptorManager.data.PreferencesManager
+import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

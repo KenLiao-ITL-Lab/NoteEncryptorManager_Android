@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.data
+package com.itl.kglab.noteEncryptorManager.data.pref
 
 import android.content.Context
 import androidx.datastore.core.DataStore

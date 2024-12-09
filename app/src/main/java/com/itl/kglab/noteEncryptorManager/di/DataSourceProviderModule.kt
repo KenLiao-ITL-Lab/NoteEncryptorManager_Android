@@ -1,8 +1,8 @@
 package com.itl.kglab.noteEncryptorManager.di
 
 import android.content.Context
-import com.itl.kglab.noteEncryptorManager.data.PreferencesManager
-import com.itl.kglab.noteEncryptorManager.data.datastore
+import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
+import com.itl.kglab.noteEncryptorManager.data.pref.datastore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

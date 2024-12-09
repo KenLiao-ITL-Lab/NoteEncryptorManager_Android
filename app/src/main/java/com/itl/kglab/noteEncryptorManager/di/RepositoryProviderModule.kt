@@ -1,6 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.di
 
-import com.itl.kglab.noteEncryptorManager.data.PreferencesManager
+import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import dagger.Module
 import dagger.Provides
