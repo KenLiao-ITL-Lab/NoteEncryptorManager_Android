@@ -27,10 +27,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.screen.data.SettingScreenInfo
@@ -151,7 +153,7 @@ fun SettingTable(
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
             list = hashTypeList,
-            label = "選擇演算法",
+            label = stringResource(id = R.string.screen_setting_algorithm_menu_label),
             selectedItemIndex = selectedItemIndex,
             onSelectedItemIndex = onSelectedItemIndex
         )
@@ -161,10 +163,10 @@ fun SettingTable(
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
             value = tableConfig.prefixValue,
-            label = "前綴",
+            label = stringResource(id = R.string.screen_setting_prefix_label),
             labelColor = Color.Gray,
             onValueChange = tableConfig.onPrefixChange,
-            supportingText = "長度限制為10，空白預設為0",
+            supportingText = stringResource(id = R.string.screen_setting_prefix_desc),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next
@@ -176,10 +178,10 @@ fun SettingTable(
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
             value = tableConfig.suffixValue,
-            label = "後綴",
+            label = stringResource(id = R.string.screen_setting_suffix_label),
             labelColor = Color.Gray,
             onValueChange = tableConfig.onSuffixChange,
-            supportingText = "長度限制為10，空白預設為0",
+            supportingText = stringResource(id = R.string.screen_setting_suffix_desc),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next
@@ -191,10 +193,10 @@ fun SettingTable(
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
             value = tableConfig.sampleSizeValue,
-            label = "取樣長度",
+            label = stringResource(id = R.string.screen_setting_size_label),
             labelColor = Color.Gray,
             onValueChange = tableConfig.onSampleSizeChange,
-            supportingText = "請輸入0~9數字",
+            supportingText = stringResource(id = R.string.screen_setting_size_desc),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
                 imeAction = ImeAction.Next
@@ -206,10 +208,10 @@ fun SettingTable(
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
             value = tableConfig.indexValue,
-            label = "起始位置",
+            label = stringResource(id = R.string.screen_setting_index_label),
             labelColor = Color.Gray,
             onValueChange = tableConfig.onIndexChange,
-            supportingText = "請輸入0~99數字",
+            supportingText = stringResource(id = R.string.screen_setting_index_desc),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
                 imeAction = ImeAction.Done
@@ -235,7 +237,7 @@ fun SettingButtonGroup(
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             onClick = onConfirmClicked,
-            buttonText = "儲存"
+            buttonText = stringResource(id = R.string.screen_setting_save_button)
         )
 
         OutlinedStyleButton(
@@ -244,7 +246,7 @@ fun SettingButtonGroup(
                 .weight(1f)
                 .padding(horizontal = 8.dp),
             onClick = onCancelClicked,
-            buttonText = "取消"
+            buttonText = stringResource(id = R.string.screen_setting_reset)
         )
     }
 }
@@ -327,7 +329,7 @@ fun DropMenuItem(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.End
                     ) {
-                        Text(text = "演算法會影響輸出結果")
+                        Text(text = stringResource(id = R.string.screen_setting_algorithm_desc))
                     }
                 },
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()

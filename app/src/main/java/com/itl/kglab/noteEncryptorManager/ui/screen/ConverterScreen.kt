@@ -19,8 +19,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.data.SaveNoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.dialog.SaveNoteDialog
@@ -105,7 +107,9 @@ fun ConverterInputSection(
             value = inputValue,
             onValueChange = onInputChange,
             label = {
-                Text("輸入")
+                Text(
+                    text = stringResource(id = R.string.screen_converter_input_label)
+                )
             }
         )
 
@@ -114,7 +118,7 @@ fun ConverterInputSection(
                 .fillMaxWidth()
                 .padding(vertical = 16.dp, horizontal = 16.dp),
             onClick = onConvertClicked,
-            buttonText = "轉換"
+            buttonText = stringResource(id = R.string.screen_converter_convert_button)
         )
 
     }
@@ -157,7 +161,7 @@ fun ConverterFunctionalButtonGroup(
                 .weight(buttonWeight)
                 .padding(horizontal = 16.dp),
             onClick = onDuplicateClicked,
-            buttonText = "複製"
+            buttonText = stringResource(id = R.string.screen_converter_copy_button)
         )
 
         OutlinedStyleButton(
@@ -165,7 +169,7 @@ fun ConverterFunctionalButtonGroup(
                 .weight(buttonWeight)
                 .padding(horizontal = 16.dp),
             onClick = onSaveClicked,
-            buttonText = "儲存"
+            buttonText = stringResource(id = R.string.screen_converter_save_button)
         )
 
         OutlinedStyleButton(
@@ -173,7 +177,7 @@ fun ConverterFunctionalButtonGroup(
                 .weight(buttonWeight)
                 .padding(horizontal = 16.dp),
             onClick = onClearClicked,
-            buttonText = "清除"
+            buttonText = stringResource(id = R.string.screen_converter_clear_button)
         )
     }
 }

@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">NoteEncryptorManager</string>
+    <string name="bottom_nav_item_converter">轉換</string>
+    <string name="bottom_nav_item_list">筆記</string>
+    <string name="bottom_nav_item_setting">設定</string>
+
+    <string name="screen_converter_input_label">輸入</string>
+    <string name="screen_converter_convert_button">轉換</string>
+    <string name="screen_converter_copy_button">複製</string>
+    <string name="screen_converter_save_button">儲存</string>
+    <string name="screen_converter_clear_button">清除</string>
+
+    <string name="screen_list_empty_list_desc">尚未儲存Note資料</string>
+    
+    <string name="screen_setting_algorithm_menu_label">選擇演算法</string>
+    <string name="screen_setting_algorithm_desc">演算法會影響輸出結果</string>
+    <string name="screen_setting_prefix_label">前綴</string>
+    <string name="screen_setting_prefix_desc">文字長度限制為10</string>
+    <string name="screen_setting_suffix_label">後綴</string>
+    <string name="screen_setting_suffix_desc">文字長度限制為10</string>
+    <string name="screen_setting_size_label">取樣長度</string>
+    <string name="screen_setting_size_desc">請輸入數字0~9，空白預設為0</string>
+    <string name="screen_setting_index_label">起始位置</string>
+    <string name="screen_setting_index_desc">請輸入數字0~99，空白預設為0</string>
+    <string name="screen_setting_save_button">儲存</string>
+    <string name="screen_setting_reset">重置</string>
 </resources>

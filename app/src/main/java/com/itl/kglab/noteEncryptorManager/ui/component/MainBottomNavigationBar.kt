@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -35,7 +36,9 @@ fun MainBottomNavigationBar(navController: NavController) {
                     )
                 },
                 label = {
-                    Text(item.label)
+                    Text(
+                        stringResource(id = item.label)
+                    )
                 }
             )
         }
@@ -60,7 +63,9 @@ fun BottomNavigationPreview() {
                     )
                 },
                 label = {
-                    Text(item.label)
+                    Text(
+                        stringResource(id = item.label)
+                    )
                 }
             )
         }
