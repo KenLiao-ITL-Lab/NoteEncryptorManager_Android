@@ -13,7 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.itl.kglab.noteEncryptorManager.ui.component.MainBottomNavigationBar
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.route.MainRoute
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
-import com.itl.kglab.noteEncryptorManager.viewmodel.MainViewModel
+import com.itl.kglab.noteEncryptorManager.viewmodel.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

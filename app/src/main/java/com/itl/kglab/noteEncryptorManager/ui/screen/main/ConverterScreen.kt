@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -24,8 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
-import com.itl.kglab.noteEncryptorManager.ui.data.SaveNoteEventData
-import com.itl.kglab.noteEncryptorManager.ui.dialog.SaveNoteDialog
+import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 
 @Composable
 fun ConverterScreen(
@@ -33,14 +31,14 @@ fun ConverterScreen(
     resultText: String,
     onConvertClicked: (String) -> Unit,
     onDuplicateClicked: () -> Unit,
-    onSaveClicked: (SaveNoteEventData) -> Unit,
+    onSaveClicked: (NoteEventData) -> Unit,
     onClearClicked: () -> Unit
 ) {
     var inputValue by rememberSaveable { mutableStateOf("") }
 
-    var showSaveDialog by remember {
-        mutableStateOf(false)
-    }
+//    var showSaveDialog by remember {
+//        mutableStateOf(false)
+//    }
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -62,7 +60,14 @@ fun ConverterScreen(
         ConverterFunctionalButtonGroup(
             onDuplicateClicked = onDuplicateClicked,
             onSaveClicked = {
-                showSaveDialog = true
+                // 不是空白才儲存
+                if (resultText.isNotBlank()) {
+                    val saveInfo = NoteEventData(
+                        inputMessage = inputValue,
+                        result = resultText
+                    )
+                    onSaveClicked.invoke(saveInfo)
+                }
             },
             onClearClicked = {
                 onClearClicked.invoke()
@@ -71,24 +76,24 @@ fun ConverterScreen(
         )
     }
 
-    if (showSaveDialog) {
-        SaveNoteDialog(
-            onDismissRequest = {
-                showSaveDialog = false
-            },
-            onConfirmClick = { note ->
-                // 彙整SaveNote
-                onSaveClicked.invoke(
-                    SaveNoteEventData(
-                        inputMessage = inputValue,
-                        result = resultText,
-                        note = note
-                    )
-                )
-            },
-            convertResult = resultText
-        )
-    }
+//    if (showSaveDialog) {
+//        SaveNoteDialog(
+//            onDismissRequest = {
+//                showSaveDialog = false
+//            },
+//            onConfirmClick = { note ->
+//                // 彙整SaveNote
+//                onSaveClicked.invoke(
+//                    SaveNoteEventData(
+//                        inputMessage = inputValue,
+//                        result = resultText,
+//                        note = note
+//                    )
+//                )
+//            },
+//            convertResult = resultText
+//        )
+//    }
 }
 
 @Composable

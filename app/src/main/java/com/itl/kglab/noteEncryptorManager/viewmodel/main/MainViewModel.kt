@@ -1,16 +1,12 @@
-package com.itl.kglab.noteEncryptorManager.viewmodel
+package com.itl.kglab.noteEncryptorManager.viewmodel.main
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
-import com.itl.kglab.noteEncryptorManager.tools.HashAlgorithmType
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
-import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
-import com.itl.kglab.noteEncryptorManager.ui.data.SaveNoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.stateIn
@@ -37,10 +33,6 @@ class MainViewModel @Inject constructor(
         resultState = hashTools.hashMessage(input)
     }
 
-    fun saveResult(data: SaveNoteEventData) {
-//        repository.saveNoteInfo()
-    }
-
     fun clear() {
         resultState = ""
     }
@@ -49,7 +41,7 @@ class MainViewModel @Inject constructor(
         return HashTools.getHashTypeList().map { it.algorithmName }
     }
 
-    fun getSettingInfo() {
+    private fun getSettingInfo() {
         viewModelScope.launch {
             val info = repository.getSettingInfo().stateIn(viewModelScope).value
 

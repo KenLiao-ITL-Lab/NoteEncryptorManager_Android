@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.viewmodel
+package com.itl.kglab.noteEncryptorManager.viewmodel.main
 
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 
