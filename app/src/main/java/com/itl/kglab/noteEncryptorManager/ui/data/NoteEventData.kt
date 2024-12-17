@@ -1,6 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.ui.data
 
- class NoteEventData(
+ data class NoteEventData(
     val inputMessage: String,
     val result: String,
     val note: String = "",

@@ -19,6 +19,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,10 +48,16 @@ class EditorActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     EditorScreen(
                         modifier = Modifier.padding(innerPadding),
-                        inputText = "",
-                        outputText = "",
-                        noteText = "",
-                        isPrivate = true
+                        inputText = viewModel.viewData.input,
+                        outputText = viewModel.viewData.output,
+                        noteText = viewModel.viewData.note,
+                        isPrivate = viewModel.viewData.isPrivate,
+                        onSaveClicked = {
+                            viewModel.saveNoteInfo(it)
+                        },
+                        onCancelClicked = {
+                            finish()
+                        }
                     )
                 }
             }
@@ -62,7 +72,7 @@ class EditorActivity : ComponentActivity() {
                 output = it.getString(NoteEventData.ARG_OUTPUT) ?: "",
                 note = it.getString(NoteEventData.ARG_NOTE) ?: ""
             )
-            viewModel.setViewData(data)
+            viewModel.updateViewData(data)
         }
     }
 }
@@ -74,8 +84,18 @@ fun EditorScreen(
     inputText: String,
     outputText: String,
     noteText: String,
-    isPrivate: Boolean
+    isPrivate: Boolean,
+    onSaveClicked: (NoteEventData) -> Unit,
+    onCancelClicked: () -> Unit
 ) {
+
+    var noteState by rememberSaveable {
+        mutableStateOf(noteText)
+    }
+
+    var privateState by rememberSaveable {
+        mutableStateOf(isPrivate)
+    }
 
     Column(
         modifier = modifier
@@ -85,8 +105,28 @@ fun EditorScreen(
         ContextTable(
             inputText = inputText,
             outputText = outputText,
-            noteText = noteText,
-            isPrivate = isPrivate
+            noteText = noteState,
+            onNoteTextChange = {
+                noteState = it
+            },
+            isPrivate = privateState,
+            onPrivateSwitchChange = {
+                privateState = it
+            }
+        )
+
+        EditorFunctionButtonGroup(
+            modifier = Modifier.fillMaxWidth(),
+            onSaveClicked = {
+                val data = NoteEventData(
+                    inputMessage = inputText,
+                    result = outputText,
+                    note = noteState,
+                    isPrivate = privateState
+                )
+                onSaveClicked(data)
+            },
+            onCancelClicked = onCancelClicked
         )
     }
 }
@@ -98,7 +138,9 @@ fun ContextTable(
     inputText: String,
     outputText: String,
     noteText: String,
-    isPrivate: Boolean
+    onNoteTextChange: (String) -> Unit,
+    isPrivate: Boolean,
+    onPrivateSwitchChange: (Boolean) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -130,8 +172,8 @@ fun ContextTable(
                     vertical = 16.dp,
                     horizontal = horizontalPadding
                 ),
-            value = "",
-            onValueChange = {},
+            value = noteText,
+            onValueChange = onNoteTextChange,
             label = {
                 Text(
                     text = "備註"
@@ -139,24 +181,18 @@ fun ContextTable(
             }
         )
 
-        HorizontalDivider(
-            Modifier.padding(horizontalPadding)
-        )
 
         // IsPrivate
         PrivateSwitch(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp, horizontal = horizontalPadding),
-            isPrivate = true
+            isPrivate = isPrivate,
+            onPrivateSwitchChange = onPrivateSwitchChange
         )
 
         HorizontalDivider(
             Modifier.padding(horizontalPadding)
-        )
-
-        EditorFunctionButtonGroup(
-            modifier = Modifier.fillMaxWidth()
         )
 
     }
@@ -165,7 +201,8 @@ fun ContextTable(
 @Composable
 fun PrivateSwitch(
     modifier: Modifier = Modifier,
-    isPrivate: Boolean
+    isPrivate: Boolean,
+    onPrivateSwitchChange: (Boolean) -> Unit
 ) {
     Row(
         modifier = modifier
@@ -179,7 +216,8 @@ fun PrivateSwitch(
             text = "是否鎖定內容"
         )
         Switch(
-            checked = isPrivate, onCheckedChange = {},
+            checked = isPrivate,
+            onCheckedChange = onPrivateSwitchChange
         )
     }
 }
@@ -222,7 +260,9 @@ fun ContentTextCard(
 
 @Composable
 fun EditorFunctionButtonGroup(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSaveClicked: () -> Unit,
+    onCancelClicked: () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -232,14 +272,16 @@ fun EditorFunctionButtonGroup(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
-            buttonText = "儲存"
+            buttonText = "儲存",
+            onClick = onSaveClicked
         )
 
         OutlinedStyleButton(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp),
-            buttonText = "取消"
+            buttonText = "取消",
+            onClick = onCancelClicked
         )
     }
 }
@@ -253,7 +295,9 @@ fun PreviewEditorScreen() {
         inputText = "Input Text",
         outputText = "Output Text",
         noteText = "Note Text",
-        isPrivate = true
+        isPrivate = true,
+        onSaveClicked = {},
+        onCancelClicked = {}
     )
 }
 
@@ -277,6 +321,8 @@ fun PreviewContextTable() {
         inputText = "輸入訊息",
         outputText = "輸出訊息",
         noteText = "備註訊息",
-        isPrivate = true
+        onNoteTextChange = {},
+        isPrivate = true,
+        onPrivateSwitchChange = {}
     )
 }
