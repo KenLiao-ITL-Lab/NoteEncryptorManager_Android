@@ -33,7 +33,9 @@ import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorViewData
 import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class EditorActivity : ComponentActivity() {
 
     private val viewModel: EditorViewModel by viewModels()
