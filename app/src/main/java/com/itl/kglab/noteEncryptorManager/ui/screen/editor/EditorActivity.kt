@@ -70,12 +70,20 @@ class EditorActivity : ComponentActivity() {
         val bundle = intent.extras
         bundle?.let {
             val data = EditorViewData(
-                input = it.getString(NoteEventData.ARG_INPUT) ?: "",
-                output = it.getString(NoteEventData.ARG_OUTPUT) ?: "",
-                note = it.getString(NoteEventData.ARG_NOTE) ?: ""
+                input = it.getString(ARG_INPUT) ?: "",
+                output = it.getString(ARG_OUTPUT) ?: ""
             )
             viewModel.updateViewData(data)
         }
+    }
+
+    companion object {
+        const val ARG_IS_EDIT = "IS_EDIT_BOOLEAN"
+        const val ARG_ID = "ID_LONG"
+        const val ARG_INPUT = "INPUT_STRING"
+        const val ARG_OUTPUT = "OUTPUT_STRING"
+        const val ARG_NOTE = "NOTE_STRING"
+        const val ARG_IS_PRIVATE = "IS_PRIVATE_BOOLEAN"
     }
 }
 

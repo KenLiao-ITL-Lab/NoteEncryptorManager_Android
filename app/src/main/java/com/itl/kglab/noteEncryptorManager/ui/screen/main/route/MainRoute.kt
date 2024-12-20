@@ -56,10 +56,9 @@ fun MainRoute(
                 },
                 onSaveClicked = { data ->
                     val bundle = Bundle().apply {
-                        putString(NoteEventData.ARG_OUTPUT, data.result)
-                        putString(NoteEventData.ARG_INPUT, data.inputMessage)
-                        putString(NoteEventData.ARG_NOTE, data.note)
-                        putBoolean(NoteEventData.ARG_PRIVATE, data.isPrivate)
+                        putBoolean(EditorActivity.ARG_IS_EDIT, true)
+                        putString(EditorActivity.ARG_OUTPUT, data.result)
+                        putString(EditorActivity.ARG_INPUT, data.inputMessage)
                     }
                     val intent = Intent(context, EditorActivity::class.java).apply {
                         putExtras(bundle)
