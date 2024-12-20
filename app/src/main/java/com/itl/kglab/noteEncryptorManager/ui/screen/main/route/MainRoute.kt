@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.screen.editor.EditorActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.NoteListScreen
@@ -57,7 +56,7 @@ fun MainRoute(
                 onSaveClicked = { data ->
                     val bundle = Bundle().apply {
                         putBoolean(EditorActivity.ARG_IS_EDIT, true)
-                        putString(EditorActivity.ARG_OUTPUT, data.result)
+                        putString(EditorActivity.ARG_OUTPUT, data.outputMessage)
                         putString(EditorActivity.ARG_INPUT, data.inputMessage)
                     }
                     val intent = Intent(context, EditorActivity::class.java).apply {

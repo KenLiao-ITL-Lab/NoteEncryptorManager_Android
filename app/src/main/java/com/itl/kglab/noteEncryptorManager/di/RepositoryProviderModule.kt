@@ -7,6 +7,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import javax.inject.Singleton
 
 @Module
 @InstallIn(ActivityComponent::class)
@@ -15,11 +18,13 @@ class RepositoryProviderModule {
     @Provides
     fun provideMainRepository(
         preferencesManager: PreferencesManager,
-        database: AppDatabase
+        database: AppDatabase,
+        ioDispatcher: CoroutineDispatcher
     ): MainRepository {
         return MainRepository(
             preferencesManager = preferencesManager,
-            database = database
+            database = database,
+            ioDispatcher = ioDispatcher
         )
     }
 

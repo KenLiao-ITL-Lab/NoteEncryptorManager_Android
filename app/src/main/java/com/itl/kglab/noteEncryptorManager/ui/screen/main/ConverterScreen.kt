@@ -64,7 +64,7 @@ fun ConverterScreen(
                 if (resultText.isNotBlank()) {
                     val saveInfo = NoteEventData(
                         inputMessage = inputValue,
-                        result = resultText
+                        outputMessage = resultText
                     )
                     onSaveClicked.invoke(saveInfo)
                 }

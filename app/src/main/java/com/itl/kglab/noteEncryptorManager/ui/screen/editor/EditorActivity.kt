@@ -50,12 +50,14 @@ class EditorActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     EditorScreen(
                         modifier = Modifier.padding(innerPadding),
+                        titleText = viewModel.viewData.title,
                         inputText = viewModel.viewData.input,
                         outputText = viewModel.viewData.output,
                         noteText = viewModel.viewData.note,
                         isPrivate = viewModel.viewData.isPrivate,
                         onSaveClicked = {
                             viewModel.saveNoteInfo(it)
+                            finish()
                         },
                         onCancelClicked = {
                             finish()
@@ -91,6 +93,7 @@ class EditorActivity : ComponentActivity() {
 @Composable
 fun EditorScreen(
     modifier: Modifier,
+    titleText: String,
     inputText: String,
     outputText: String,
     noteText: String,
@@ -98,6 +101,10 @@ fun EditorScreen(
     onSaveClicked: (NoteEventData) -> Unit,
     onCancelClicked: () -> Unit
 ) {
+
+    var titleState by rememberSaveable {
+        mutableStateOf(titleText)
+    }
 
     var noteState by rememberSaveable {
         mutableStateOf(noteText)
@@ -115,6 +122,10 @@ fun EditorScreen(
         ContextTable(
             inputText = inputText,
             outputText = outputText,
+            titleText = titleState,
+            onTitleTextChange = {
+                titleState = it
+            },
             noteText = noteState,
             onNoteTextChange = {
                 noteState = it
@@ -129,8 +140,9 @@ fun EditorScreen(
             modifier = Modifier.fillMaxWidth(),
             onSaveClicked = {
                 val data = NoteEventData(
+                    title = titleState,
                     inputMessage = inputText,
-                    result = outputText,
+                    outputMessage = outputText,
                     note = noteState,
                     isPrivate = privateState
                 )
@@ -147,6 +159,8 @@ fun ContextTable(
     modifier: Modifier = Modifier,
     inputText: String,
     outputText: String,
+    titleText: String,
+    onTitleTextChange: (String) -> Unit,
     noteText: String,
     onNoteTextChange: (String) -> Unit,
     isPrivate: Boolean,
@@ -157,6 +171,36 @@ fun ContextTable(
     ) {
 
         val horizontalPadding = 8.dp
+
+        // Title
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    vertical = 16.dp,
+                    horizontal = horizontalPadding
+                ),
+            value = titleText,
+            onValueChange = onTitleTextChange,
+            label = {
+                Text(text = "標題")
+            }
+        )
+
+        // Note
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    vertical = 16.dp,
+                    horizontal = horizontalPadding
+                ),
+            value = noteText,
+            onValueChange = onNoteTextChange,
+            label = {
+                Text(text = "備註")
+            }
+        )
 
         // Input
         ContentTextCard(
@@ -172,23 +216,6 @@ fun ContextTable(
                 .padding(horizontal = horizontalPadding),
             label = "輸出",
             contentText = outputText
-        )
-
-        // Note
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    vertical = 16.dp,
-                    horizontal = horizontalPadding
-                ),
-            value = noteText,
-            onValueChange = onNoteTextChange,
-            label = {
-                Text(
-                    text = "備註"
-                )
-            }
         )
 
 
@@ -304,6 +331,7 @@ fun PreviewEditorScreen() {
             .fillMaxSize(),
         inputText = "Input Text",
         outputText = "Output Text",
+        titleText = "Title Text",
         noteText = "Note Text",
         isPrivate = true,
         onSaveClicked = {},
@@ -329,6 +357,8 @@ fun PreviewContentTextCard() {
 fun PreviewContextTable() {
     ContextTable(
         inputText = "輸入訊息",
+        titleText = "標題",
+        onTitleTextChange = {},
         outputText = "輸出訊息",
         noteText = "備註訊息",
         onNoteTextChange = {},

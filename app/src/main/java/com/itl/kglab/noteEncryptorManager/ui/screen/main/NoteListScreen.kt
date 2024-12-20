@@ -119,7 +119,7 @@ fun NoteListItem(
                 modifier = Modifier
                     .height(60.dp)
                     .fillMaxWidth(),
-                text = info.desc,
+                text = info.note,
                 maxLines = 3
             )
 
@@ -233,8 +233,9 @@ fun NoteListItemPreview() {
         id = 0,
         title = "測試標題測試標題測試標題測試標題測試標題",
         timeDesc = "2024/12/25 16:40",
-        desc = "Note內容",
-        contentText = "密語ContentText"
+        note = "Note內容",
+        inputText = "輸入 ContentText",
+        outputText = "輸出 ContentText"
     )
 
     NoteListItem(
