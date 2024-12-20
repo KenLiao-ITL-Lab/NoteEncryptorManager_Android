@@ -48,13 +48,10 @@ class EditorActivity : ComponentActivity() {
         setContent {
             NoteEncryptorManagerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    val viewData = viewModel.viewData.data
                     EditorScreen(
                         modifier = Modifier.padding(innerPadding),
-                        titleText = viewModel.viewData.title,
-                        inputText = viewModel.viewData.input,
-                        outputText = viewModel.viewData.output,
-                        noteText = viewModel.viewData.note,
-                        isPrivate = viewModel.viewData.isPrivate,
+                        viewData = viewData,
                         onSaveClicked = {
                             viewModel.saveNoteInfo(it)
                             finish()
@@ -93,25 +90,21 @@ class EditorActivity : ComponentActivity() {
 @Composable
 fun EditorScreen(
     modifier: Modifier,
-    titleText: String,
-    inputText: String,
-    outputText: String,
-    noteText: String,
-    isPrivate: Boolean,
+    viewData: EditorViewData,
     onSaveClicked: (NoteEventData) -> Unit,
     onCancelClicked: () -> Unit
 ) {
 
     var titleState by rememberSaveable {
-        mutableStateOf(titleText)
+        mutableStateOf(viewData.title)
     }
 
     var noteState by rememberSaveable {
-        mutableStateOf(noteText)
+        mutableStateOf(viewData.note)
     }
 
     var privateState by rememberSaveable {
-        mutableStateOf(isPrivate)
+        mutableStateOf(viewData.isPrivate)
     }
 
     Column(
@@ -120,8 +113,8 @@ fun EditorScreen(
     ) {
 
         ContextTable(
-            inputText = inputText,
-            outputText = outputText,
+            inputText = viewData.input,
+            outputText = viewData.output,
             titleText = titleState,
             onTitleTextChange = {
                 titleState = it
@@ -141,8 +134,8 @@ fun EditorScreen(
             onSaveClicked = {
                 val data = NoteEventData(
                     title = titleState,
-                    inputMessage = inputText,
-                    outputMessage = outputText,
+                    inputMessage = viewData.input,
+                    outputMessage = viewData.output,
                     note = noteState,
                     isPrivate = privateState
                 )
@@ -329,11 +322,7 @@ fun PreviewEditorScreen() {
     EditorScreen(
         modifier = Modifier
             .fillMaxSize(),
-        inputText = "Input Text",
-        outputText = "Output Text",
-        titleText = "Title Text",
-        noteText = "Note Text",
-        isPrivate = true,
+        viewData = EditorViewData(),
         onSaveClicked = {},
         onCancelClicked = {}
     )

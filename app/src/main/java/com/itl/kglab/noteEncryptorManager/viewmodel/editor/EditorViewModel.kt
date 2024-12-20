@@ -22,13 +22,15 @@ class EditorViewModel @Inject constructor (
 
     private val dateFormater = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.TAIWAN)
 
-    var viewData by mutableStateOf(EditorViewData())
+    var viewData by mutableStateOf(EditorViewState())
         private set
 
     fun updateViewData(
         data: EditorViewData
     ) {
-        viewData = data
+        viewData = viewData.copy(
+            data = data
+        )
     }
 
     fun saveNoteInfo(evenData: NoteEventData) {
