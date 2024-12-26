@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NoteEncryptorManager</string>
+    <string name="app_name">密語訊息筆記簿</string>
     <string name="bottom_nav_item_converter">轉換</string>
     <string name="bottom_nav_item_list">筆記</string>
     <string name="bottom_nav_item_setting">設定</string>
