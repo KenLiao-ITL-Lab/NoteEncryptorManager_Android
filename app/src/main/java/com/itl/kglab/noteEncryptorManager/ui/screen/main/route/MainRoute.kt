@@ -36,7 +36,9 @@ fun MainRoute(
 
         val screenModifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(
+                horizontal = 16.dp
+            )
 
         composable(MainBottomNavigationItem.Converter.route) {
 
@@ -72,7 +74,7 @@ fun MainRoute(
         composable(MainBottomNavigationItem.NoteList.route) {
             NoteListScreen(
                 modifier = screenModifier,
-                noteList = emptyList()
+                noteList = viewModel.state.noteInfoList
             )
         }
         composable(MainBottomNavigationItem.Setting.route) {

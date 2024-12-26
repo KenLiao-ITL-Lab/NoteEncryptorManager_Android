@@ -29,8 +29,8 @@ class MainRepository @Inject constructor (
             dao.insertInfo(info)
         }
 
-    override suspend fun getNoteList(): List<NoteInfo> {
+    override suspend fun getNoteList(): List<NoteInfo> = withContext(ioDispatcher) {
         val dao = database.noteInfoDao()
-        return dao.getInfoList()
+        dao.getInfoList()
     }
 }

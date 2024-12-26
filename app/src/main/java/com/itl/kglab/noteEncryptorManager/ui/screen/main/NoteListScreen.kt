@@ -55,8 +55,9 @@ fun NoteListScreen(
         }
     } else {
         LazyColumn(
-            modifier = modifier,
-            verticalArrangement = Arrangement.Center,
+            modifier = modifier
+                .padding(top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             items(noteList) { noteInfo ->
@@ -67,7 +68,6 @@ fun NoteListScreen(
         }
     }
 }
-
 
 @Composable
 fun NoteListItem(
@@ -221,6 +221,7 @@ fun NoteItemMenu(
 @Composable
 fun NoteListScreenPreview() {
     NoteListScreen(
+        modifier = Modifier,
         noteList = emptyList()
     )
 }

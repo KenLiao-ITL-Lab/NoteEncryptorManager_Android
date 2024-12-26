@@ -9,6 +9,7 @@ import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,6 +28,7 @@ class MainViewModel @Inject constructor(
 
     init {
         getSettingInfo()
+        getNoteInfoList()
     }
 
     fun convertInput(input: String) {
@@ -65,13 +67,17 @@ class MainViewModel @Inject constructor(
     fun saveSettingInfo(screenInfo: SettingScreenInfo) {
         viewModelScope.launch {
             repository.setSettingInfo(screenInfo.info)
-
             getSettingInfo()
         }
     }
 
-    fun clearSettingInfo() {
-        getSettingInfo()
+    fun getNoteInfoList() {
+        viewModelScope.launch {
+            val list = repository.getNoteList()
+            state = state.copy(
+                noteInfoList = list
+            )
+        }
     }
 
 }
