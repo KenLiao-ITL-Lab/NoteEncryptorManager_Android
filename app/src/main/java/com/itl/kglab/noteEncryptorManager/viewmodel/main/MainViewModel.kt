@@ -72,7 +72,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun getNoteInfoList() {
+    fun getNoteInfoList() {
         viewModelScope.launch {
             val list = repository.getNoteList()
             state = state.copy(

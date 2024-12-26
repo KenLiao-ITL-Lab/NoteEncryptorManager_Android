@@ -19,20 +19,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
-import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorViewData
 import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorViewModel
+import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorViewState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -48,10 +45,12 @@ class EditorActivity : ComponentActivity() {
         setContent {
             NoteEncryptorManagerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val viewData = viewModel.viewData.data
                     EditorScreen(
                         modifier = Modifier.padding(innerPadding),
-                        viewData = viewData,
+                        viewState = viewModel.viewState,
+                        onTableChanged = {
+                            viewModel.updateNoteInfo(it)
+                        },
                         onSaveClicked = {
                             viewModel.saveNoteInfo(it)
                             finish()
@@ -68,11 +67,18 @@ class EditorActivity : ComponentActivity() {
     private fun initViewData() {
         val bundle = intent.extras
         bundle?.let {
-            val data = EditorViewData(
-                input = it.getString(ARG_INPUT) ?: "",
-                output = it.getString(ARG_OUTPUT) ?: ""
-            )
-            viewModel.updateViewData(data)
+            val isEditor = it.getBoolean(ARG_IS_EDIT)
+            if (isEditor) {
+                val id = bundle.getLong(ARG_ID)
+                viewModel.findNoteInfo(id = id)
+            } else {
+                val noteInfo = NoteInfo(
+                    id = 0,
+                    inputText = it.getString(ARG_INPUT) ?: "",
+                    outputText = it.getString(ARG_OUTPUT) ?: ""
+                )
+                viewModel.updateNoteInfo(noteInfo)
+            }
         }
     }
 
@@ -81,8 +87,6 @@ class EditorActivity : ComponentActivity() {
         const val ARG_ID = "ID_LONG"
         const val ARG_INPUT = "INPUT_STRING"
         const val ARG_OUTPUT = "OUTPUT_STRING"
-        const val ARG_NOTE = "NOTE_STRING"
-        const val ARG_IS_PRIVATE = "IS_PRIVATE_BOOLEAN"
     }
 }
 
@@ -90,42 +94,33 @@ class EditorActivity : ComponentActivity() {
 @Composable
 fun EditorScreen(
     modifier: Modifier,
-    viewData: EditorViewData,
+    viewState: EditorViewState,
+    onTableChanged: (NoteInfo) -> Unit,
     onSaveClicked: (NoteEventData) -> Unit,
     onCancelClicked: () -> Unit
 ) {
-
-    var titleState by rememberSaveable {
-        mutableStateOf(viewData.title)
-    }
-
-    var noteState by rememberSaveable {
-        mutableStateOf(viewData.note)
-    }
-
-    var privateState by rememberSaveable {
-        mutableStateOf(viewData.isPrivate)
-    }
 
     Column(
         modifier = modifier
             .padding(horizontal = 8.dp)
     ) {
 
+        val noteInfo = viewState.noteInfo
+
         ContextTable(
-            inputText = viewData.input,
-            outputText = viewData.output,
-            titleText = titleState,
+            inputText = noteInfo.inputText,
+            outputText = noteInfo.outputText,
+            titleText = noteInfo.title,
             onTitleTextChange = {
-                titleState = it
+                onTableChanged.invoke(noteInfo.copy(title = it))
             },
-            noteText = noteState,
+            noteText = noteInfo.note,
             onNoteTextChange = {
-                noteState = it
+                onTableChanged.invoke(noteInfo.copy(note = it))
             },
-            isPrivate = privateState,
+            isPrivate = noteInfo.isPrivate,
             onPrivateSwitchChange = {
-                privateState = it
+                onTableChanged.invoke(noteInfo.copy(isPrivate = it))
             }
         )
 
@@ -133,11 +128,11 @@ fun EditorScreen(
             modifier = Modifier.fillMaxWidth(),
             onSaveClicked = {
                 val data = NoteEventData(
-                    title = titleState,
-                    inputMessage = viewData.input,
-                    outputMessage = viewData.output,
-                    note = noteState,
-                    isPrivate = privateState
+                    title = noteInfo.title,
+                    inputMessage = noteInfo.inputText,
+                    outputMessage = noteInfo.outputText,
+                    note = noteInfo.note,
+                    isPrivate = noteInfo.isPrivate
                 )
                 onSaveClicked(data)
             },
@@ -322,7 +317,8 @@ fun PreviewEditorScreen() {
     EditorScreen(
         modifier = Modifier
             .fillMaxSize(),
-        viewData = EditorViewData(),
+        viewState = EditorViewState(NoteInfo()),
+        onTableChanged = {},
         onSaveClicked = {},
         onCancelClicked = {}
     )

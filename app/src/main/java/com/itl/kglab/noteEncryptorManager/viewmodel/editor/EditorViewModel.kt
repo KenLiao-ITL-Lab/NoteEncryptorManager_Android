@@ -22,20 +22,29 @@ class EditorViewModel @Inject constructor (
 
     private val dateFormater = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.TAIWAN)
 
-    var viewData by mutableStateOf(EditorViewState())
+    var viewState by mutableStateOf(
+        EditorViewState(noteInfo = NoteInfo())
+    )
         private set
 
-    fun updateViewData(
-        data: EditorViewData
-    ) {
-        viewData = viewData.copy(
-            data = data
+    fun updateNoteInfo(noteInfo: NoteInfo) {
+        viewState = viewState.copy(
+            noteInfo = noteInfo
         )
+    }
+
+    fun findNoteInfo(id: Long) {
+        viewModelScope.launch {
+            val info = repository.getNoteInfoById(id)
+            viewState = viewState.copy(
+                noteInfo = info
+            )
+        }
     }
 
     fun saveNoteInfo(evenData: NoteEventData) {
         val info = NoteInfo(
-            id = evenData.id,
+            id = viewState.noteInfo.id, // 必須帶入ID
             title = evenData.title,
             timeDesc = dateFormater.format(Date()),
             inputText = evenData.inputMessage,

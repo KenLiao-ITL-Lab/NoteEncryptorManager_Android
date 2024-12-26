@@ -5,7 +5,6 @@ import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -29,13 +28,21 @@ class MainRepository @Inject constructor (
             dao.insertInfo(info)
         }
 
-    override suspend fun getNoteList(): List<NoteInfo> = withContext(ioDispatcher) {
-        val dao = database.noteInfoDao()
-        dao.getInfoList()
-    }
+    override suspend fun getNoteList(): List<NoteInfo> =
+        withContext(ioDispatcher) {
+            val dao = database.noteInfoDao()
+            dao.getInfoList()
+        }
 
-    override suspend fun deleteNoteInfo(info: NoteInfo) = withContext(ioDispatcher) {
-        val dao = database.noteInfoDao()
-        dao.deleteInfo(info)
-    }
+    override suspend fun getNoteInfoById(id: Long): NoteInfo =
+        withContext(ioDispatcher) {
+            val dao = database.noteInfoDao()
+            dao.getInfoById(id)
+        }
+
+    override suspend fun deleteNoteInfo(info: NoteInfo) =
+        withContext(ioDispatcher) {
+            val dao = database.noteInfoDao()
+            dao.deleteInfo(info)
+        }
 }
