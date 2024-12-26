@@ -317,7 +317,7 @@ fun PreviewEditorScreen() {
     EditorScreen(
         modifier = Modifier
             .fillMaxSize(),
-        viewState = EditorViewState(NoteInfo()),
+        viewState = EditorViewState(),
         onTableChanged = {},
         onSaveClicked = {},
         onCancelClicked = {}

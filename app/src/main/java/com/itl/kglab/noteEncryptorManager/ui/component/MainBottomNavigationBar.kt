@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,6 +18,8 @@ import com.itl.kglab.noteEncryptorManager.ui.screen.main.route.MainBottomNavigat
 @Composable
 fun MainBottomNavigationBar(navController: NavController) {
     NavigationBar {
+        val keyboardManager = LocalSoftwareKeyboardController.current
+
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
@@ -28,6 +31,7 @@ fun MainBottomNavigationBar(navController: NavController) {
                         popUpTo(navController.graph.startDestinationId)
                         launchSingleTop = true
                     }
+                    keyboardManager?.hide()
                 },
                 icon = {
                     Icon(

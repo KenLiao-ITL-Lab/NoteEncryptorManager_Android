@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -58,21 +59,24 @@ fun MainRoute(
             )
 
         composable(MainBottomNavigationItem.Converter.route) {
-
+            val keyboardManager = LocalSoftwareKeyboardController.current
             val clipboardManager = LocalClipboardManager.current
 
             ConverterScreen(
                 modifier = screenModifier,
                 resultText = viewModel.resultState,
                 onConvertClicked = { input ->
+                    keyboardManager?.hide()
                     viewModel.convertInput(input)
                 },
                 onDuplicateClicked = {
+                    keyboardManager?.hide()
                     if (viewModel.resultState.isNotBlank()) {
                         clipboardManager.setText(AnnotatedString(viewModel.resultState))
                     }
                 },
                 onSaveClicked = { data ->
+                    keyboardManager?.hide()
                     val bundle = Bundle().apply {
                         putBoolean(EditorActivity.ARG_IS_EDIT, false)
                         putString(EditorActivity.ARG_OUTPUT, data.outputMessage)

@@ -1,8 +1,5 @@
 package com.itl.kglab.noteEncryptorManager.viewmodel.editor
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
@@ -22,23 +19,17 @@ class EditorViewModel @Inject constructor (
 
     private val dateFormater = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.TAIWAN)
 
-    var viewState by mutableStateOf(
-        EditorViewState(noteInfo = NoteInfo())
-    )
+    var viewState = EditorViewState()
         private set
 
     fun updateNoteInfo(noteInfo: NoteInfo) {
-        viewState = viewState.copy(
-            noteInfo = noteInfo
-        )
+        viewState.updateNoteInfo(noteInfo)
     }
 
     fun findNoteInfo(id: Long) {
         viewModelScope.launch {
             val info = repository.getNoteInfoById(id)
-            viewState = viewState.copy(
-                noteInfo = info
-            )
+            viewState.updateNoteInfo(info)
         }
     }
 
