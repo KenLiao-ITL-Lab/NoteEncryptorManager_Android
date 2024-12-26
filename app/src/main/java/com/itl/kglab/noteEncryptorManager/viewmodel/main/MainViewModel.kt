@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
@@ -71,12 +72,19 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun getNoteInfoList() {
+    private fun getNoteInfoList() {
         viewModelScope.launch {
             val list = repository.getNoteList()
             state = state.copy(
                 noteInfoList = list
             )
+        }
+    }
+
+    fun deleteNoteInfo(info: NoteInfo) {
+        viewModelScope.launch {
+            repository.deleteNoteInfo(info)
+            getNoteInfoList()
         }
     }
 

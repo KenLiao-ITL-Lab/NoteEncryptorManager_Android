@@ -39,7 +39,9 @@ import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 @Composable
 fun NoteListScreen(
     modifier: Modifier = Modifier,
-    noteList: List<NoteInfo>
+    noteList: List<NoteInfo>,
+    onItemEditClicked: (NoteInfo) -> Unit,
+    onItemDeleteClicked: (NoteInfo) -> Unit
 ) {
 
     if (noteList.isEmpty()) {
@@ -62,7 +64,9 @@ fun NoteListScreen(
         ) {
             items(noteList) { noteInfo ->
                 NoteListItem(
-                    info = noteInfo
+                    info = noteInfo,
+                    onItemEditClicked = onItemEditClicked,
+                    onItemDeleteClicked = onItemDeleteClicked
                 )
             }
         }
@@ -72,7 +76,9 @@ fun NoteListScreen(
 @Composable
 fun NoteListItem(
     modifier: Modifier = Modifier,
-    info: NoteInfo
+    info: NoteInfo,
+    onItemEditClicked: (NoteInfo) -> Unit,
+    onItemDeleteClicked: (NoteInfo) -> Unit
 ) {
 
     var menuExpanded by remember {
@@ -99,9 +105,12 @@ fun NoteListItem(
                 },
                 onEditClicked = {
                     menuExpanded = false
+                    onItemEditClicked.invoke(info)
                 },
                 onDeleteClicked = {
                     menuExpanded = false
+                    onItemDeleteClicked.invoke(info)
+                    
                 }
             )
 
@@ -222,7 +231,9 @@ fun NoteItemMenu(
 fun NoteListScreenPreview() {
     NoteListScreen(
         modifier = Modifier,
-        noteList = emptyList()
+        noteList = emptyList(),
+        onItemEditClicked = {},
+        onItemDeleteClicked = {}
     )
 }
 
@@ -240,7 +251,9 @@ fun NoteListItemPreview() {
     )
 
     NoteListItem(
-        info = noteInfo
+        info = noteInfo,
+        onItemDeleteClicked = {},
+        onItemEditClicked = {}
     )
 }
 

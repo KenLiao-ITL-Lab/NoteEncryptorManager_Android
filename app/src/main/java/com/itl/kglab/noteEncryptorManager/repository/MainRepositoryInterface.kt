@@ -10,5 +10,6 @@ interface MainRepositoryInterface {
 
     suspend fun saveNoteInfo(info: NoteInfo)
     suspend fun getNoteList(): List<NoteInfo>
+    suspend fun deleteNoteInfo(info: NoteInfo)
 
 }

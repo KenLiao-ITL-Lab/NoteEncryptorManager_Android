@@ -33,4 +33,9 @@ class MainRepository @Inject constructor (
         val dao = database.noteInfoDao()
         dao.getInfoList()
     }
+
+    override suspend fun deleteNoteInfo(info: NoteInfo) = withContext(ioDispatcher) {
+        val dao = database.noteInfoDao()
+        dao.deleteInfo(info)
+    }
 }

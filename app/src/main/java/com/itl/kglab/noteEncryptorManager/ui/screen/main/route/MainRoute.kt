@@ -74,7 +74,11 @@ fun MainRoute(
         composable(MainBottomNavigationItem.NoteList.route) {
             NoteListScreen(
                 modifier = screenModifier,
-                noteList = viewModel.state.noteInfoList
+                noteList = viewModel.state.noteInfoList,
+                onItemEditClicked = {},
+                onItemDeleteClicked = { info ->
+                    viewModel.deleteNoteInfo(info)
+                }
             )
         }
         composable(MainBottomNavigationItem.Setting.route) {
