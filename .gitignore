@@ -32,6 +32,8 @@ captures/
 *.apk
 output.json
 
+app/release
+
 # IntelliJ
 *.iml
 .idea/
