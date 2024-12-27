@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -87,6 +88,7 @@ fun ConverterInputSection(
                 .padding(bottom = 8.dp),
             value = inputValue,
             onValueChange = onInputChange,
+            shape = RoundedCornerShape(12.dp),
             label = {
                 Text(
                     text = stringResource(id = R.string.screen_converter_input_label)

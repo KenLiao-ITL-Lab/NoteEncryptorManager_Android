@@ -87,7 +87,7 @@ fun SettingScreen(
 
         OutlinedCard(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(vertical = 8.dp)
         ) {
             SettingTable(
                 hashTypeList = hashTypeList,
