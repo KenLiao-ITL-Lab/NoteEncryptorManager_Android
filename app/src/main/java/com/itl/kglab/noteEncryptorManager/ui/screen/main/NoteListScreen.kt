@@ -21,7 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,11 +33,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.currentStateAsState
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
+import com.itl.kglab.noteEncryptorManager.ui.data.DeleteNoteDataEvent
+import com.itl.kglab.noteEncryptorManager.ui.dialog.DeleteConfirmDialog
 
 @Composable
 fun NoteListScreen(
@@ -47,6 +45,10 @@ fun NoteListScreen(
     onItemEditClicked: (NoteInfo) -> Unit,
     onItemDeleteClicked: (NoteInfo) -> Unit
 ) {
+
+    var deleteEventState by remember {
+        mutableStateOf(DeleteNoteDataEvent())
+    }
 
     if (noteList.isEmpty()) {
         Column(
@@ -69,10 +71,41 @@ fun NoteListScreen(
             items(noteList) { noteInfo ->
                 NoteListItem(
                     info = noteInfo,
-                    onItemEditClicked = onItemEditClicked,
-                    onItemDeleteClicked = onItemDeleteClicked
+                    onItemEditClicked = {
+                        onItemEditClicked.invoke(noteInfo)
+                    },
+                    onItemDeleteClicked = {
+                        // 將當下的NoteInfo帶進DeleteEventState
+                        deleteEventState = deleteEventState.copy(
+                            noteInfo = noteInfo,
+                            isShowConfirmDialog = true
+                        )
+                    }
                 )
             }
+        }
+    }
+
+    if (deleteEventState.isShowConfirmDialog) {
+        deleteEventState.noteInfo?.let { info ->
+            DeleteConfirmDialog(
+                noteTitle = info.title,
+                onConfirmClicked = {
+                    onItemDeleteClicked(info)
+                    // 還原DeleteEventState
+                    deleteEventState = deleteEventState.copy(
+                        noteInfo = null,
+                        isShowConfirmDialog = false
+                    )
+                },
+                onDismissRequest = {
+                    // 還原DeleteEventState
+                    deleteEventState = deleteEventState.copy(
+                        noteInfo = null,
+                        isShowConfirmDialog = false
+                    )
+                }
+            )
         }
     }
 }
@@ -81,8 +114,8 @@ fun NoteListScreen(
 fun NoteListItem(
     modifier: Modifier = Modifier,
     info: NoteInfo,
-    onItemEditClicked: (NoteInfo) -> Unit,
-    onItemDeleteClicked: (NoteInfo) -> Unit
+    onItemEditClicked: () -> Unit,
+    onItemDeleteClicked: () -> Unit
 ) {
 
     var menuExpanded by remember {
@@ -109,12 +142,11 @@ fun NoteListItem(
                 },
                 onEditClicked = {
                     menuExpanded = false
-                    onItemEditClicked.invoke(info)
+                    onItemEditClicked()
                 },
                 onDeleteClicked = {
                     menuExpanded = false
-                    onItemDeleteClicked.invoke(info)
-                    
+                    onItemDeleteClicked()
                 }
             )
 

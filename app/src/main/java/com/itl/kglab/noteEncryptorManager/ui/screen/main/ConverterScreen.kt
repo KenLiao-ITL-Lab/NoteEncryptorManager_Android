@@ -1,6 +1,5 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.main
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,10 +34,6 @@ fun ConverterScreen(
     onClearClicked: () -> Unit
 ) {
     var inputValue by rememberSaveable { mutableStateOf("") }
-
-//    var showSaveDialog by remember {
-//        mutableStateOf(false)
-//    }
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -75,25 +70,6 @@ fun ConverterScreen(
             }
         )
     }
-
-//    if (showSaveDialog) {
-//        SaveNoteDialog(
-//            onDismissRequest = {
-//                showSaveDialog = false
-//            },
-//            onConfirmClick = { note ->
-//                // 彙整SaveNote
-//                onSaveClicked.invoke(
-//                    SaveNoteEventData(
-//                        inputMessage = inputValue,
-//                        result = resultText,
-//                        note = note
-//                    )
-//                )
-//            },
-//            convertResult = resultText
-//        )
-//    }
 }
 
 @Composable
