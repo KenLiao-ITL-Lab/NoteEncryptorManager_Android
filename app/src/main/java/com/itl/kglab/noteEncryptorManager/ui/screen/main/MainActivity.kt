@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.itl.kglab.noteEncryptorManager.ui.component.MainBottomNavigationBar
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.route.MainBottomNavigationBar
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.route.MainRoute
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.main.MainViewModel

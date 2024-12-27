@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.component
+package com.itl.kglab.noteEncryptorManager.ui.screen.main.route
 
 import android.content.res.Configuration
 import androidx.compose.material3.Icon
@@ -13,7 +13,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.itl.kglab.noteEncryptorManager.ui.screen.main.route.MainBottomNavigationItem
 
 @Composable
 fun MainBottomNavigationBar(navController: NavController) {
@@ -27,11 +26,13 @@ fun MainBottomNavigationBar(navController: NavController) {
             NavigationBarItem(
                 selected = item.route == currentRoute,
                 onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+                    if (currentRoute != item.route) {
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
+                        keyboardManager?.hide()
                     }
-                    keyboardManager?.hide()
                 },
                 icon = {
                     Icon(
