@@ -18,12 +18,28 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreenIdRes.TAG_CONVERTER_BUTTON
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreenIdRes.TAG_FUNC_CLEAR_BUTTON
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreenIdRes.TAG_FUNC_COPY_BUTTON
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreenIdRes.TAG_FUNC_SAVE_BUTTON
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreenIdRes.TAG_INPUT_TEXT_FILED
+import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreenIdRes.TAG_RESULT_LABEL
+
+object ConverterScreenIdRes {
+    const val TAG_INPUT_TEXT_FILED = "input_text_filed" // 輸入
+    const val TAG_CONVERTER_BUTTON = "converter_button" // 轉換
+    const val TAG_RESULT_LABEL = "result_label" // 結果
+    const val TAG_FUNC_COPY_BUTTON = "copy_button" // 複製
+    const val TAG_FUNC_SAVE_BUTTON = "save_button" // 儲存
+    const val TAG_FUNC_CLEAR_BUTTON = "clear_button" // 清除
+}
 
 @Composable
 fun ConverterScreen(
@@ -85,7 +101,8 @@ fun ConverterInputSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .padding(bottom = 8.dp),
+                .padding(bottom = 8.dp)
+                .testTag(TAG_INPUT_TEXT_FILED),
             value = inputValue,
             onValueChange = onInputChange,
             shape = RoundedCornerShape(12.dp),
@@ -99,7 +116,8 @@ fun ConverterInputSection(
         OutlinedStyleButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp),
+                .padding(vertical = 16.dp, horizontal = 16.dp)
+                .testTag(TAG_CONVERTER_BUTTON),
             onClick = onConvertClicked,
             buttonText = stringResource(id = R.string.screen_converter_convert_button)
         )
@@ -119,7 +137,8 @@ fun ConverterResultSection(
         Text(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .testTag(TAG_RESULT_LABEL),
             text = resultText
         )
     }
@@ -142,7 +161,8 @@ fun ConverterFunctionalButtonGroup(
         OutlinedStyleButton(
             modifier = Modifier
                 .weight(buttonWeight)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .testTag(TAG_FUNC_COPY_BUTTON),
             onClick = onDuplicateClicked,
             buttonText = stringResource(id = R.string.screen_converter_copy_button)
         )
@@ -150,7 +170,8 @@ fun ConverterFunctionalButtonGroup(
         OutlinedStyleButton(
             modifier = Modifier
                 .weight(buttonWeight)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .testTag(TAG_FUNC_SAVE_BUTTON),
             onClick = onSaveClicked,
             buttonText = stringResource(id = R.string.screen_converter_save_button)
         )
@@ -158,7 +179,8 @@ fun ConverterFunctionalButtonGroup(
         OutlinedStyleButton(
             modifier = Modifier
                 .weight(buttonWeight)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .testTag(TAG_FUNC_CLEAR_BUTTON),
             onClick = onClearClicked,
             buttonText = stringResource(id = R.string.screen_converter_clear_button)
         )
