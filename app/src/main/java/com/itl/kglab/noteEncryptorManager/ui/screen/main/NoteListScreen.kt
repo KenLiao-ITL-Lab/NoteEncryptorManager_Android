@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -131,6 +132,7 @@ fun NoteListItem(
 
             NoteItemTitle(
                 modifier = Modifier,
+                isLocked = info.isPrivate,
                 title = info.title,
                 desc = info.timeDesc,
                 menuExpanded = menuExpanded,
@@ -177,6 +179,7 @@ fun NoteItemTitle(
     modifier: Modifier = Modifier,
     title: String,
     desc: String,
+    isLocked: Boolean,
     menuExpanded: Boolean,
     onMenuClicked: () -> Unit,
     onDismissRequest: () -> Unit,
@@ -188,18 +191,26 @@ fun NoteItemTitle(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
 
+            if (isLocked) {
+                Icon(
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = "Is Private Icon"
+                )
+            }
+
             Text(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(bottom = 4.dp),
+                    .weight(1f),
                 text = title,
                 fontSize = 20.sp,
-                maxLines = 1
+                maxLines = 1,
             )
 
             NoteItemMenu(
@@ -299,6 +310,7 @@ fun NoteListItemTitlePreview() {
     NoteItemTitle(
         title = "測試標題測試標題測試標題測試標題測試標題",
         desc = "2024/12/25 16:40",
+        isLocked = true,
         menuExpanded = false,
         onMenuClicked = {},
         onDismissRequest = {},

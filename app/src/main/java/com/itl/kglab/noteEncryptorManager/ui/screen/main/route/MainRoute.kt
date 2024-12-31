@@ -180,23 +180,36 @@ fun MainRoute(
                         context.startActivity(intent)
                     }
 
-                    bioAuthState = bioAuthState.copy(
-                        func = func
-                    )
+                    if (info.isPrivate) {
+                        bioAuthState = bioAuthState.copy(
+                            func = func
+                        )
 
-                    bioAuthManager.showBiometricPrompt(
-                        title = "身份驗證",
-                        desc = "請驗證身份編輯「${info.title}」"
-                    )
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = "請驗證身份編輯「${info.title}」"
+                        )
+                    } else {
+                        func.invoke()
+                    }
+
                 },
                 onItemDeleteClicked = { info ->
-                    bioAuthState = bioAuthState.copy(
-                        func = { viewModel.deleteNoteInfo(info) }
-                    )
-                    bioAuthManager.showBiometricPrompt(
-                        title = "身份驗證",
-                        desc = "請驗證身份，隨後將刪除「${info.title}」"
-                    )
+                    val func = {
+                        viewModel.deleteNoteInfo(info)
+                    }
+
+                    if (info.isPrivate) {
+                        bioAuthState = bioAuthState.copy(
+                            func = { viewModel.deleteNoteInfo(info) }
+                        )
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = "請驗證身份，隨後將刪除「${info.title}」"
+                        )
+                    } else {
+                        func.invoke()
+                    }
                 }
             )
         }
