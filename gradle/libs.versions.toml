@@ -18,6 +18,8 @@ room = "2.6.1"
 
 hilt = "2.52" # upgrade to 2.50 fixed the issue
 
+biometric = "1.4.0-alpha02"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -49,10 +51,17 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
+# Biometric
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
+androidx-biometric-ktx = { group = "androidx.biometric", name = "biometric-ktx", version.ref = "biometric" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 google-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
+
+[bundles]
+biometric = ["androidx-biometric", "androidx-biometric-ktx"]
 
