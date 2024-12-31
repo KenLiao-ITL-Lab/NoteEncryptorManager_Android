@@ -14,12 +14,14 @@ class BiometricPromptManager(
 ) {
 
     private val resultChannel = Channel<BioAuthResult>()
-    private val promptResult = resultChannel.receiveAsFlow()
+    val promptResult = resultChannel.receiveAsFlow()
 
     fun showBiometricPrompt(
         title: String,
         desc: String
     ) {
+        resultChannel.trySend(BioAuthResult.Init) // 重設狀態，觸發Compose SideEffect
+
         val manager = BiometricManager.from(context)
 
         val authenticators = if (Build.VERSION.SDK_INT >= 30) {
@@ -53,10 +55,7 @@ class BiometricPromptManager(
             setTitle(title)
             setDescription(desc)
             setAllowedAuthenticators(authenticators)
-
-            if (Build.VERSION.SDK_INT < 30) {
-                setNegativeButtonText("取消")
-            }
+            setNegativeButtonText("取消")
         }.build()
 
     }
@@ -84,21 +83,27 @@ class BiometricPromptManager(
         manager: BiometricManager,
         authenticators: Int
     ) {
+        resultChannel.trySend(BioAuthResult.Init) // 重設狀態，觸發Compose SideEffect
+
         when(manager.canAuthenticate(authenticators)) {
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
                 resultChannel.trySend(BioAuthResult.HardwareUnavailable)
+                resultChannel.trySend(BioAuthResult.Init)
             }
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
                 resultChannel.trySend(BioAuthResult.FeatureUnavailable)
+                resultChannel.trySend(BioAuthResult.Init)
             }
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
                 resultChannel.trySend(BioAuthResult.AuthenticationNotSet)
+                resultChannel.trySend(BioAuthResult.Init)
             }
             else -> Unit
         }
     }
 
     sealed class BioAuthResult {
+        data object Init: BioAuthResult()
         data object HardwareUnavailable: BioAuthResult()
         data object FeatureUnavailable: BioAuthResult()
         data object AuthenticationNotSet: BioAuthResult()
