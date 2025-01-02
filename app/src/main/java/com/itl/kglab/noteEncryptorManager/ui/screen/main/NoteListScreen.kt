@@ -43,6 +43,7 @@ import com.itl.kglab.noteEncryptorManager.ui.dialog.DeleteConfirmDialog
 fun NoteListScreen(
     modifier: Modifier = Modifier,
     noteList: List<NoteInfo>,
+    onItemCardClicked: (NoteInfo) -> Unit,
     onItemEditClicked: (NoteInfo) -> Unit,
     onItemDeleteClicked: (NoteInfo) -> Unit
 ) {
@@ -72,6 +73,9 @@ fun NoteListScreen(
             items(noteList) { noteInfo ->
                 NoteListItem(
                     info = noteInfo,
+                    onItemCardClicked = {
+                        onItemCardClicked.invoke(noteInfo)
+                    },
                     onItemEditClicked = {
                         onItemEditClicked.invoke(noteInfo)
                     },
@@ -115,6 +119,7 @@ fun NoteListScreen(
 fun NoteListItem(
     modifier: Modifier = Modifier,
     info: NoteInfo,
+    onItemCardClicked: () -> Unit,
     onItemEditClicked: () -> Unit,
     onItemDeleteClicked: () -> Unit
 ) {
@@ -128,6 +133,9 @@ fun NoteListItem(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
+                .clickable {
+                    onItemCardClicked.invoke()
+                }
         ) {
 
             NoteItemTitle(
@@ -275,14 +283,42 @@ fun NoteItemMenu(
 
 @Preview(showBackground = true)
 @Composable
-fun NoteListScreenPreview() {
+fun NoteListScreenEmptyPreview() {
     NoteListScreen(
         modifier = Modifier,
         noteList = emptyList(),
+        onItemCardClicked = {},
         onItemEditClicked = {},
         onItemDeleteClicked = {}
     )
 }
+
+@Preview(showBackground = true)
+@Composable
+fun NoteListScreenPreview() {
+    val list = mutableListOf<NoteInfo>().apply {
+        repeat(15) { index ->
+            add(
+                NoteInfo(
+                    title = "Item Title $index",
+                    timeDesc = "xxxx-xx-xx",
+                    inputText = "Input Text $index",
+                    outputText = "Output Text $index",
+                    note = "Test Note Content",
+                    isPrivate = (index % 2) == 0
+                )
+            )
+        }
+    }
+
+    NoteListScreen(
+        noteList = list,
+        onItemCardClicked = {},
+        onItemEditClicked = {},
+        onItemDeleteClicked = {}
+    )
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -299,6 +335,7 @@ fun NoteListItemPreview() {
 
     NoteListItem(
         info = noteInfo,
+        onItemCardClicked = {},
         onItemDeleteClicked = {},
         onItemEditClicked = {}
     )

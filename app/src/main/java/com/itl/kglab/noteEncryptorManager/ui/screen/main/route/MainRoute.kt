@@ -38,6 +38,11 @@ import com.itl.kglab.noteEncryptorManager.ui.screen.main.NoteListScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.SettingScreen
 import com.itl.kglab.noteEncryptorManager.viewmodel.main.MainViewModel
 
+/**
+ *  關於Type safety in Kotlin DSL and Navigation Compose 可參考下列文件
+ *   - https://developer.android.com/guide/navigation/design/type-safety
+ */
+
 @Composable
 fun MainRoute(
     modifier: Modifier = Modifier,
@@ -54,9 +59,7 @@ fun MainRoute(
     val biometricResult by bioAuthManager.promptResult.collectAsState(initial = BiometricPromptManager.BioAuthResult.Init)
     val enrollLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = {
-//            Log.d("TAG", "Activity result: $it")
-        }
+        onResult = {}
     )
 
     var bioAuthState by remember {
@@ -118,7 +121,7 @@ fun MainRoute(
     NavHost(
         modifier = modifier,
         navController = navHostController,
-        startDestination = MainBottomNavigationItem.Converter.route
+        startDestination = MainBottomNavigationItem.Converter
     ) {
 
         val screenModifier = Modifier
@@ -127,7 +130,16 @@ fun MainRoute(
                 horizontal = 16.dp
             )
 
-        composable(MainBottomNavigationItem.Converter.route) {
+//        composable<DetailRoute> { backStackEntry ->
+//            val infoId = backStackEntry.toRoute<InformationRoute>().noteId
+//            viewModel.state.noteInfoList.find {  info -> info.id == infoId } ?.let {
+//                InformationScreen(
+//                    noteInfo = it
+//                )
+//            }
+//        }
+
+        composable<MainBottomNavigationItem.Converter> {
             val keyboardManager = LocalSoftwareKeyboardController.current
             val clipboardManager = LocalClipboardManager.current
 
@@ -161,10 +173,13 @@ fun MainRoute(
                 }
             )
         }
-        composable(MainBottomNavigationItem.NoteList.route) {
+        composable<MainBottomNavigationItem.NoteList> {
             NoteListScreen(
                 modifier = screenModifier,
                 noteList = viewModel.state.noteInfoList,
+                onItemCardClicked = { info ->
+//                    navHostController.navigate(InformationRoute(info.id))
+                },
                 onItemEditClicked = { info ->
                     val func = {
                         val id = info.id
@@ -213,7 +228,7 @@ fun MainRoute(
                 }
             )
         }
-        composable(MainBottomNavigationItem.Setting.route) {
+        composable<MainBottomNavigationItem.Setting> {
             SettingScreen(
                 modifier = screenModifier,
                 hashTypeList = viewModel.getHashTypeList(),

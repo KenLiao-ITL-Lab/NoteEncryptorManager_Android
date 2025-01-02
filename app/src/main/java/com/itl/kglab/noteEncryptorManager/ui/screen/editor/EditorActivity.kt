@@ -5,14 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -21,10 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
+import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
@@ -249,41 +246,6 @@ fun PrivateSwitch(
 
 
 @Composable
-fun ContentTextCard(
-    modifier: Modifier = Modifier,
-    label: String,
-    contentText: String
-) {
-    Column(
-        modifier = modifier
-    ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    top = 16.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 8.dp
-                ),
-            text = label
-        )
-
-        Text(
-            modifier = Modifier
-                .border(
-                    width = 1.dp,
-                    color = Color.LightGray,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .fillMaxWidth()
-                .padding(16.dp),
-            text = contentText
-        )
-    }
-}
-
-@Composable
 fun EditorFunctionButtonGroup(
     modifier: Modifier = Modifier,
     onSaveClicked: () -> Unit,
@@ -325,17 +287,7 @@ fun PreviewEditorScreen() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewContentTextCard() {
-    ContentTextCard(
-        modifier = Modifier
-            .height(200.dp)
-            .padding(vertical = 8.dp),
-        label = "Content Label",
-        contentText = "Content Text"
-    )
-}
+
 
 @Preview(showBackground = true)
 @Composable

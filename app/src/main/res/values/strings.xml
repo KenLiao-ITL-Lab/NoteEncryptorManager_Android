@@ -25,4 +25,5 @@
     <string name="screen_setting_save_button">儲存</string>
     <string name="screen_setting_reset">重置</string>
     <string name="title_activity_editor">EditorActivity</string>
+    <string name="title_activity_detail">DetailActivity</string>
 </resources>
