@@ -32,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.itl.kglab.noteEncryptorManager.manager.BiometricPromptManager
 import com.itl.kglab.noteEncryptorManager.ui.data.BioAuthEvent
+import com.itl.kglab.noteEncryptorManager.ui.screen.detail.DetailActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.editor.EditorActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.NoteListScreen
@@ -130,15 +131,6 @@ fun MainRoute(
                 horizontal = 16.dp
             )
 
-//        composable<DetailRoute> { backStackEntry ->
-//            val infoId = backStackEntry.toRoute<InformationRoute>().noteId
-//            viewModel.state.noteInfoList.find {  info -> info.id == infoId } ?.let {
-//                InformationScreen(
-//                    noteInfo = it
-//                )
-//            }
-//        }
-
         composable<MainBottomNavigationItem.Converter> {
             val keyboardManager = LocalSoftwareKeyboardController.current
             val clipboardManager = LocalClipboardManager.current
@@ -178,7 +170,33 @@ fun MainRoute(
                 modifier = screenModifier,
                 noteList = viewModel.state.noteInfoList,
                 onItemCardClicked = { info ->
-//                    navHostController.navigate(InformationRoute(info.id))
+
+                    val func = {
+                        val id = info.id
+                        val bundle = Bundle().apply {
+                            putLong(DetailActivity.ARG_ID, id)
+                        }
+
+                        val intent = Intent(context, DetailActivity::class.java).apply {
+                            putExtras(bundle)
+                        }
+
+                        context.startActivity(intent)
+                    }
+
+                    if (info.isPrivate) {
+                        bioAuthState = bioAuthState.copy(
+                            func = func
+                        )
+
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = "請驗證身份查看「${info.title}」內容"
+                        )
+                    } else {
+                        func.invoke()
+                    }
+
                 },
                 onItemEditClicked = { info ->
                     val func = {
