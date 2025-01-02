@@ -51,7 +51,9 @@ class DetailActivity : ComponentActivity() {
                     DetailScreen(
                         modifier = Modifier
                             .padding(innerPadding)
-                            .padding(horizontal = 16.dp),
+                            .padding(
+                                horizontal = 16.dp
+                            ),
                         noteInfo = viewModel.viewState.noteInfo,
                         onBackClicked = {
                             finish()
@@ -86,80 +88,17 @@ fun DetailScreen(
             .fillMaxSize()
     ) {
 
-        TextButton(
-            modifier = Modifier
-                .padding(vertical = 4.dp),
-            onClick = onBackClicked
-        ) {
-            Row(
-                modifier = Modifier,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Back"
-                )
-                Text(
-                    text = "返回"
-                )
-            }
-        }
+        BackTextButton(
+            onBackClicked = onBackClicked
+        )
 
-
-        Column(
+        NoteInfoDetailTable(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            OutlinedCard(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                ) {
-
-                    InformationTitleCard(
-                        title = noteInfo.title,
-                        timeDesc = noteInfo.timeDesc,
-                        isPrivate = noteInfo.isPrivate
-                    )
-
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp)
-                            .height(1.dp)
-                            .background(
-                                color = Color.LightGray
-                            ),
-                    )
-                    // Note
-                    ContentTextCard(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        label = "備註",
-                        contentText = noteInfo.note
-                    )
-
-                    // Input
-                    ContentTextCard(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        label = "輸入",
-                        contentText = noteInfo.inputText
-                    )
-
-                    // PW - 點擊可複製
-                    ContentTextCard(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        label = "輸出",
-                        contentText = noteInfo.outputText
-                    )
-                }
-            }
-        }
+                .verticalScroll(rememberScrollState()),
+            noteInfo = noteInfo
+        )
     }
 }
 
@@ -198,10 +137,107 @@ fun InformationTitleCard(
     )
 }
 
+@Composable
+fun BackTextButton(
+    onBackClicked: () -> Unit
+) {
+    TextButton(
+        onClick = onBackClicked
+    ) {
+        Row(
+            modifier = Modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                contentDescription = "Back"
+            )
+            Text(
+                text = "返回"
+            )
+        }
+    }
+}
+
+@Composable
+fun NoteInfoDetailTable(
+    modifier: Modifier,
+    noteInfo: NoteInfo
+) {
+    Column(
+        modifier = modifier
+    ) {
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+
+                InformationTitleCard(
+                    title = noteInfo.title,
+                    timeDesc = noteInfo.timeDesc,
+                    isPrivate = noteInfo.isPrivate
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                        .height(1.dp)
+                        .background(
+                            color = Color.LightGray
+                        ),
+                )
+                // Note
+                ContentTextCard(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    label = "備註",
+                    contentText = noteInfo.note
+                )
+
+                // Input
+                ContentTextCard(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    label = "輸入",
+                    contentText = noteInfo.inputText
+                )
+
+                // PW - 點擊可複製
+                ContentTextCard(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    label = "輸出",
+                    contentText = noteInfo.outputText
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-fun PreviewInfoCardTitle() {
+fun PreviewBackTextButton() {
+    BackTextButton {}
+}
 
+@Preview(showBackground = true)
+@Composable
+fun PreviewNoteInfoDetailTable() {
+    NoteInfoDetailTable(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState()),
+        noteInfo = NoteInfo(
+            title = "This is Title container",
+            timeDesc = "2024-08-11 16:33",
+            inputText = "Look!! Input message!",
+            outputText = "Woo!! Is output text!",
+            note = "I wanna tell you something.",
+            isPrivate = true
+        )
+    )
 }
 
 @Preview(showBackground = true)
