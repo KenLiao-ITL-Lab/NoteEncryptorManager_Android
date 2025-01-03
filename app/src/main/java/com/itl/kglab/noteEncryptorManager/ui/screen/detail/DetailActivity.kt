@@ -1,5 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.detail
 
+import android.content.ClipData
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -27,7 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +49,9 @@ class DetailActivity : ComponentActivity() {
         enableEdgeToEdge()
         initViewData()
         setContent {
+
+            val clipboardManager = LocalClipboardManager.current
+
             NoteEncryptorManagerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     DetailScreen(
@@ -58,6 +63,16 @@ class DetailActivity : ComponentActivity() {
                         noteInfo = viewModel.viewState.noteInfo,
                         onBackClicked = {
                             finish()
+                        },
+                        onContentLongClicked = { content ->
+                            val clipData = ClipData.newPlainText(
+                                "plain text",
+                                content
+                            )
+
+                            clipboardManager.setClip(
+                                ClipEntry(clipData)
+                            )
                         }
                     )
                 }
@@ -82,7 +97,8 @@ class DetailActivity : ComponentActivity() {
 fun DetailScreen(
     modifier: Modifier = Modifier,
     noteInfo: NoteInfo,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onContentLongClicked: (String) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -98,7 +114,8 @@ fun DetailScreen(
                 .weight(1f)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            noteInfo = noteInfo
+            noteInfo = noteInfo,
+            onContentLongClicked = onContentLongClicked
         )
     }
 }
@@ -162,7 +179,8 @@ fun BackTextButton(
 @Composable
 fun NoteInfoDetailTable(
     modifier: Modifier,
-    noteInfo: NoteInfo
+    noteInfo: NoteInfo,
+    onContentLongClicked: (String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -183,34 +201,69 @@ fun NoteInfoDetailTable(
                     isPrivate = noteInfo.isPrivate
                 )
 
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                        .height(1.dp)
-                        .background(
-                            color = Color.LightGray
-                        ),
-                )
+                Row(
+                    modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 12.dp)
+                            .height(1.dp)
+                            .background(
+                                color = Color.LightGray
+                            ),
+                    )
+
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 8.dp),
+                        textAlign = TextAlign.End,
+                        fontSize = 10.sp,
+                        color = Color.Gray,
+                        text = "長按內容即可複製"
+                    )
+                }
+
+
+
+
+
                 // Note
                 ContentTextCard(
                     modifier = Modifier.padding(vertical = 8.dp),
                     label = "備註",
-                    contentText = noteInfo.note
+                    contentText = noteInfo.note,
+                    onContentLongClicked = {
+                        onContentLongClicked.invoke(
+                            noteInfo.note
+                        )
+                    }
                 )
 
                 // Input
                 ContentTextCard(
                     modifier = Modifier.padding(vertical = 8.dp),
                     label = "輸入",
-                    contentText = noteInfo.inputText
+                    contentText = noteInfo.inputText,
+                    onContentLongClicked = {
+                        onContentLongClicked.invoke(
+                            noteInfo.inputText
+                        )
+                    }
                 )
 
                 // PW - 點擊可複製
                 ContentTextCard(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .padding(vertical = 8.dp),
                     label = "輸出",
-                    contentText = noteInfo.outputText
+                    contentText = noteInfo.outputText,
+                    onContentLongClicked = {
+                        onContentLongClicked.invoke(
+                            noteInfo.outputText
+                        )
+                    }
                 )
             }
         }
@@ -236,7 +289,8 @@ fun PreviewNoteInfoDetailTable() {
             outputText = "Woo!! Is output text!",
             note = "I wanna tell you something.",
             isPrivate = true
-        )
+        ),
+        onContentLongClicked = {}
     )
 }
 
@@ -252,6 +306,7 @@ fun PreviewInformationScreen() {
             note = "I wanna tell you something.",
             isPrivate = true
         ),
-        onBackClicked = {}
+        onBackClicked = {},
+        onContentLongClicked = {}
     )
 }

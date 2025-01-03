@@ -1,6 +1,8 @@
 package com.itl.kglab.noteEncryptorManager.ui.component
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,11 +14,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContentTextCard(
     modifier: Modifier = Modifier,
     label: String,
-    contentText: String
+    contentText: String,
+    onContentLongClicked: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
@@ -40,7 +44,13 @@ fun ContentTextCard(
                     shape = RoundedCornerShape(8.dp)
                 )
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        onContentLongClicked?.invoke()
+                    }
+                ),
             text = contentText
         )
     }
@@ -52,6 +62,7 @@ fun PreviewContentTextCard() {
     ContentTextCard(
         modifier = Modifier,
         label = "Content Label",
-        contentText = "Content Text"
+        contentText = "Content Text",
+        onContentLongClicked = {}
     )
 }
