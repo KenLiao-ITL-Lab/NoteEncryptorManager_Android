@@ -26,8 +26,8 @@ fun MainBottomNavigationBar(navController: NavController) {
             NavigationBarItem(
                 selected = item.route == currentRoute,
                 onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
+                    if (currentRoute != item::class.qualifiedName) {
+                        navController.navigate(item) {
                             popUpTo(navController.graph.startDestinationId)
                             launchSingleTop = true
                         }

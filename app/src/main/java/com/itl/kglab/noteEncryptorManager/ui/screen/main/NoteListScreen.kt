@@ -1,11 +1,9 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.main
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,8 +13,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +43,7 @@ import com.itl.kglab.noteEncryptorManager.ui.dialog.DeleteConfirmDialog
 fun NoteListScreen(
     modifier: Modifier = Modifier,
     noteList: List<NoteInfo>,
+    onItemCardClicked: (NoteInfo) -> Unit,
     onItemEditClicked: (NoteInfo) -> Unit,
     onItemDeleteClicked: (NoteInfo) -> Unit
 ) {
@@ -71,6 +73,9 @@ fun NoteListScreen(
             items(noteList) { noteInfo ->
                 NoteListItem(
                     info = noteInfo,
+                    onItemCardClicked = {
+                        onItemCardClicked.invoke(noteInfo)
+                    },
                     onItemEditClicked = {
                         onItemEditClicked.invoke(noteInfo)
                     },
@@ -114,6 +119,7 @@ fun NoteListScreen(
 fun NoteListItem(
     modifier: Modifier = Modifier,
     info: NoteInfo,
+    onItemCardClicked: () -> Unit,
     onItemEditClicked: () -> Unit,
     onItemDeleteClicked: () -> Unit
 ) {
@@ -127,10 +133,14 @@ fun NoteListItem(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
+                .clickable {
+                    onItemCardClicked.invoke()
+                }
         ) {
 
             NoteItemTitle(
                 modifier = Modifier,
+                isLocked = info.isPrivate,
                 title = info.title,
                 desc = info.timeDesc,
                 menuExpanded = menuExpanded,
@@ -150,14 +160,11 @@ fun NoteListItem(
                 }
             )
 
-            Spacer(
+            HorizontalDivider(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(vertical = 12.dp)
-                    .height(1.dp)
-                    .background(
-                        color = Color.LightGray
-                    ),
+                    .height(1.dp),
+                color = Color.LightGray
             )
 
             Text(
@@ -177,6 +184,7 @@ fun NoteItemTitle(
     modifier: Modifier = Modifier,
     title: String,
     desc: String,
+    isLocked: Boolean,
     menuExpanded: Boolean,
     onMenuClicked: () -> Unit,
     onDismissRequest: () -> Unit,
@@ -188,18 +196,27 @@ fun NoteItemTitle(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
 
+            if (isLocked) {
+                Icon(
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = "Is Private Icon"
+                )
+            }
+
             Text(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(bottom = 4.dp),
+                    .weight(1f),
                 text = title,
                 fontSize = 20.sp,
-                maxLines = 1
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             NoteItemMenu(
@@ -264,14 +281,42 @@ fun NoteItemMenu(
 
 @Preview(showBackground = true)
 @Composable
-fun NoteListScreenPreview() {
+fun NoteListScreenEmptyPreview() {
     NoteListScreen(
         modifier = Modifier,
         noteList = emptyList(),
+        onItemCardClicked = {},
         onItemEditClicked = {},
         onItemDeleteClicked = {}
     )
 }
+
+@Preview(showBackground = true)
+@Composable
+fun NoteListScreenPreview() {
+    val list = mutableListOf<NoteInfo>().apply {
+        repeat(15) { index ->
+            add(
+                NoteInfo(
+                    title = "Item Title $index",
+                    timeDesc = "xxxx-xx-xx",
+                    inputText = "Input Text $index",
+                    outputText = "Output Text $index",
+                    note = "Test Note Content",
+                    isPrivate = (index % 2) == 0
+                )
+            )
+        }
+    }
+
+    NoteListScreen(
+        noteList = list,
+        onItemCardClicked = {},
+        onItemEditClicked = {},
+        onItemDeleteClicked = {}
+    )
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -288,6 +333,7 @@ fun NoteListItemPreview() {
 
     NoteListItem(
         info = noteInfo,
+        onItemCardClicked = {},
         onItemDeleteClicked = {},
         onItemEditClicked = {}
     )
@@ -299,6 +345,7 @@ fun NoteListItemTitlePreview() {
     NoteItemTitle(
         title = "測試標題測試標題測試標題測試標題測試標題",
         desc = "2024/12/25 16:40",
+        isLocked = true,
         menuExpanded = false,
         onMenuClicked = {},
         onDismissRequest = {},

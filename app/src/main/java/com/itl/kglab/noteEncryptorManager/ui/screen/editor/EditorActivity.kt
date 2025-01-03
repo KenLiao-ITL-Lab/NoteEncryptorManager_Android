@@ -5,14 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -21,10 +21,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
+import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
@@ -44,9 +47,14 @@ class EditorActivity : ComponentActivity() {
 
         setContent {
             NoteEncryptorManagerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
                     EditorScreen(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .padding(horizontal = dimensionResource(id = R.dimen.screen_table_padding))
+                        ,
                         viewState = viewModel.viewState,
                         onTableChanged = {
                             viewModel.updateNoteInfo(it)
@@ -102,7 +110,7 @@ fun EditorScreen(
 
     Column(
         modifier = modifier
-            .padding(horizontal = 8.dp)
+            .verticalScroll(rememberScrollState())
     ) {
 
         val noteInfo = viewState.noteInfo
@@ -158,21 +166,22 @@ fun ContextTable(
         modifier = modifier
     ) {
 
-        val horizontalPadding = 8.dp
-
         // Title
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    vertical = 16.dp,
-                    horizontal = horizontalPadding
+                    vertical = 16.dp
                 ),
             value = titleText,
+            maxLines = 1,
             onValueChange = onTitleTextChange,
             label = {
                 Text(text = "標題")
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            )
         )
 
         // Note
@@ -181,27 +190,27 @@ fun ContextTable(
                 .fillMaxWidth()
                 .padding(
                     vertical = 16.dp,
-                    horizontal = horizontalPadding
                 ),
             value = noteText,
             onValueChange = onNoteTextChange,
             label = {
                 Text(text = "備註")
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            )
         )
 
         // Input
         ContentTextCard(
-            modifier = Modifier
-                .padding(horizontal = horizontalPadding),
+            modifier = Modifier,
             label = "輸入",
             contentText = inputText
         )
 
         // Output
         ContentTextCard(
-            modifier = Modifier
-                .padding(horizontal = horizontalPadding),
+            modifier = Modifier,
             label = "輸出",
             contentText = outputText
         )
@@ -211,14 +220,12 @@ fun ContextTable(
         PrivateSwitch(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = horizontalPadding),
+                .padding(vertical = 8.dp),
             isPrivate = isPrivate,
             onPrivateSwitchChange = onPrivateSwitchChange
         )
 
-        HorizontalDivider(
-            Modifier.padding(horizontalPadding)
-        )
+        HorizontalDivider()
 
     }
 }
@@ -247,41 +254,6 @@ fun PrivateSwitch(
     }
 }
 
-
-@Composable
-fun ContentTextCard(
-    modifier: Modifier = Modifier,
-    label: String,
-    contentText: String
-) {
-    Column(
-        modifier = modifier
-    ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    top = 16.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 8.dp
-                ),
-            text = label
-        )
-
-        Text(
-            modifier = Modifier
-                .border(
-                    width = 1.dp,
-                    color = Color.LightGray,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .fillMaxWidth()
-                .padding(16.dp),
-            text = contentText
-        )
-    }
-}
 
 @Composable
 fun EditorFunctionButtonGroup(
@@ -325,17 +297,7 @@ fun PreviewEditorScreen() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewContentTextCard() {
-    ContentTextCard(
-        modifier = Modifier
-            .height(200.dp)
-            .padding(vertical = 8.dp),
-        label = "Content Label",
-        contentText = "Content Text"
-    )
-}
+
 
 @Preview(showBackground = true)
 @Composable

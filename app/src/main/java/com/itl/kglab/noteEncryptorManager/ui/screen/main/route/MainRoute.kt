@@ -1,16 +1,28 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.main.route
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -19,23 +31,92 @@ import androidx.lifecycle.compose.currentStateAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.itl.kglab.noteEncryptorManager.R
+import com.itl.kglab.noteEncryptorManager.manager.BiometricPromptManager
+import com.itl.kglab.noteEncryptorManager.ui.data.BioAuthEvent
+import com.itl.kglab.noteEncryptorManager.ui.screen.detail.DetailActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.editor.EditorActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.NoteListScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.SettingScreen
 import com.itl.kglab.noteEncryptorManager.viewmodel.main.MainViewModel
 
+/**
+ *  關於Type safety in Kotlin DSL and Navigation Compose 可參考下列文件
+ *   - https://developer.android.com/guide/navigation/design/type-safety
+ */
+
 @Composable
 fun MainRoute(
     modifier: Modifier = Modifier,
     navHostController: NavHostController,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    bioAuthManager: BiometricPromptManager
 ) {
 
     val context = LocalContext.current
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
+
+    val biometricResult by bioAuthManager.promptResult.collectAsState(initial = BiometricPromptManager.BioAuthResult.Init)
+    val enrollLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {}
+    )
+
+    var bioAuthState by remember {
+        mutableStateOf(BioAuthEvent())
+    }
+
+    val screenModifier = Modifier
+        .fillMaxSize()
+        .padding(
+            horizontal = dimensionResource(id = R.dimen.screen_table_padding)
+        )
+
+    // Result判斷，當biometricResult狀態改變即執行一次
+    LaunchedEffect(biometricResult) {
+        biometricResult.let { result ->
+            when(result) {
+                is BiometricPromptManager.BioAuthResult.AuthenticationError -> {
+                    Log.d("TAG", "AuthenticationError: ${result.errorMessage}")
+                }
+                BiometricPromptManager.BioAuthResult.AuthenticationFailed -> {
+                    Log.d("TAG", "AuthenticationFailed")
+                }
+                BiometricPromptManager.BioAuthResult.AuthenticationFailed -> {
+                    Log.d("TAG", "AuthenticationFailed")
+                }
+                BiometricPromptManager.BioAuthResult.AuthenticationSuccess -> {
+                    Log.d("TAG", "AuthenticationSuccess")
+                    bioAuthState.func?.invoke() ?: run { }
+                    bioAuthState = bioAuthState.copy(
+                        func = null
+                    )
+                }
+                BiometricPromptManager.BioAuthResult.FeatureUnavailable -> {
+                    Log.d("TAG", "FeatureUnavailable")
+                }
+                BiometricPromptManager.BioAuthResult.HardwareUnavailable -> {
+                    Log.d("TAG", "HardwareUnavailable")
+                }
+                BiometricPromptManager.BioAuthResult.AuthenticationNotSet -> {
+                    if (Build.VERSION.SDK_INT >= 30) {
+                        val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                            putExtra(
+                                Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+                            )
+                        }
+                        enrollLauncher.launch(enrollIntent)
+                    }
+                }
+
+                BiometricPromptManager.BioAuthResult.Init -> {}
+            }
+        }
+    }
 
     LaunchedEffect(lifecycleState) {
         when(lifecycleState) {
@@ -49,16 +130,10 @@ fun MainRoute(
     NavHost(
         modifier = modifier,
         navController = navHostController,
-        startDestination = MainBottomNavigationItem.Converter.route
+        startDestination = MainBottomNavigationItem.Converter
     ) {
 
-        val screenModifier = Modifier
-            .fillMaxSize()
-            .padding(
-                horizontal = 16.dp
-            )
-
-        composable(MainBottomNavigationItem.Converter.route) {
+        composable<MainBottomNavigationItem.Converter> {
             val keyboardManager = LocalSoftwareKeyboardController.current
             val clipboardManager = LocalClipboardManager.current
 
@@ -92,29 +167,88 @@ fun MainRoute(
                 }
             )
         }
-        composable(MainBottomNavigationItem.NoteList.route) {
+        composable<MainBottomNavigationItem.NoteList> {
             NoteListScreen(
                 modifier = screenModifier,
                 noteList = viewModel.state.noteInfoList,
+                onItemCardClicked = { info ->
+
+                    val func = {
+                        val id = info.id
+                        val bundle = Bundle().apply {
+                            putLong(DetailActivity.ARG_ID, id)
+                        }
+
+                        val intent = Intent(context, DetailActivity::class.java).apply {
+                            putExtras(bundle)
+                        }
+
+                        context.startActivity(intent)
+                    }
+
+                    if (info.isPrivate) {
+                        bioAuthState = bioAuthState.copy(
+                            func = func
+                        )
+
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = "請驗證身份查看「${info.title}」內容"
+                        )
+                    } else {
+                        func.invoke()
+                    }
+
+                },
                 onItemEditClicked = { info ->
-                    val id = info.id
-                    val bundle = Bundle().apply {
-                        putBoolean(EditorActivity.ARG_IS_EDIT, true)
-                        putLong(EditorActivity.ARG_ID, id)
+                    val func = {
+                        val id = info.id
+                        val bundle = Bundle().apply {
+                            putBoolean(EditorActivity.ARG_IS_EDIT, true)
+                            putLong(EditorActivity.ARG_ID, id)
+                        }
+
+                        val intent = Intent(context, EditorActivity::class.java).apply {
+                            putExtras(bundle)
+                        }
+
+                        context.startActivity(intent)
                     }
 
-                    val intent = Intent(context, EditorActivity::class.java).apply {
-                        putExtras(bundle)
+                    if (info.isPrivate) {
+                        bioAuthState = bioAuthState.copy(
+                            func = func
+                        )
+
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = "請驗證身份編輯「${info.title}」"
+                        )
+                    } else {
+                        func.invoke()
                     }
 
-                    context.startActivity(intent)
                 },
                 onItemDeleteClicked = { info ->
-                    viewModel.deleteNoteInfo(info)
+                    val func = {
+                        viewModel.deleteNoteInfo(info)
+                    }
+
+                    if (info.isPrivate) {
+                        bioAuthState = bioAuthState.copy(
+                            func = { viewModel.deleteNoteInfo(info) }
+                        )
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = "請驗證身份，隨後將刪除「${info.title}」"
+                        )
+                    } else {
+                        func.invoke()
+                    }
                 }
             )
         }
-        composable(MainBottomNavigationItem.Setting.route) {
+        composable<MainBottomNavigationItem.Setting> {
             SettingScreen(
                 modifier = screenModifier,
                 hashTypeList = viewModel.getHashTypeList(),
