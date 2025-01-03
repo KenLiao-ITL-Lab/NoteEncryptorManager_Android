@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -30,6 +31,7 @@ import androidx.lifecycle.compose.currentStateAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.manager.BiometricPromptManager
 import com.itl.kglab.noteEncryptorManager.ui.data.BioAuthEvent
 import com.itl.kglab.noteEncryptorManager.ui.screen.detail.DetailActivity
@@ -66,6 +68,12 @@ fun MainRoute(
     var bioAuthState by remember {
         mutableStateOf(BioAuthEvent())
     }
+
+    val screenModifier = Modifier
+        .fillMaxSize()
+        .padding(
+            horizontal = dimensionResource(id = R.dimen.screen_table_padding)
+        )
 
     // Result判斷，當biometricResult狀態改變即執行一次
     LaunchedEffect(biometricResult) {
@@ -124,12 +132,6 @@ fun MainRoute(
         navController = navHostController,
         startDestination = MainBottomNavigationItem.Converter
     ) {
-
-        val screenModifier = Modifier
-            .fillMaxSize()
-            .padding(
-                horizontal = 16.dp
-            )
 
         composable<MainBottomNavigationItem.Converter> {
             val keyboardManager = LocalSoftwareKeyboardController.current

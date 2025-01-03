@@ -1,11 +1,9 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.main
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +16,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -161,14 +160,11 @@ fun NoteListItem(
                 }
             )
 
-            Spacer(
+            HorizontalDivider(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(vertical = 12.dp)
-                    .height(1.dp)
-                    .background(
-                        color = Color.LightGray
-                    ),
+                    .height(1.dp),
+                color = Color.LightGray
             )
 
             Text(
