@@ -20,8 +20,11 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +43,7 @@ class EditorActivity : ComponentActivity() {
 
     private val viewModel: EditorViewModel by viewModels()
 
+    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -54,7 +58,9 @@ class EditorActivity : ComponentActivity() {
                         modifier = Modifier
                             .padding(innerPadding)
                             .padding(horizontal = dimensionResource(id = R.dimen.screen_table_padding))
-                        ,
+                            .semantics {
+                                testTagsAsResourceId = true
+                            },
                         viewState = viewModel.viewState,
                         onTableChanged = {
                             viewModel.updateNoteInfo(it)
