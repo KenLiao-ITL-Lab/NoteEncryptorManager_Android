@@ -22,11 +22,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +39,7 @@ import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.DetailViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class DetailActivity : ComponentActivity() {
@@ -49,8 +51,8 @@ class DetailActivity : ComponentActivity() {
         enableEdgeToEdge()
         initViewData()
         setContent {
-
-            val clipboardManager = LocalClipboardManager.current
+            val clipboardManager = LocalClipboard.current
+            val coroutineScope = rememberCoroutineScope()
 
             NoteEncryptorManagerTheme {
                 Scaffold(
@@ -71,10 +73,9 @@ class DetailActivity : ComponentActivity() {
                                 "plain text",
                                 content
                             )
-
-                            clipboardManager.setClip(
-                                ClipEntry(clipData)
-                            )
+                            coroutineScope.launch {
+                                clipboardManager.setClipEntry(ClipEntry(clipData))
+                            }
                         }
                     )
                 }
