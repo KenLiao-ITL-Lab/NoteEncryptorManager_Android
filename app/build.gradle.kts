@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.google.hilt.android)
     alias(libs.plugins.androidx.room)
+    alias(libs.plugins.kotlin.compose)
 
     kotlin("plugin.serialization") version "1.9.23"
 }
