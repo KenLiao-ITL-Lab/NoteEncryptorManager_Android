@@ -2,8 +2,8 @@
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.jetbrains.kotlin.android) apply false
-    alias(libs.plugins.google.devtools.ksp) version "2.0.21-1.0.27" apply false
-    alias(libs.plugins.google.hilt.android) version "2.52" apply false
+    alias(libs.plugins.google.devtools.ksp) version "2.2.0-2.0.2" apply false
+    alias(libs.plugins.google.hilt.android) version "2.57.1" apply false
     alias(libs.plugins.androidx.room) apply false
     alias(libs.plugins.kotlin.compose) apply false
 }

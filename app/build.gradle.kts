@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -6,17 +9,17 @@ plugins {
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.kotlin.compose)
 
-    kotlin("plugin.serialization") version "1.9.23"
+    kotlin("plugin.serialization") version "2.2.10"
 }
 
 android {
     namespace = "com.itl.kglab.noteEncryptorManager"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.itl.kglab.noteEncryptorManager"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
