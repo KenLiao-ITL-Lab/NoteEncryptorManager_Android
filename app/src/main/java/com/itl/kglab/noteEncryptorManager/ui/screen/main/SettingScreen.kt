@@ -37,6 +37,7 @@ import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
+import com.itl.kglab.noteEncryptorManager.ui.component.DescInputItem
 
 @Composable
 fun SettingScreen(
@@ -158,7 +159,7 @@ fun SettingTable(
             onSelectedItemIndex = onSelectedItemIndex
         )
 
-        SettingInputItem(
+        DescInputItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
@@ -173,7 +174,7 @@ fun SettingTable(
             )
         )
 
-        SettingInputItem(
+        DescInputItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
@@ -188,7 +189,7 @@ fun SettingTable(
             )
         )
 
-        SettingInputItem(
+        DescInputItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
@@ -203,7 +204,7 @@ fun SettingTable(
             )
         )
 
-        SettingInputItem(
+        DescInputItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = itemPadding),
@@ -250,41 +251,6 @@ fun SettingButtonGroup(
         )
     }
 }
-
-@Composable
-fun SettingInputItem(
-    modifier: Modifier = Modifier,
-    value: String,
-    label: String,
-    labelColor: Color = Color.Unspecified,
-    supportingText: String = "",
-    onValueChange: (String) -> Unit,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
-) {
-    OutlinedTextField(
-        modifier = modifier,
-        value = value,
-        label = { Text(
-            text = label,
-            color = labelColor
-        )},
-        supportingText = if (supportingText.isBlank()) {
-            null
-        } else {
-            {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(text = supportingText)
-                }
-            }
-        },
-        onValueChange = onValueChange,
-        keyboardOptions = keyboardOptions
-    )
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -387,16 +353,5 @@ fun PreviewDropMenu() {
         list = emptyList(),
         selectedItemIndex = 0,
         onSelectedItemIndex = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewInputItem() {
-    SettingInputItem(
-        value = "Preview Input",
-        label = "Preview Label",
-        supportingText = "Preview SupportingText",
-        onValueChange = {}
     )
 }
