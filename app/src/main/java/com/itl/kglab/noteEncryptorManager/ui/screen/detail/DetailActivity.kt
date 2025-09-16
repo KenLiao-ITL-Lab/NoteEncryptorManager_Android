@@ -9,13 +9,14 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -29,13 +30,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
+import com.itl.kglab.noteEncryptorManager.ui.component.DescInputItem
+import com.itl.kglab.noteEncryptorManager.ui.component.TableDivider
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.DetailViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,8 +63,11 @@ class DetailActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
+                    val scrollState = rememberScrollState()
                     DetailScreen(
                         modifier = Modifier
+                            .verticalScroll(state = scrollState)
+                            .fillMaxSize()
                             .padding(innerPadding)
                             .padding(
                                 horizontal = dimensionResource(id = R.dimen.screen_table_padding)
@@ -101,11 +109,11 @@ fun DetailScreen(
     modifier: Modifier = Modifier,
     noteInfo: NoteInfo,
     onBackClicked: () -> Unit,
-    onContentLongClicked: (String) -> Unit
+    onContentLongClicked: (String) -> Unit,
 ) {
+
     Column(
         modifier = modifier
-            .fillMaxSize()
     ) {
 
         BackTextButton(
@@ -114,11 +122,11 @@ fun DetailScreen(
 
         NoteInfoDetailTable(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
+                .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             noteInfo = noteInfo,
-            onContentLongClicked = onContentLongClicked
+            config = EditorSettingConfig(),
+            onContentLongClicked = onContentLongClicked,
         )
     }
 }
@@ -183,6 +191,7 @@ fun BackTextButton(
 fun NoteInfoDetailTable(
     modifier: Modifier,
     noteInfo: NoteInfo,
+    config: EditorSettingConfig,
     onContentLongClicked: (String) -> Unit,
 ) {
     Column(
@@ -204,26 +213,11 @@ fun NoteInfoDetailTable(
                     isPrivate = noteInfo.isPrivate
                 )
 
-                Row(
-                    modifier = Modifier,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(vertical = 12.dp)
-                    )
-
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 8.dp),
-                        textAlign = TextAlign.End,
-                        fontSize = 10.sp,
-                        color = Color.Gray,
-                        text = "長按內容即可複製"
-                    )
-                }
+                TableDivider(
+                    modifier = Modifier
+                        .padding(top = 16.dp),
+                    desc = "長按內容即可複製"
+                )
 
                 // Note
                 ContentTextCard(
@@ -249,10 +243,46 @@ fun NoteInfoDetailTable(
                     }
                 )
 
+                TableDivider(
+                    modifier = Modifier
+                        .padding(top = 24.dp),
+                    desc = "取樣設定"
+                )
+
+                DescInputItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    value = config.sampleSizeValue,
+                    label = stringResource(id = R.string.screen_setting_size_label),
+                    labelColor = Color.Gray,
+                    onValueChange = config.onSampleSizeChange,
+                    supportingText = stringResource(id = R.string.screen_setting_size_desc),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    )
+                )
+
+                DescInputItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    value = config.indexValue,
+                    label = stringResource(id = R.string.screen_setting_index_label),
+                    labelColor = Color.Gray,
+                    onValueChange = config.onIndexChange,
+                    supportingText = stringResource(id = R.string.screen_setting_index_desc),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Done
+                    )
+                )
+
                 // PW - 點擊可複製
                 ContentTextCard(
                     modifier = Modifier
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 24.dp),
                     label = "輸出",
                     contentText = noteInfo.outputText,
                     onContentLongClicked = {
@@ -286,6 +316,7 @@ fun PreviewNoteInfoDetailTable() {
             note = "I wanna tell you something.",
             isPrivate = true
         ),
+        config = EditorSettingConfig(),
         onContentLongClicked = {}
     )
 }
@@ -306,3 +337,10 @@ fun PreviewInformationScreen() {
         onContentLongClicked = {}
     )
 }
+
+data class EditorSettingConfig(
+    val sampleSizeValue: String = "",
+    val onSampleSizeChange: (String) -> Unit = {},
+    val indexValue: String = "",
+    val onIndexChange: (String) -> Unit = {},
+)

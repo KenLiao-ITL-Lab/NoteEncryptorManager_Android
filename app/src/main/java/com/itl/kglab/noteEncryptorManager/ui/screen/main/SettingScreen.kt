@@ -188,36 +188,6 @@ fun SettingTable(
                 imeAction = ImeAction.Next
             )
         )
-
-        DescInputItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = itemPadding),
-            value = tableConfig.sampleSizeValue,
-            label = stringResource(id = R.string.screen_setting_size_label),
-            labelColor = Color.Gray,
-            onValueChange = tableConfig.onSampleSizeChange,
-            supportingText = stringResource(id = R.string.screen_setting_size_desc),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Next
-            )
-        )
-
-        DescInputItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = itemPadding),
-            value = tableConfig.indexValue,
-            label = stringResource(id = R.string.screen_setting_index_label),
-            labelColor = Color.Gray,
-            onValueChange = tableConfig.onIndexChange,
-            supportingText = stringResource(id = R.string.screen_setting_index_desc),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Done
-            )
-        )
     }
 }
 

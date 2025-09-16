@@ -14,8 +14,8 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun DescInputItem(
     modifier: Modifier = Modifier,
-    value: String,
-    label: String,
+    value: String = "",
+    label: String = "",
     labelColor: Color = Color.Unspecified,
     supportingText: String = "",
     onValueChange: (String) -> Unit,
