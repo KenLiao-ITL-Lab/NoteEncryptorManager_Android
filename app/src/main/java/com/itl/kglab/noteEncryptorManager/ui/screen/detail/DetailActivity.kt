@@ -63,11 +63,10 @@ class DetailActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
-                    val scrollState = rememberScrollState()
+
                     DetailScreen(
                         modifier = Modifier
-                            .verticalScroll(state = scrollState)
-                            .fillMaxSize()
+                            .fillMaxWidth()
                             .padding(innerPadding)
                             .padding(
                                 horizontal = dimensionResource(id = R.dimen.screen_table_padding)
