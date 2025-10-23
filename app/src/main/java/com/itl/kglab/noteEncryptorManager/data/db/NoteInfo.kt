@@ -18,9 +18,13 @@ data class NoteInfo(
     @ColumnInfo(name = "output_text")
     val outputText: String = "", // 輸入 - 要點開才可查看
     @ColumnInfo(name = "note")
-    val note: String = "", // 備註 - 要點開才可以查看
+    val note: String = "", // 備註
     @ColumnInfo(name = "is_private")
-    val isPrivate: Boolean = false // 密語保護
+    val isPrivate: Boolean = false, // 密語保護
+    @ColumnInfo(name = "sample_size")
+    val sampleSize: Int = 0,
+    @ColumnInfo(name = "sample_index")
+    val sampleIndex: Int = 0
 ) {
     companion object {
         const val TABLE_NAME = "noteInfoTable"
