@@ -4,11 +4,15 @@
     <string name="bottom_nav_item_list">筆記</string>
     <string name="bottom_nav_item_setting">設定</string>
 
+
+
     <string name="screen_converter_input_label">輸入</string>
     <string name="screen_converter_convert_button">轉換</string>
     <string name="screen_converter_copy_button">複製</string>
     <string name="screen_converter_save_button">儲存</string>
     <string name="screen_converter_clear_button">清除</string>
+    <string name="screen_converter_output_label">輸出</string>
+    <string name="screen_converter_output_supporting_desc">長按可複製</string>
 
     <string name="screen_list_empty_list_desc">尚未儲存Note資料</string>
 

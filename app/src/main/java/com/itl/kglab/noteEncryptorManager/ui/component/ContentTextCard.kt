@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,9 +35,13 @@ fun ContentTextCard(
         modifier = modifier
             .background(backgroundColor),
     ) {
-        Box {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+        ) {
             val titleModifier = if (titleLabel.isNotEmpty()) {
-                Modifier.padding(top = 8.dp)
+                Modifier.padding(top = 12.dp)
             } else {
                 Modifier
             }
@@ -47,7 +52,7 @@ fun ContentTextCard(
                         color = Color.LightGray,
                         shape = RoundedCornerShape(8.dp)
                     )
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .padding(16.dp)
                     .combinedClickable(
                         onClick = {},

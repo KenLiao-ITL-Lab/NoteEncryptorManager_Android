@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
@@ -77,10 +78,13 @@ fun ConverterInputSection(
     onInputChange: (String) -> Unit,
     onConvertClicked: () -> Unit
 ) {
-    Column {
+    Column(
+        modifier = Modifier
+    ) {
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(200.dp)
                 .padding(bottom = 8.dp),
             value = inputValue,
             onValueChange = onInputChange,
@@ -109,10 +113,11 @@ fun ConverterResultSection(
     onContentLongClicked: (() -> Unit)? = null
 ) {
     ContentTextCard(
-        modifier = Modifier,
-        titleLabel = "輸出",
+        modifier = Modifier
+            .height(200.dp),
+        titleLabel = stringResource(id = R.string.screen_converter_output_label),
         contentText = resultText,
-        supportingText = "長按可複製",
+        supportingText = stringResource(id = R.string.screen_converter_output_supporting_desc),
         onContentLongClicked = onContentLongClicked
     )
 }
@@ -183,4 +188,17 @@ fun PreviewFunctionButtonGroup() {
         onSaveClicked = {},
         onClearClicked = {}
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewScreen() {
+    ConverterScreen(
+        resultText = "Result Text",
+        onConvertClicked = {},
+        onDuplicateClicked = {},
+        onSaveClicked = {},
+        onClearClicked = {}
+    )
+
 }
