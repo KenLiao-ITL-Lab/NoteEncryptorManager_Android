@@ -15,6 +15,11 @@ class MainRepository @Inject constructor (
     private val database: AppDatabase,
     private val ioDispatcher: CoroutineDispatcher
 ): MainRepositoryInterface {
+
+    override suspend fun clearPreviousPreferences() {
+        preferencesManager.clearLastVersionKeys()
+    }
+
     override suspend fun setSettingInfo(settingInfo: SettingInfo) {
         preferencesManager.setSettingInfo(settingInfo)
     }
@@ -47,10 +52,10 @@ class MainRepository @Inject constructor (
             dao.deleteInfo(info)
         }
 
-    override suspend fun saveNoteSampleSetting(data: InfoSettingUpdate) {
+    override suspend fun saveNoteSampleSetting(info: InfoSettingUpdate) {
         withContext(ioDispatcher) {
             val dao = database.noteInfoDao()
-            dao.updateInfoSetting(data)
+            dao.updateInfoSetting(info)
         }
     }
 }

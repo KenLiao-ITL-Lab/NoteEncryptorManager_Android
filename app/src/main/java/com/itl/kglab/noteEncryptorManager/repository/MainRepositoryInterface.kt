@@ -16,4 +16,6 @@ interface MainRepositoryInterface {
 
     suspend fun saveNoteSampleSetting(info: InfoSettingUpdate)
 
+    suspend fun clearPreviousPreferences()
+
 }

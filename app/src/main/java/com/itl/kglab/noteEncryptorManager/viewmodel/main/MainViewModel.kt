@@ -10,6 +10,7 @@ import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,6 +30,12 @@ class MainViewModel @Inject constructor(
     init {
         getSettingInfo()
         getNoteInfoList()
+    }
+
+    private fun clearPreviousPreferences() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.clearPreviousPreferences()
+        }
     }
 
     fun convertInput(input: String) {

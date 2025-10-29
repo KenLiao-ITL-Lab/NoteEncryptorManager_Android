@@ -40,8 +40,6 @@ fun SettingScreen(
     settingInfo: SettingScreenInfo,
     onSaveSettingClicked: (SettingScreenInfo) -> Unit
 ) {
-    var sampleSizeInput by rememberSaveable { mutableStateOf(settingInfo.info.samplingSize.toString()) }
-    var indexInput by rememberSaveable { mutableStateOf(settingInfo.info.sampleIndex.toString()) }
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(settingInfo.algorithmIndex) }
 
     Column(
@@ -76,16 +74,12 @@ fun SettingScreen(
                             algorithmIndex = selectedItemIndex,
                             info = SettingInfo(
                                 algorithmName = hashTypeList[selectedItemIndex],
-                                samplingSize = if (sampleSizeInput.isBlank()) 0 else sampleSizeInput.toInt(),
-                                sampleIndex = if (indexInput.isBlank()) 0 else indexInput.toInt()
                             ),
                         )
                     )
                 },
                 onCancelClicked = {
                     selectedItemIndex = settingInfo.algorithmIndex
-                    sampleSizeInput = settingInfo.info.samplingSize.toString()
-                    indexInput = settingInfo.info.sampleIndex.toString()
                 }
             )
         }

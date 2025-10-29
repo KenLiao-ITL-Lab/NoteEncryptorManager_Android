@@ -17,15 +17,20 @@ class PreferencesManager(
     private val dataStore: DataStore<Preferences>
 ) {
 
+    suspend fun clearLastVersionKeys() {
+        dataStore.edit { pref ->
+            pref.remove(SETTING_PREFIX)
+            pref.remove(SETTING_SUFFIX)
+            pref.remove(SETTING_SAMPLE_INDEX)
+            pref.remove(SETTING_SAMPLE_SIZE)
+        }
+    }
+
     fun getSettingInfo(): Flow<SettingInfo> {
         return dataStore.data.map { pref ->
             val algorithm = pref[SETTING_ALGORITHM] ?: ""
             SettingInfo(
                 algorithmName = algorithm,
-                prefixText = pref[SETTING_PREFIX] ?: "",
-                suffixText = pref[SETTING_SUFFIX] ?: "",
-                sampleIndex = pref[SETTING_SAMPLE_INDEX] ?: 0,
-                samplingSize = pref[SETTING_SAMPLE_SIZE] ?: 0
             )
         }
     }
@@ -35,10 +40,6 @@ class PreferencesManager(
     ) {
         dataStore.edit { pref ->
             pref[SETTING_ALGORITHM] = settingInfo.algorithmName
-            pref[SETTING_PREFIX] = settingInfo.prefixText
-            pref[SETTING_SUFFIX] = settingInfo.suffixText
-            pref[SETTING_SAMPLE_INDEX] = settingInfo.sampleIndex
-            pref[SETTING_SAMPLE_SIZE] = settingInfo.samplingSize
         }
     }
 
@@ -48,6 +49,7 @@ class PreferencesManager(
         val SETTING_SUFFIX = stringPreferencesKey("setting_suffix")
         val SETTING_SAMPLE_INDEX = intPreferencesKey("setting_sample_index")
         val SETTING_SAMPLE_SIZE = intPreferencesKey("setting_sample_size")
+
     }
 
 }
