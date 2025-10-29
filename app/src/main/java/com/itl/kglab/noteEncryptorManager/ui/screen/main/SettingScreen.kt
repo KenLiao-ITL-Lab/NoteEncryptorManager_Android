@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material3.DropdownMenuItem
@@ -26,18 +25,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
-import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
-import com.itl.kglab.noteEncryptorManager.ui.component.DescInputItem
 
 @Composable
 fun SettingScreen(
@@ -46,45 +40,14 @@ fun SettingScreen(
     settingInfo: SettingScreenInfo,
     onSaveSettingClicked: (SettingScreenInfo) -> Unit
 ) {
-    var prefixInput by rememberSaveable { mutableStateOf(settingInfo.info.prefixText) }
-    var suffixInput by rememberSaveable { mutableStateOf(settingInfo.info.suffixText) }
     var sampleSizeInput by rememberSaveable { mutableStateOf(settingInfo.info.samplingSize.toString()) }
     var indexInput by rememberSaveable { mutableStateOf(settingInfo.info.sampleIndex.toString()) }
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(settingInfo.algorithmIndex) }
-
-    val regex = remember { SettingInputRegex() }
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        val config = SettingTableConfig(
-            prefixValue = prefixInput,
-            onPrefixChange = {
-                if (regex.decorateRegex.matches(it)) {
-                    prefixInput = it
-                }
-            },
-            suffixValue = suffixInput,
-            onSuffixChange = {
-                if (regex.decorateRegex.matches(it)) {
-                    suffixInput = it
-                }
-            },
-            sampleSizeValue = sampleSizeInput.toString(),
-            onSampleSizeChange = {
-                if (regex.sampleSizeRegex.matches(it)) {
-                    sampleSizeInput = it
-                }
-            },
-            indexValue = indexInput.toString(),
-            onIndexChange = {
-                if (regex.indexRegex.matches(it)) {
-                    indexInput = it
-                }
-            }
-        )
 
         OutlinedCard(
             modifier = Modifier
@@ -92,7 +55,6 @@ fun SettingScreen(
         ) {
             SettingTable(
                 hashTypeList = hashTypeList,
-                tableConfig = config,
                 onSelectedItemIndex = { index ->
                     selectedItemIndex = index
                 },
@@ -114,8 +76,6 @@ fun SettingScreen(
                             algorithmIndex = selectedItemIndex,
                             info = SettingInfo(
                                 algorithmName = hashTypeList[selectedItemIndex],
-                                prefixText = prefixInput,
-                                suffixText = suffixInput,
                                 samplingSize = if (sampleSizeInput.isBlank()) 0 else sampleSizeInput.toInt(),
                                 sampleIndex = if (indexInput.isBlank()) 0 else indexInput.toInt()
                             ),
@@ -124,8 +84,6 @@ fun SettingScreen(
                 },
                 onCancelClicked = {
                     selectedItemIndex = settingInfo.algorithmIndex
-                    prefixInput = settingInfo.info.prefixText
-                    suffixInput = settingInfo.info.suffixText
                     sampleSizeInput = settingInfo.info.samplingSize.toString()
                     indexInput = settingInfo.info.sampleIndex.toString()
                 }
@@ -137,7 +95,6 @@ fun SettingScreen(
 @Composable
 fun SettingTable(
     hashTypeList: List<String>,
-    tableConfig: SettingTableConfig,
     selectedItemIndex: Int,
     onSelectedItemIndex: (Int) -> Unit,
 ) {
@@ -157,36 +114,6 @@ fun SettingTable(
             label = stringResource(id = R.string.screen_setting_algorithm_menu_label),
             selectedItemIndex = selectedItemIndex,
             onSelectedItemIndex = onSelectedItemIndex
-        )
-
-        DescInputItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = itemPadding),
-            value = tableConfig.prefixValue,
-            label = stringResource(id = R.string.screen_setting_prefix_label),
-            labelColor = Color.Gray,
-            onValueChange = tableConfig.onPrefixChange,
-            supportingText = stringResource(id = R.string.screen_setting_prefix_desc),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            )
-        )
-
-        DescInputItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = itemPadding),
-            value = tableConfig.suffixValue,
-            label = stringResource(id = R.string.screen_setting_suffix_label),
-            labelColor = Color.Gray,
-            onValueChange = tableConfig.onSuffixChange,
-            supportingText = stringResource(id = R.string.screen_setting_suffix_desc),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            )
         )
     }
 }
@@ -292,17 +219,6 @@ fun DropMenuItem(
         }
     }
 }
-
-class SettingTableConfig(
-    val prefixValue: String = "",
-    val onPrefixChange: (String) -> Unit = {},
-    val suffixValue: String = "",
-    val onSuffixChange: (String) -> Unit = {},
-    val sampleSizeValue: String = "",
-    val onSampleSizeChange: (String) -> Unit = {},
-    val indexValue: String = "",
-    val onIndexChange: (String) -> Unit = {},
-)
 
 @Preview(showBackground = true)
 @Composable
