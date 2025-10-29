@@ -204,14 +204,14 @@ fun ContextTable(
         // Input
         ContentTextCard(
             modifier = Modifier,
-            label = "輸入",
+            titleLabel = "輸入",
             contentText = inputText
         )
 
         // Output
         ContentTextCard(
             modifier = Modifier,
-            label = "輸出",
+            titleLabel = "輸出",
             contentText = outputText
         )
 

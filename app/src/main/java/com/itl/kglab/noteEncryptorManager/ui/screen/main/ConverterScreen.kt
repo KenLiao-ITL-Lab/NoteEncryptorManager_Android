@@ -3,12 +3,9 @@ package com.itl.kglab.noteEncryptorManager.ui.screen.main
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.R
+import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 
@@ -79,12 +77,10 @@ fun ConverterInputSection(
     onInputChange: (String) -> Unit,
     onConvertClicked: () -> Unit
 ) {
-
     Column {
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
                 .padding(bottom = 8.dp),
             value = inputValue,
             onValueChange = onInputChange,
@@ -109,20 +105,16 @@ fun ConverterInputSection(
 
 @Composable
 fun ConverterResultSection(
-    resultText: String
+    resultText: String,
+    onContentLongClicked: (() -> Unit)? = null
 ) {
-    OutlinedCard(
-        modifier = Modifier
-            .height(200.dp)
-            .padding(vertical = 8.dp)
-    ) {
-        Text(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            text = resultText
-        )
-    }
+    ContentTextCard(
+        modifier = Modifier,
+        titleLabel = "輸出",
+        contentText = resultText,
+        supportingText = "長按可複製",
+        onContentLongClicked = onContentLongClicked
+    )
 }
 
 @Composable

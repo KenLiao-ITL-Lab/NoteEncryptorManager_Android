@@ -221,7 +221,7 @@ fun NoteInfoDetailTable(
                 // Note
                 ContentTextCard(
                     modifier = Modifier.padding(vertical = 8.dp),
-                    label = "備註",
+                    titleLabel = "備註",
                     contentText = noteInfo.note,
                     onContentLongClicked = {
                         onContentLongClicked.invoke(
@@ -233,7 +233,7 @@ fun NoteInfoDetailTable(
                 // Input
                 ContentTextCard(
                     modifier = Modifier.padding(vertical = 8.dp),
-                    label = "輸入",
+                    titleLabel = "輸入",
                     contentText = noteInfo.inputText,
                     onContentLongClicked = {
                         onContentLongClicked.invoke(
@@ -282,7 +282,7 @@ fun NoteInfoDetailTable(
                 ContentTextCard(
                     modifier = Modifier
                         .padding(vertical = 24.dp),
-                    label = "輸出",
+                    titleLabel = "輸出",
                     contentText = noteInfo.outputText,
                     onContentLongClicked = {
                         onContentLongClicked.invoke(
