@@ -4,7 +4,9 @@
     <string name="bottom_nav_item_list">筆記</string>
     <string name="bottom_nav_item_setting">設定</string>
 
-
+    <string name="title_func_button_return">返回</string>
+    <string name="title_func_button_edit">編輯</string>
+    <string name="title_func_button_save">儲存</string>
 
     <string name="screen_converter_input_label">輸入</string>
     <string name="screen_converter_convert_button">轉換</string>

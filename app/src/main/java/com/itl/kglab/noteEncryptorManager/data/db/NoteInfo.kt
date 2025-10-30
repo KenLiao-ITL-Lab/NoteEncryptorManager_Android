@@ -14,9 +14,9 @@ data class NoteInfo(
     @ColumnInfo(name = "time_desc")
     val timeDesc: String = "", // 時間
     @ColumnInfo(name = "input_text")
-    val inputText: String = "", // 密語
+    val inputText: String = "", // 訊息原文
     @ColumnInfo(name = "output_text")
-    val outputText: String = "", // 輸入 - 要點開才可查看
+    val outputText: String = "", // 訊息密文
     @ColumnInfo(name = "note")
     val note: String = "", // 備註
     @ColumnInfo(name = "is_private")
@@ -24,7 +24,11 @@ data class NoteInfo(
     @ColumnInfo(name = "sample_size")
     val sampleSize: Int = 0,
     @ColumnInfo(name = "sample_index")
-    val sampleIndex: Int = 0
+    val sampleIndex: Int = 0,
+    @ColumnInfo(name = "prefix")
+    val prefix: String = "",
+    @ColumnInfo(name = "suffix")
+    val suffix: String = ""
 ) {
     companion object {
         const val TABLE_NAME = "noteInfoTable"
