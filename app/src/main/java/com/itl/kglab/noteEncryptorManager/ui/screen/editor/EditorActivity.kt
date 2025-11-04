@@ -29,7 +29,6 @@ import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonReturn
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonSave
-import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.component.TitleFuncButtons
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme

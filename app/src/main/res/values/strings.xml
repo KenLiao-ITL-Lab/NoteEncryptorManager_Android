@@ -30,6 +30,11 @@
     <string name="screen_setting_index_desc">請輸入數字0~99，空白預設為0</string>
     <string name="screen_setting_save_button">儲存</string>
     <string name="screen_setting_reset">重置</string>
+
     <string name="title_activity_editor">EditorActivity</string>
+
+
     <string name="title_activity_detail">DetailActivity</string>
+    <string name="screen_detail_input">輸入</string>
+
 </resources>

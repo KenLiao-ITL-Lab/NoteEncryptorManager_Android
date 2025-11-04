@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,6 +42,7 @@ import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.DescInputItem
+import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.component.TableDivider
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.DetailViewModel
@@ -127,6 +130,11 @@ fun DetailScreen(
             config = EditorSettingConfig(),
             onContentLongClicked = onContentLongClicked,
         )
+
+        SimpleTable(
+            modifier = Modifier
+                .padding(top = 16.dp)
+        )
     }
 }
 
@@ -158,7 +166,11 @@ fun InformationTitleCard(
 
     // Date
     Text(
-        modifier = Modifier.padding(vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .padding(top = 8.dp),
+        textAlign = TextAlign.End,
         text = timeDesc,
         color = Color.Gray
     )
@@ -203,6 +215,7 @@ fun NoteInfoDetailTable(
 
             Column(
                 modifier = Modifier
+                    .background(color = Color.White)
                     .padding(16.dp)
             ) {
 
@@ -214,15 +227,15 @@ fun NoteInfoDetailTable(
 
                 TableDivider(
                     modifier = Modifier
-                        .padding(top = 16.dp),
-                    desc = "長按內容即可複製"
+                        .padding(top = 8.dp),
+                    desc = ""
                 )
 
                 // Note
                 ContentTextCard(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    titleLabel = "備註",
-                    contentText = noteInfo.note,
+                    modifier = Modifier
+                        .padding(vertical = 8.dp),
+                    contentText = "備註內容",
                     onContentLongClicked = {
                         onContentLongClicked.invoke(
                             noteInfo.note
@@ -230,75 +243,127 @@ fun NoteInfoDetailTable(
                     }
                 )
 
-                // Input
-                ContentTextCard(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    titleLabel = "輸入",
-                    contentText = noteInfo.inputText,
-                    onContentLongClicked = {
-                        onContentLongClicked.invoke(
-                            noteInfo.inputText
-                        )
-                    }
-                )
+                // 是否鎖定Checkbox
 
-                TableDivider(
-                    modifier = Modifier
-                        .padding(top = 24.dp),
-                    desc = "取樣設定"
-                )
-
-                DescInputItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    value = config.sampleSizeValue,
-                    label = stringResource(id = R.string.screen_setting_size_label),
-                    labelColor = Color.Gray,
-                    onValueChange = config.onSampleSizeChange,
-                    supportingText = stringResource(id = R.string.screen_setting_size_desc),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Next
-                    )
-                )
-
-                DescInputItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    value = config.indexValue,
-                    label = stringResource(id = R.string.screen_setting_index_label),
-                    labelColor = Color.Gray,
-                    onValueChange = config.onIndexChange,
-                    supportingText = stringResource(id = R.string.screen_setting_index_desc),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Done
-                    )
-                )
-
-                // PW - 點擊可複製
-                ContentTextCard(
-                    modifier = Modifier
-                        .padding(vertical = 24.dp),
-                    titleLabel = "輸出",
-                    contentText = noteInfo.outputText,
-                    onContentLongClicked = {
-                        onContentLongClicked.invoke(
-                            noteInfo.outputText
-                        )
-                    }
-                )
             }
         }
     }
 }
 
+@Composable
+private fun SimpleTable(
+    modifier: Modifier = Modifier
+) {
+    OutlinedCard(
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .background(color = Color.White)
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth()
+        ) {
+            TableDivider(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(top = 24.dp),
+                desc = "轉換器",
+            )
+
+            DescInputItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                value = "密文內容",
+                label = stringResource(id = R.string.screen_detail_input),
+                labelColor = Color.Gray,
+                onValueChange = {},
+                supportingText = "請輸入密文內容",
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Next
+                )
+            )
+
+            OutlinedStyleButton(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                buttonText = "轉換",
+                onClick = {}
+            )
+
+            ContentTextCard(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth(),
+                contentText = "轉換內容",
+                supportingText = "長按可複製"
+            )
+
+            TableDivider(
+                modifier = Modifier
+                    .padding(bottom = 8.dp),
+                desc = "取樣設定"
+            )
+
+            SampleSettingInput()
+
+            OutlinedStyleButton(
+                modifier = Modifier
+                    .padding(
+                        horizontal = 8.dp,
+                        vertical = 16.dp
+                    )
+                    .fillMaxWidth(),
+                buttonText = "取樣"
+            )
+        }
+    }
+}
+
+@Composable
+private fun SampleSettingInput() {
+    Row(
+        modifier = Modifier
+            .padding(bottom = 8.dp)
+            .fillMaxWidth()
+    ) {
+        DescInputItem(
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .weight(1f),
+            label = "取樣起始",
+            supportingText = "請輸入0 ~ 99整數",
+            onValueChange = {}
+        )
+
+        DescInputItem(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .weight(1f),
+            label = "取樣長度",
+            supportingText = "請輸入0 ~ 99整數",
+            onValueChange = {}
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-fun PreviewBackTextButton() {
-    BackTextButton {}
+fun PreviewInformationScreen() {
+    DetailScreen(
+        noteInfo = NoteInfo(
+            title = "This is Title container",
+            timeDesc = "2024-08-11 16:33",
+            inputText = "Look!! Input message!",
+            outputText = "Woo!! Is output text!",
+            note = "I wanna tell you something.",
+            isPrivate = true
+        ),
+        onBackClicked = {},
+        onContentLongClicked = {}
+    )
 }
 
 @Preview(showBackground = true)
@@ -322,19 +387,20 @@ fun PreviewNoteInfoDetailTable() {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewInformationScreen() {
-    DetailScreen(
-        noteInfo = NoteInfo(
-            title = "This is Title container",
-            timeDesc = "2024-08-11 16:33",
-            inputText = "Look!! Input message!",
-            outputText = "Woo!! Is output text!",
-            note = "I wanna tell you something.",
-            isPrivate = true
-        ),
-        onBackClicked = {},
-        onContentLongClicked = {}
-    )
+fun PreviewSimpleTable() {
+    SimpleTable()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewBackTextButton() {
+    BackTextButton {}
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewSampleSettingInput() {
+    SampleSettingInput()
 }
 
 data class EditorSettingConfig(

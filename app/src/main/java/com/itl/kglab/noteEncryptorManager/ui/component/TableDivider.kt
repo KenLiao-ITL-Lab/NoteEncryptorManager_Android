@@ -15,26 +15,26 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun TableDivider(
     modifier: Modifier,
-    desc: String
+    desc: String,
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        HorizontalDivider(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 12.dp)
-        )
-
         Text(
             modifier = Modifier
-                .padding(start = 8.dp),
+                .padding(end = 8.dp),
             textAlign = TextAlign.End,
             fontSize = 10.sp,
             color = Color.Gray,
             text = desc
+        )
+
+        HorizontalDivider(
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 12.dp)
         )
     }
 }

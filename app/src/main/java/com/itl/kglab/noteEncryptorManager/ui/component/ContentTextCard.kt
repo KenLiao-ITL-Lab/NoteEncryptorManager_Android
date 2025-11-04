@@ -37,8 +37,7 @@ fun ContentTextCard(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
+                .fillMaxWidth()
         ) {
             val titleModifier = if (titleLabel.isNotEmpty()) {
                 Modifier.padding(top = 12.dp)
@@ -52,7 +51,7 @@ fun ContentTextCard(
                         color = Color.LightGray,
                         shape = RoundedCornerShape(8.dp)
                     )
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(16.dp)
                     .combinedClickable(
                         onClick = {},
