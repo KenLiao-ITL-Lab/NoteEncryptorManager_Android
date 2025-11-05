@@ -66,26 +66,42 @@ class DetailActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
 
-                    DetailScreen(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(innerPadding)
-                            .padding(
-                                horizontal = dimensionResource(id = R.dimen.screen_table_padding)
-                            ),
-                        noteInfo = NoteInfoTableData(),
-                        onBackClicked = {
-                            finish()
+                    val sampleTableEvent = SampleTableEvent(
+                        onInputValueChange = { input ->
+                            // 輸入
                         },
-                        onContentLongClicked = { content ->
+                        onConvertClicked = {
+                            // 轉換
+                        },
+                        onOutputLongClicked = { output ->
+                            // 輸出長按
                             val clipData = ClipData.newPlainText(
                                 "plain text",
-                                content
+                                output
                             )
                             coroutineScope.launch {
                                 clipboardManager.setClipEntry(ClipEntry(clipData))
                             }
+                        },
+                        onSampleIndexValueChange = {
+                            // 取樣起始
+                        },
+                        onSampleSizeValueChange = {
+                            // 取樣長度
+                        },
+                        onSampleClicked = {
+                            // 取樣
                         }
+                    )
+
+                    DetailScreen(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(innerPadding),
+                        onBackClicked = {
+                            finish()
+                        },
+                        sampleTableEvent = sampleTableEvent
                     )
                 }
             }
@@ -107,12 +123,10 @@ class DetailActivity : ComponentActivity() {
 
 @Composable
 fun DetailScreen(
-    modifier: Modifier = Modifier,
-    noteInfo: NoteInfoTableData,
+    modifier: Modifier,
     onBackClicked: () -> Unit,
-    onContentLongClicked: (String) -> Unit,
+    sampleTableEvent: SampleTableEvent
 ) {
-
     Column(
         modifier = modifier
     ) {
@@ -121,18 +135,43 @@ fun DetailScreen(
             onBackClicked = onBackClicked
         )
 
+        DetailTable(
+            modifier = Modifier
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.screen_table_padding)
+                ),
+            noteInfo = NoteInfoTableData(),
+            onNoteLongClicked = { content ->
+
+            },
+            sampleTableEvent = sampleTableEvent
+        )
+    }
+}
+
+@Composable
+fun DetailTable(
+    modifier: Modifier = Modifier,
+    noteInfo: NoteInfoTableData,
+    onNoteLongClicked: (String) -> Unit,
+    sampleTableEvent: SampleTableEvent
+) {
+    Column(
+        modifier = modifier
+    ) {
         NoteInfoDetailTable(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             noteInfoTableData = noteInfo,
-            onContentLongClicked = onContentLongClicked,
+            onContentLongClicked = onNoteLongClicked,
         )
 
         SimpleTable(
             modifier = Modifier
                 .padding(top = 16.dp),
-            simpleSettingData = SimpleSettingData()
+            sampleSettingData = SampleSettingData(),
+            sampleEvent = sampleTableEvent
         )
     }
 }
@@ -251,7 +290,8 @@ fun NoteInfoDetailTable(
 @Composable
 private fun SimpleTable(
     modifier: Modifier = Modifier,
-    simpleSettingData: SimpleSettingData
+    sampleSettingData: SampleSettingData,
+    sampleEvent: SampleTableEvent
 ) {
     OutlinedCard(
         modifier = modifier
@@ -273,10 +313,10 @@ private fun SimpleTable(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                value = simpleSettingData.input,
+                value = sampleSettingData.input,
                 label = stringResource(id = R.string.screen_detail_input),
                 labelColor = Color.Gray,
-                onValueChange = {},
+                onValueChange = sampleEvent.onInputValueChange,
                 supportingText = "請輸入密文內容",
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal,
@@ -296,7 +336,7 @@ private fun SimpleTable(
                 modifier = Modifier
                     .padding(vertical = 8.dp)
                     .fillMaxWidth(),
-                contentText = simpleSettingData.output,
+                contentText = sampleSettingData.output,
                 supportingText = "長按可複製"
             )
 
@@ -307,7 +347,7 @@ private fun SimpleTable(
             )
 
             SampleSettingInput(
-                settingData = simpleSettingData
+                settingData = sampleSettingData
             )
 
             OutlinedStyleButton(
@@ -325,7 +365,7 @@ private fun SimpleTable(
 
 @Composable
 private fun SampleSettingInput(
-    settingData: SimpleSettingData
+    settingData: SampleSettingData
 ) {
     Row(
         modifier = Modifier
@@ -356,11 +396,35 @@ private fun SampleSettingInput(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewInformationScreen() {
+fun PreviewDetailScreen() {
     DetailScreen(
-        noteInfo = NoteInfoTableData(),
+        modifier = Modifier,
         onBackClicked = {},
-        onContentLongClicked = {}
+        sampleTableEvent = SampleTableEvent(
+            onInputValueChange = {},
+            onConvertClicked = {},
+            onOutputLongClicked = {},
+            onSampleIndexValueChange = {},
+            onSampleSizeValueChange = {},
+            onSampleClicked = {}
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewInformationScreen() {
+    DetailTable(
+        noteInfo = NoteInfoTableData(),
+        onNoteLongClicked = {},
+        sampleTableEvent = SampleTableEvent(
+            onInputValueChange = {},
+            onConvertClicked = {},
+            onOutputLongClicked = {},
+            onSampleIndexValueChange = {},
+            onSampleSizeValueChange = {},
+            onSampleClicked = {}
+        )
     )
 }
 
@@ -384,7 +448,15 @@ fun PreviewNoteInfoDetailTable() {
 @Composable
 fun PreviewSimpleTable() {
     SimpleTable(
-        simpleSettingData = SimpleSettingData()
+        sampleSettingData = SampleSettingData(),
+        sampleEvent = SampleTableEvent(
+            onInputValueChange = {},
+            onConvertClicked = {},
+            onOutputLongClicked = {},
+            onSampleIndexValueChange = {},
+            onSampleSizeValueChange = {},
+            onSampleClicked = {}
+        )
     )
 }
 
@@ -398,6 +470,15 @@ fun PreviewBackTextButton() {
 @Composable
 fun PreviewSampleSettingInput() {
     SampleSettingInput(
-        settingData = SimpleSettingData()
+        settingData = SampleSettingData()
     )
 }
+
+data class SampleTableEvent(
+    val onConvertClicked: () -> Unit,
+    val onInputValueChange: (String) -> Unit,
+    val onOutputLongClicked: (String) -> Unit,
+    val onSampleIndexValueChange: (Int) -> Unit,
+    val onSampleSizeValueChange: (Int) -> Unit,
+    val onSampleClicked: () -> Unit
+)
