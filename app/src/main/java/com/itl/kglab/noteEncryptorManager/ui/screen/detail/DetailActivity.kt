@@ -39,7 +39,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itl.kglab.noteEncryptorManager.R
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.DescInputItem
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
@@ -74,7 +73,7 @@ class DetailActivity : ComponentActivity() {
                             .padding(
                                 horizontal = dimensionResource(id = R.dimen.screen_table_padding)
                             ),
-                        noteInfo = viewModel.viewState.noteInfo,
+                        noteInfo = NoteInfoTableData(),
                         onBackClicked = {
                             finish()
                         },
@@ -109,7 +108,7 @@ class DetailActivity : ComponentActivity() {
 @Composable
 fun DetailScreen(
     modifier: Modifier = Modifier,
-    noteInfo: NoteInfo,
+    noteInfo: NoteInfoTableData,
     onBackClicked: () -> Unit,
     onContentLongClicked: (String) -> Unit,
 ) {
@@ -126,14 +125,14 @@ fun DetailScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
-            noteInfo = noteInfo,
-            config = EditorSettingConfig(),
+            noteInfoTableData = noteInfo,
             onContentLongClicked = onContentLongClicked,
         )
 
         SimpleTable(
             modifier = Modifier
-                .padding(top = 16.dp)
+                .padding(top = 16.dp),
+            simpleSettingData = SimpleSettingData()
         )
     }
 }
@@ -201,8 +200,7 @@ fun BackTextButton(
 @Composable
 fun NoteInfoDetailTable(
     modifier: Modifier,
-    noteInfo: NoteInfo,
-    config: EditorSettingConfig,
+    noteInfoTableData: NoteInfoTableData,
     onContentLongClicked: (String) -> Unit,
 ) {
     Column(
@@ -220,9 +218,9 @@ fun NoteInfoDetailTable(
             ) {
 
                 InformationTitleCard(
-                    title = noteInfo.title,
-                    timeDesc = noteInfo.timeDesc,
-                    isPrivate = noteInfo.isPrivate
+                    title = noteInfoTableData.title,
+                    timeDesc = noteInfoTableData.time,
+                    isPrivate = noteInfoTableData.isPrivate
                 )
 
                 TableDivider(
@@ -235,10 +233,10 @@ fun NoteInfoDetailTable(
                 ContentTextCard(
                     modifier = Modifier
                         .padding(vertical = 8.dp),
-                    contentText = "備註內容",
+                    contentText = noteInfoTableData.note,
                     onContentLongClicked = {
                         onContentLongClicked.invoke(
-                            noteInfo.note
+                            noteInfoTableData.note
                         )
                     }
                 )
@@ -252,7 +250,8 @@ fun NoteInfoDetailTable(
 
 @Composable
 private fun SimpleTable(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    simpleSettingData: SimpleSettingData
 ) {
     OutlinedCard(
         modifier = modifier
@@ -274,7 +273,7 @@ private fun SimpleTable(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                value = "密文內容",
+                value = simpleSettingData.input,
                 label = stringResource(id = R.string.screen_detail_input),
                 labelColor = Color.Gray,
                 onValueChange = {},
@@ -297,7 +296,7 @@ private fun SimpleTable(
                 modifier = Modifier
                     .padding(vertical = 8.dp)
                     .fillMaxWidth(),
-                contentText = "轉換內容",
+                contentText = simpleSettingData.output,
                 supportingText = "長按可複製"
             )
 
@@ -307,7 +306,9 @@ private fun SimpleTable(
                 desc = "取樣設定"
             )
 
-            SampleSettingInput()
+            SampleSettingInput(
+                settingData = simpleSettingData
+            )
 
             OutlinedStyleButton(
                 modifier = Modifier
@@ -323,7 +324,9 @@ private fun SimpleTable(
 }
 
 @Composable
-private fun SampleSettingInput() {
+private fun SampleSettingInput(
+    settingData: SimpleSettingData
+) {
     Row(
         modifier = Modifier
             .padding(bottom = 8.dp)
@@ -335,6 +338,7 @@ private fun SampleSettingInput() {
                 .weight(1f),
             label = "取樣起始",
             supportingText = "請輸入0 ~ 99整數",
+            value = settingData.sampleIndex.toString(),
             onValueChange = {}
         )
 
@@ -344,6 +348,7 @@ private fun SampleSettingInput() {
                 .weight(1f),
             label = "取樣長度",
             supportingText = "請輸入0 ~ 99整數",
+            value = settingData.sampleSize.toString(),
             onValueChange = {}
         )
     }
@@ -353,14 +358,7 @@ private fun SampleSettingInput() {
 @Composable
 fun PreviewInformationScreen() {
     DetailScreen(
-        noteInfo = NoteInfo(
-            title = "This is Title container",
-            timeDesc = "2024-08-11 16:33",
-            inputText = "Look!! Input message!",
-            outputText = "Woo!! Is output text!",
-            note = "I wanna tell you something.",
-            isPrivate = true
-        ),
+        noteInfo = NoteInfoTableData(),
         onBackClicked = {},
         onContentLongClicked = {}
     )
@@ -372,15 +370,12 @@ fun PreviewNoteInfoDetailTable() {
     NoteInfoDetailTable(
         modifier = Modifier
             .verticalScroll(rememberScrollState()),
-        noteInfo = NoteInfo(
+        noteInfoTableData = NoteInfoTableData(
             title = "This is Title container",
-            timeDesc = "2024-08-11 16:33",
-            inputText = "Look!! Input message!",
-            outputText = "Woo!! Is output text!",
+            time = "2024-08-11 16:33",
             note = "I wanna tell you something.",
             isPrivate = true
         ),
-        config = EditorSettingConfig(),
         onContentLongClicked = {}
     )
 }
@@ -388,7 +383,9 @@ fun PreviewNoteInfoDetailTable() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewSimpleTable() {
-    SimpleTable()
+    SimpleTable(
+        simpleSettingData = SimpleSettingData()
+    )
 }
 
 @Preview(showBackground = true)
@@ -400,12 +397,7 @@ fun PreviewBackTextButton() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewSampleSettingInput() {
-    SampleSettingInput()
+    SampleSettingInput(
+        settingData = SimpleSettingData()
+    )
 }
-
-data class EditorSettingConfig(
-    val sampleSizeValue: String = "",
-    val onSampleSizeChange: (String) -> Unit = {},
-    val indexValue: String = "",
-    val onIndexChange: (String) -> Unit = {},
-)
