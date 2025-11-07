@@ -1,4 +1,4 @@
-package com.itl.kglab.noteEncryptorManager.ui.screen.detail
+package com.itl.kglab.noteEncryptorManager.viewmodel.detail
 
 data class SampleSettingData(
     val sampleIndex: Int = 0,

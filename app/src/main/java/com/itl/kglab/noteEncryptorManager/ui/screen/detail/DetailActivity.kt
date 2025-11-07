@@ -45,6 +45,8 @@ import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.component.TableDivider
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.DetailViewModel
+import com.itl.kglab.noteEncryptorManager.viewmodel.detail.NoteInfoTableData
+import com.itl.kglab.noteEncryptorManager.viewmodel.detail.SampleSettingData
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -101,7 +103,9 @@ class DetailActivity : ComponentActivity() {
                         onBackClicked = {
                             finish()
                         },
-                        sampleTableEvent = sampleTableEvent
+                        sampleTableEvent = sampleTableEvent,
+                        noteInfoTableData = viewModel.noteInfoState,
+                        sampleSettingData = viewModel.settingState
                     )
                 }
             }
@@ -125,12 +129,13 @@ class DetailActivity : ComponentActivity() {
 fun DetailScreen(
     modifier: Modifier,
     onBackClicked: () -> Unit,
-    sampleTableEvent: SampleTableEvent
+    sampleTableEvent: SampleTableEvent,
+    noteInfoTableData: NoteInfoTableData = NoteInfoTableData(),
+    sampleSettingData: SampleSettingData = SampleSettingData()
 ) {
     Column(
         modifier = modifier
     ) {
-
         BackTextButton(
             onBackClicked = onBackClicked
         )
@@ -139,12 +144,14 @@ fun DetailScreen(
             modifier = Modifier
                 .padding(
                     horizontal = dimensionResource(id = R.dimen.screen_table_padding)
-                ),
-            noteInfo = NoteInfoTableData(),
+                )
+                .verticalScroll(rememberScrollState()),
             onNoteLongClicked = { content ->
 
             },
-            sampleTableEvent = sampleTableEvent
+            sampleTableEvent = sampleTableEvent,
+            noteInfoTableData = noteInfoTableData,
+            sampleSettingData = sampleSettingData
         )
     }
 }
@@ -152,25 +159,25 @@ fun DetailScreen(
 @Composable
 fun DetailTable(
     modifier: Modifier = Modifier,
-    noteInfo: NoteInfoTableData,
     onNoteLongClicked: (String) -> Unit,
-    sampleTableEvent: SampleTableEvent
+    sampleTableEvent: SampleTableEvent,
+    noteInfoTableData: NoteInfoTableData = NoteInfoTableData(),
+    sampleSettingData: SampleSettingData = SampleSettingData()
 ) {
     Column(
         modifier = modifier
     ) {
         NoteInfoDetailTable(
             modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-            noteInfoTableData = noteInfo,
+                .fillMaxWidth(),
+            noteInfoTableData = noteInfoTableData,
             onContentLongClicked = onNoteLongClicked,
         )
 
         SimpleTable(
             modifier = Modifier
                 .padding(top = 16.dp),
-            sampleSettingData = SampleSettingData(),
+            sampleSettingData = sampleSettingData,
             sampleEvent = sampleTableEvent
         )
     }
@@ -415,7 +422,6 @@ fun PreviewDetailScreen() {
 @Composable
 fun PreviewInformationScreen() {
     DetailTable(
-        noteInfo = NoteInfoTableData(),
         onNoteLongClicked = {},
         sampleTableEvent = SampleTableEvent(
             onInputValueChange = {},
@@ -432,8 +438,7 @@ fun PreviewInformationScreen() {
 @Composable
 fun PreviewNoteInfoDetailTable() {
     NoteInfoDetailTable(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState()),
+        modifier = Modifier,
         noteInfoTableData = NoteInfoTableData(
             title = "This is Title container",
             time = "2024-08-11 16:33",
