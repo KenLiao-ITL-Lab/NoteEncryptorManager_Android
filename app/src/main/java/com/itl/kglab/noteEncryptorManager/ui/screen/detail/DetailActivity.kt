@@ -74,9 +74,11 @@ class DetailActivity : ComponentActivity() {
                     val sampleTableEvent = SampleTableEvent(
                         onInputValueChange = { input ->
                             // 輸入
+                            viewModel.setInput(input)
                         },
                         onConvertClicked = {
                             // 轉換
+                            viewModel.convertMessage()
                         },
                         onOutputLongClicked = { output ->
                             // 輸出長按
@@ -345,7 +347,7 @@ private fun SimpleTable(
                     .padding(16.dp)
                     .fillMaxWidth(),
                 buttonText = "轉換",
-                onClick = {}
+                onClick = sampleEvent.onConvertClicked
             )
 
             ContentTextCard(
@@ -374,6 +376,14 @@ private fun SimpleTable(
                     )
                     .fillMaxWidth(),
                 buttonText = "取樣"
+            )
+
+            ContentTextCard(
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 16.dp)
+                    .fillMaxWidth(),
+                contentText = "取樣後",
+                supportingText = "長按可複製"
             )
         }
     }

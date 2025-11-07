@@ -39,5 +39,27 @@ class HashTools(
         fun getHashTypeList(): List<HashAlgorithmType> {
             return HashAlgorithmType.getList()
         }
+
+        fun getAlgorithmListIndexByName(algorithmName: String): Int {
+            val index = getHashTypeList().map { it.algorithmName }.indexOf(algorithmName)
+            return if (index == -1) 0 else index
+        }
+    }
+}
+
+sealed class HashAlgorithmType(
+    val algorithmName: String
+) {
+
+    data object Sha256 : HashAlgorithmType("SHA-256")
+    data object Sha512 : HashAlgorithmType("SHA-512")
+
+    companion object {
+        fun getList(): List<HashAlgorithmType> {
+            return listOf(
+                Sha256,
+                Sha512
+            )
+        }
     }
 }

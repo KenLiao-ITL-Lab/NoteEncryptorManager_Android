@@ -23,6 +23,7 @@ class MainViewModel @Inject constructor(
     private lateinit var hashTools: HashTools
 
     var state by mutableStateOf(ScreenState())
+        private set
 
     var resultState by mutableStateOf("")
         private set

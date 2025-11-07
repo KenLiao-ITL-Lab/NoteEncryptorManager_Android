@@ -7,13 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
+import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val repository: MainRepository
+    private val repository: MainRepository,
 ): ViewModel() {
 
     var noteInfoState by mutableStateOf(NoteInfoTableData())
@@ -22,12 +25,33 @@ class DetailViewModel @Inject constructor(
     var settingState by mutableStateOf(SampleSettingData())
         private set
 
+    fun setInput(input: String) {
+        settingState = settingState.copy(
+            input = input
+        )
+    }
+
     fun getNoteInfoById(id: Long) {
         viewModelScope.launch {
             val info = repository.getNoteInfoById(id)
             noteInfoState = convertNoteInfoTable(info)
             settingState = convertSampleSetting(info)
         }
+    }
+
+    fun convertMessage() {
+        viewModelScope.launch {
+            val tool = getHashTool()
+            val hashMessage = tool.hashMessage(settingState.input)
+            settingState = settingState.copy(
+                output = hashMessage
+            )
+        }
+    }
+
+    private suspend fun getHashTool(): HashTools {
+        val info = repository.getSettingInfo().stateIn(viewModelScope).value
+        return HashTools(info)
     }
 
     private fun convertNoteInfoTable(
