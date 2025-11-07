@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itl.kglab.noteEncryptorManager.R
+import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.DescInputItem
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonEdit
@@ -90,14 +91,17 @@ class DetailActivity : ComponentActivity() {
                                 clipboardManager.setClipEntry(ClipEntry(clipData))
                             }
                         },
-                        onSampleIndexValueChange = {
+                        onSampleIndexValueChange = { index ->
                             // 取樣起始
+                            viewModel.setSampleIndex(index)
                         },
-                        onSampleSizeValueChange = {
+                        onSampleSizeValueChange = { size ->
                             // 取樣長度
+                            viewModel.setSampleSize(size)
                         },
                         onSampleClicked = {
                             // 取樣
+                            viewModel.sampleMessage()
                         }
                     )
 
@@ -365,7 +369,8 @@ private fun SimpleTable(
             )
 
             SampleSettingInput(
-                settingData = sampleSettingData
+                settingData = sampleSettingData,
+                sampleTableEvent = sampleEvent
             )
 
             OutlinedStyleButton(
@@ -375,14 +380,15 @@ private fun SimpleTable(
                         vertical = 16.dp
                     )
                     .fillMaxWidth(),
-                buttonText = "取樣"
+                buttonText = "取樣",
+                onClick = sampleEvent.onSampleClicked
             )
 
             ContentTextCard(
                 modifier = Modifier
                     .padding(top = 8.dp, bottom = 16.dp)
                     .fillMaxWidth(),
-                contentText = "取樣後",
+                contentText = sampleSettingData.sampledMessage,
                 supportingText = "長按可複製"
             )
         }
@@ -391,7 +397,8 @@ private fun SimpleTable(
 
 @Composable
 private fun SampleSettingInput(
-    settingData: SampleSettingData
+    settingData: SampleSettingData,
+    sampleTableEvent: SampleTableEvent
 ) {
     Row(
         modifier = Modifier
@@ -404,8 +411,10 @@ private fun SampleSettingInput(
                 .weight(1f),
             label = "取樣起始",
             supportingText = "請輸入0 ~ 99整數",
-            value = settingData.sampleIndex.toString(),
-            onValueChange = {}
+            value = settingData.sampleIndex,
+            onValueChange = { indexString ->
+                sampleTableEvent.onSampleIndexValueChange.invoke(indexString)
+            }
         )
 
         DescInputItem(
@@ -414,8 +423,10 @@ private fun SampleSettingInput(
                 .weight(1f),
             label = "取樣長度",
             supportingText = "請輸入0 ~ 99整數",
-            value = settingData.sampleSize.toString(),
-            onValueChange = {}
+            value = settingData.sampleSize,
+            onValueChange = { sizeString ->
+                sampleTableEvent.onSampleSizeValueChange.invoke(sizeString)
+            }
         )
     }
 }
@@ -494,7 +505,15 @@ fun PreviewBackTextButton() {
 @Composable
 fun PreviewSampleSettingInput() {
     SampleSettingInput(
-        settingData = SampleSettingData()
+        settingData = SampleSettingData(),
+        sampleTableEvent = SampleTableEvent(
+            onInputValueChange = {},
+            onConvertClicked = {},
+            onOutputLongClicked = {},
+            onSampleIndexValueChange = {},
+            onSampleSizeValueChange = {},
+            onSampleClicked = {}
+        )
     )
 }
 
@@ -502,7 +521,7 @@ data class SampleTableEvent(
     val onConvertClicked: () -> Unit,
     val onInputValueChange: (String) -> Unit,
     val onOutputLongClicked: (String) -> Unit,
-    val onSampleIndexValueChange: (Int) -> Unit,
-    val onSampleSizeValueChange: (Int) -> Unit,
+    val onSampleIndexValueChange: (String) -> Unit,
+    val onSampleSizeValueChange: (String) -> Unit,
     val onSampleClicked: () -> Unit
 )

@@ -33,6 +33,35 @@ class HashTools(
         return resultByte
     }
 
+    fun sampleMessage(
+        message: String,
+        index: Int,
+        size: Int
+    ): String {
+
+        val builder = StringBuilder()
+
+        // 取樣大小為0，則預設全部取樣
+        var resultLength = if (size == 0) { message.length -1 } else { size - 1 }
+
+        // 指標不為0，則取餘數
+        var index = if (index != 0) { (index % (message.length)) } else { index }
+
+        while (resultLength >= 0) {
+            if (index >= message.length) index = 0
+
+            // 跳過換行符號
+            if (message[index].code != 10) {
+                builder.append(message[index])
+            }
+
+            resultLength --
+            index ++
+        }
+
+        return builder.toString()
+    }
+
 
 
     companion object {

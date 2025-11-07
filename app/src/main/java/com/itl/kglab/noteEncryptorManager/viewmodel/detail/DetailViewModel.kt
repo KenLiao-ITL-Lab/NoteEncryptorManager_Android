@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
+import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,9 +25,23 @@ class DetailViewModel @Inject constructor(
     var settingState by mutableStateOf(SampleSettingData())
         private set
 
+    private val inputRegex = SettingInputRegex()
+
     fun setInput(input: String) {
         settingState = settingState.copy(
             input = input
+        )
+    }
+
+    fun setSampleIndex(indexString: String) {
+        settingState = settingState.copy(
+            sampleIndex = indexString
+        )
+    }
+
+    fun setSampleSize(sizeString: String) {
+        settingState = settingState.copy(
+            sampleSize = sizeString
         )
     }
 
@@ -45,6 +59,21 @@ class DetailViewModel @Inject constructor(
             val hashMessage = tool.hashMessage(settingState.input)
             settingState = settingState.copy(
                 output = hashMessage
+            )
+        }
+    }
+
+    fun sampleMessage() {
+        if (settingState.output.isEmpty()) return
+        viewModelScope.launch {
+            val tool = getHashTool()
+            val sampledMessage = tool.sampleMessage(
+                message = settingState.output,
+                index = settingState.sampleIndex.toInt(),
+                size =  settingState.sampleSize.toInt()
+            )
+            settingState = settingState.copy(
+                sampledMessage = sampledMessage
             )
         }
     }
@@ -71,8 +100,8 @@ class DetailViewModel @Inject constructor(
         return SampleSettingData(
             input = column.inputText,
             output = column.outputText,
-            sampleIndex = column.sampleIndex,
-            sampleSize = column.sampleSize
+            sampleIndex = column.sampleIndex.toString(),
+            sampleSize = column.sampleSize.toString()
         )
     }
 
