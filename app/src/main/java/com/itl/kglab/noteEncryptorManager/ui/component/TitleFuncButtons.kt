@@ -22,11 +22,12 @@ import com.itl.kglab.noteEncryptorManager.R
 
 @Composable
 fun TitleFuncButtons(
+    modifier: Modifier = Modifier,
     leftButton: @Composable (() -> Unit)?,
     rightButton: @Composable (() -> Unit)?
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
     ) {

@@ -41,8 +41,11 @@ import androidx.compose.ui.unit.sp
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.DescInputItem
+import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonEdit
+import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonReturn
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.component.TableDivider
+import com.itl.kglab.noteEncryptorManager.ui.component.TitleFuncButtons
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.DetailViewModel
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.NoteInfoTableData
@@ -136,8 +139,14 @@ fun DetailScreen(
     Column(
         modifier = modifier
     ) {
-        BackTextButton(
-            onBackClicked = onBackClicked
+
+        TitleFuncButtons(
+            leftButton = {
+                IconButtonReturn { onBackClicked.invoke() }
+            },
+            rightButton = {
+                IconButtonEdit {  }
+            }
         )
 
         DetailTable(
