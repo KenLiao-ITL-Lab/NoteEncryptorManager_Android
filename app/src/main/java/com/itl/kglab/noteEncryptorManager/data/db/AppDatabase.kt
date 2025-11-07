@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [
-        NoteInfo::class
+        NoteInfoColumn::class
     ],
     version = 1,
     exportSchema = true

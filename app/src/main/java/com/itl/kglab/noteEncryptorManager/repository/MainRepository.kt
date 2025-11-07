@@ -1,7 +1,7 @@
 package com.itl.kglab.noteEncryptorManager.repository
 
 import com.itl.kglab.noteEncryptorManager.data.db.AppDatabase
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
 import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
@@ -28,25 +28,25 @@ class MainRepository @Inject constructor (
         return preferencesManager.getSettingInfo()
     }
 
-    override suspend fun saveNoteInfo(info: NoteInfo) =
+    override suspend fun saveNoteInfo(info: NoteInfoColumn) =
         withContext(ioDispatcher) {
             val dao = database.noteInfoDao()
             dao.insertInfo(info)
         }
 
-    override suspend fun getNoteList(): List<NoteInfo> =
+    override suspend fun getNoteList(): List<NoteInfoColumn> =
         withContext(ioDispatcher) {
             val dao = database.noteInfoDao()
             dao.getInfoList()
         }
 
-    override suspend fun getNoteInfoById(id: Long): NoteInfo =
+    override suspend fun getNoteInfoById(id: Long): NoteInfoColumn =
         withContext(ioDispatcher) {
             val dao = database.noteInfoDao()
             dao.getInfoById(id)
         }
 
-    override suspend fun deleteNoteInfo(info: NoteInfo) =
+    override suspend fun deleteNoteInfo(info: NoteInfoColumn) =
         withContext(ioDispatcher) {
             val dao = database.noteInfoDao()
             dao.deleteInfo(info)

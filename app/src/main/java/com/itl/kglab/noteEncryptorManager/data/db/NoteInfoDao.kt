@@ -12,23 +12,23 @@ import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
 interface NoteInfoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertInfo(info: NoteInfo)
+    fun insertInfo(info: NoteInfoColumn)
 
-    @Update(entity = NoteInfo::class)
-    fun updateInfo(info: NoteInfo)
+    @Update(entity = NoteInfoColumn::class)
+    fun updateInfo(info: NoteInfoColumn)
 
     @Delete
-    fun deleteInfo(info: NoteInfo)
+    fun deleteInfo(info: NoteInfoColumn)
 
     @Query("SELECT * FROM noteInfoTable")
-    fun getInfoList(): List<NoteInfo>
+    fun getInfoList(): List<NoteInfoColumn>
 
     @Query("SELECT * FROM noteInfoTable WHERE id = :id")
-    fun getInfoById(id: Long): NoteInfo
+    fun getInfoById(id: Long): NoteInfoColumn
 
     @Update(
         onConflict = OnConflictStrategy.REPLACE,
-        entity = NoteInfo::class
+        entity = NoteInfoColumn::class
     )
     fun updateInfoSetting(data: InfoSettingUpdate)
 

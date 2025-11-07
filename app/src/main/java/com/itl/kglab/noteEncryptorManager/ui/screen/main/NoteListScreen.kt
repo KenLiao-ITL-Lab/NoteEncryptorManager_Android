@@ -35,17 +35,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itl.kglab.noteEncryptorManager.R
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.ui.data.DeleteNoteDataEvent
 import com.itl.kglab.noteEncryptorManager.ui.dialog.DeleteConfirmDialog
 
 @Composable
 fun NoteListScreen(
     modifier: Modifier = Modifier,
-    noteList: List<NoteInfo>,
-    onItemCardClicked: (NoteInfo) -> Unit,
-    onItemEditClicked: (NoteInfo) -> Unit,
-    onItemDeleteClicked: (NoteInfo) -> Unit
+    noteList: List<NoteInfoColumn>,
+    onItemCardClicked: (NoteInfoColumn) -> Unit,
+    onItemEditClicked: (NoteInfoColumn) -> Unit,
+    onItemDeleteClicked: (NoteInfoColumn) -> Unit
 ) {
 
     var deleteEventState by remember {
@@ -118,7 +118,7 @@ fun NoteListScreen(
 @Composable
 fun NoteListItem(
     modifier: Modifier = Modifier,
-    info: NoteInfo,
+    info: NoteInfoColumn,
     onItemCardClicked: () -> Unit,
     onItemEditClicked: () -> Unit,
     onItemDeleteClicked: () -> Unit
@@ -294,10 +294,10 @@ fun NoteListScreenEmptyPreview() {
 @Preview(showBackground = true)
 @Composable
 fun NoteListScreenPreview() {
-    val list = mutableListOf<NoteInfo>().apply {
+    val list = mutableListOf<NoteInfoColumn>().apply {
         repeat(15) { index ->
             add(
-                NoteInfo(
+                NoteInfoColumn(
                     title = "Item Title $index",
                     timeDesc = "xxxx-xx-xx",
                     inputText = "Input Text $index",
@@ -322,7 +322,7 @@ fun NoteListScreenPreview() {
 @Composable
 fun NoteListItemPreview() {
 
-    val noteInfo = NoteInfo(
+    val noteInfo = NoteInfoColumn(
         id = 0,
         title = "測試標題測試標題測試標題測試標題測試標題",
         timeDesc = "2024/12/25 16:40",

@@ -2,7 +2,7 @@ package com.itl.kglab.noteEncryptorManager.viewmodel.editor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +22,7 @@ class EditorViewModel @Inject constructor (
     var viewState = EditorViewState()
         private set
 
-    fun updateNoteInfo(noteInfo: NoteInfo) {
+    fun updateNoteInfo(noteInfo: NoteInfoColumn) {
         viewState.updateNoteInfo(noteInfo)
     }
 
@@ -34,7 +34,7 @@ class EditorViewModel @Inject constructor (
     }
 
     fun saveNoteInfo(evenData: NoteEventData) {
-        val info = NoteInfo(
+        val info = NoteInfoColumn(
             id = viewState.noteInfo.id, // 必須帶入ID
             title = evenData.title,
             timeDesc = dateFormater.format(Date()),

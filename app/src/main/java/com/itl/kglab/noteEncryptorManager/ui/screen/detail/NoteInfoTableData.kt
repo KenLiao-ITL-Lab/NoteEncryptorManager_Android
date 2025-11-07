@@ -6,3 +6,15 @@ data class NoteInfoTableData(
     val time: String = "",
     val isPrivate: Boolean = false
 )
+
+// NotInfo
+// title: String
+// note: String
+// time: String
+// isPrivate: Boolean
+
+// Sample
+// input: String
+// output: String
+// sampleIndex: Int
+// sampleSize: Int

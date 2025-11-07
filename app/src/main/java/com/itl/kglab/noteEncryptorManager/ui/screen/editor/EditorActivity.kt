@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.R
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonReturn
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonSave
@@ -81,7 +81,7 @@ class EditorActivity : ComponentActivity() {
                 val id = bundle.getLong(ARG_ID)
                 viewModel.findNoteInfo(id = id)
             } else {
-                val noteInfo = NoteInfo(
+                val noteInfo = NoteInfoColumn(
                     id = 0,
                     inputText = it.getString(ARG_INPUT) ?: "",
                     outputText = it.getString(ARG_OUTPUT) ?: ""
@@ -103,8 +103,8 @@ class EditorActivity : ComponentActivity() {
 @Composable
 fun EditorScreen(
     modifier: Modifier,
-    noteInfo: NoteInfo,
-    onTableChanged: (NoteInfo) -> Unit,
+    noteInfo: NoteInfoColumn,
+    onTableChanged: (NoteInfoColumn) -> Unit,
     onSaveClicked: (NoteEventData) -> Unit,
     onCancelClicked: () -> Unit
 ) {
@@ -155,7 +155,7 @@ fun EditorScreen(
 @Composable
 fun ContextTable(
     modifier: Modifier = Modifier,
-    noteInfo: NoteInfo,
+    noteInfo: NoteInfoColumn,
     onTitleTextChange: (String) -> Unit,
     onNoteTextChange: (String) -> Unit,
     onPrivateSwitchChange: (Boolean) -> Unit
@@ -240,7 +240,7 @@ fun ContextTable(
 @Preview(showBackground = true)
 @Composable
 fun PreviewEditorScreen() {
-    val noteInfo = NoteInfo(
+    val noteInfo = NoteInfoColumn(
         timeDesc = "2025-11-01"
     )
     EditorScreen(
@@ -258,7 +258,7 @@ fun PreviewEditorScreen() {
 @Composable
 fun PreviewContextTable() {
 
-    val noteInfo = NoteInfo(
+    val noteInfo = NoteInfoColumn(
         timeDesc = "2025/11/01",
         title = "標題",
         note = "訊息備註",
