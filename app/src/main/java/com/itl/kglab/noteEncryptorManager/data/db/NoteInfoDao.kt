@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
+import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.NoteInfoUpdate
 
 @Dao
 interface NoteInfoDao {
@@ -28,6 +29,12 @@ interface NoteInfoDao {
 
     @Update(
         onConflict = OnConflictStrategy.REPLACE,
+        entity = NoteInfoColumn::class
+    )
+    fun updateNoteInfo(vararg category: NoteInfoUpdate)
+
+    @Update(
+//        onConflict = OnConflictStrategy.REPLACE,
         entity = NoteInfoColumn::class
     )
     fun updateInfoSetting(data: InfoSettingUpdate)

@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
+import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
@@ -57,20 +58,21 @@ class DetailViewModel @Inject constructor(
 
     fun convertMessage() {
         viewModelScope.launch {
-            isShowLoading(true)
+            showLoading(true)
             val tool = getHashTool()
             val hashMessage = tool.hashMessage(settingState.input)
             settingState = settingState.copy(
                 output = hashMessage
             )
-            isShowLoading(false)
+            updateSampleSetting()
+            showLoading(false)
         }
     }
 
     fun sampleMessage() {
         if (settingState.output.isEmpty()) return
         viewModelScope.launch {
-            isShowLoading(true)
+            showLoading(true)
             val tool = getHashTool()
             val index = checkIndexString(settingState.sampleIndex)
             val size = checkSizeString(settingState.sampleSize)
@@ -84,7 +86,8 @@ class DetailViewModel @Inject constructor(
                 sampleSize = size.toString(),
                 sampledMessage = sampledMessage
             )
-            isShowLoading(false)
+            updateSampleSetting()
+            showLoading(false)
         }
     }
 
@@ -111,6 +114,7 @@ class DetailViewModel @Inject constructor(
         column: NoteInfoColumn
     ): NoteInfoTableData {
         return NoteInfoTableData(
+            id = column.id,
             title = column.title,
             note = column.note,
             time = column.timeDesc,
@@ -122,15 +126,30 @@ class DetailViewModel @Inject constructor(
         column: NoteInfoColumn
     ): SampleSettingData {
         return SampleSettingData(
+            id = column.id,
             input = column.inputText,
             output = column.outputText,
+            sampledMessage = column.sampledMessage,
             sampleIndex = column.sampleIndex.toString(),
             sampleSize = column.sampleSize.toString()
         )
     }
 
-    private fun isShowLoading(isShow: Boolean) {
-        uiState =  uiState.copy(isLoading = isShow)
+    private suspend fun updateSampleSetting() {
+        val id = noteInfoState.id
+        val sampleSetting = InfoSettingUpdate(
+            id = id,
+            inputText = settingState.input,
+            outputText = settingState.output,
+            sampledMessage = settingState.sampledMessage,
+            sampleIndex = settingState.sampleIndex.toInt(),
+            sampleSize = settingState.sampleSize.toInt()
+        )
+        repository.updateNoteSampleSetting(sampleSetting)
+    }
+
+    private fun showLoading(visible: Boolean) {
+        uiState =  uiState.copy(isLoading = visible)
     }
 
 }

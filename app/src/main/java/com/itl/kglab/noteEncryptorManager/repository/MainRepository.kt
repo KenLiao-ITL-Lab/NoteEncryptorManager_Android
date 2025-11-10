@@ -3,6 +3,7 @@ package com.itl.kglab.noteEncryptorManager.repository
 import com.itl.kglab.noteEncryptorManager.data.db.AppDatabase
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
+import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.NoteInfoUpdate
 import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,7 +53,14 @@ class MainRepository @Inject constructor (
             dao.deleteInfo(info)
         }
 
-    override suspend fun saveNoteSampleSetting(info: InfoSettingUpdate) {
+    override suspend fun updateNoteInfo(info: NoteInfoUpdate) {
+        withContext(ioDispatcher) {
+            val dao = database.noteInfoDao()
+            dao.updateNoteInfo(info)
+        }
+    }
+
+    override suspend fun updateNoteSampleSetting(info: InfoSettingUpdate) {
         withContext(ioDispatcher) {
             val dao = database.noteInfoDao()
             dao.updateInfoSetting(info)
