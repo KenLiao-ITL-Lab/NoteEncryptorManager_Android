@@ -3,6 +3,7 @@ package com.itl.kglab.noteEncryptorManager.viewmodel.detail
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
@@ -24,8 +25,6 @@ class DetailViewModel @Inject constructor(
 
     var settingState by mutableStateOf(SampleSettingData())
         private set
-
-    private val inputRegex = SettingInputRegex()
 
     fun setInput(input: String) {
         settingState = settingState.copy(
@@ -67,15 +66,33 @@ class DetailViewModel @Inject constructor(
         if (settingState.output.isEmpty()) return
         viewModelScope.launch {
             val tool = getHashTool()
+            val index = checkIndexString(settingState.sampleIndex)
+            val size = checkSizeString(settingState.sampleSize)
             val sampledMessage = tool.sampleMessage(
                 message = settingState.output,
-                index = settingState.sampleIndex.toInt(),
-                size =  settingState.sampleSize.toInt()
+                index = index,
+                size =  size
             )
             settingState = settingState.copy(
+                sampleIndex = index.toString(),
+                sampleSize = size.toString(),
                 sampledMessage = sampledMessage
             )
         }
+    }
+
+    private fun checkIndexString(indexString: String): Int {
+        return if (indexString.matches(SettingInputRegex.sampleIndexCheckRegex))
+            indexString.toInt()
+        else
+            SettingInputRegex.DEFAULT_INDEX
+    }
+
+    private fun checkSizeString(sizeString: String): Int {
+        return if (sizeString.matches(SettingInputRegex.sampleSizeCheckRegex))
+            sizeString.toInt()
+        else
+            SettingInputRegex.DEFAULT_SIZE
     }
 
     private suspend fun getHashTool(): HashTools {

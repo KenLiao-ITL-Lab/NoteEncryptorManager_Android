@@ -92,12 +92,16 @@ class DetailActivity : ComponentActivity() {
                             }
                         },
                         onSampleIndexValueChange = { index ->
-                            // 取樣起始
-                            viewModel.setSampleIndex(index)
+                            if (index.matches(SettingInputRegex.sampleIndexInputRegex)) {
+                                // 取樣起始
+                                viewModel.setSampleIndex(index)
+                            }
                         },
                         onSampleSizeValueChange = { size ->
-                            // 取樣長度
-                            viewModel.setSampleSize(size)
+                            if (size.matches(SettingInputRegex.sampleSizeInputRegex)) {
+                                // 取樣長度
+                                viewModel.setSampleSize(size)
+                            }
                         },
                         onSampleClicked = {
                             // 取樣
@@ -414,7 +418,10 @@ private fun SampleSettingInput(
             value = settingData.sampleIndex,
             onValueChange = { indexString ->
                 sampleTableEvent.onSampleIndexValueChange.invoke(indexString)
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.NumberPassword
+            )
         )
 
         DescInputItem(
@@ -426,7 +433,10 @@ private fun SampleSettingInput(
             value = settingData.sampleSize,
             onValueChange = { sizeString ->
                 sampleTableEvent.onSampleSizeValueChange.invoke(sizeString)
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.NumberPassword
+            )
         )
     }
 }
