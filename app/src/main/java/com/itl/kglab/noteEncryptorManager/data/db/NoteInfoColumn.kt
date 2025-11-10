@@ -9,28 +9,24 @@ data class NoteInfoColumn(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     val id: Long = -1,
-    @ColumnInfo(name = "title", defaultValue = "Unname Title")
-    val title: String = "Unname Title", // 標題
-    @ColumnInfo(name = "time_desc", defaultValue = "Undefine")
-    val timeDesc: String = "", // 時間
-    @ColumnInfo(name = "note", defaultValue = "")
+    @ColumnInfo(name = "title")
+    val title: String = "", // 標題
+    @ColumnInfo(name = "time_desc")
+    val timeDesc: String = "Undefine", // 時間
+    @ColumnInfo(name = "note")
     val note: String = "", // 備註
-    @ColumnInfo(name = "is_private", defaultValue = "0")
+    @ColumnInfo(name = "is_private")
     val isPrivate: Boolean = false, // 密語保護
-    @ColumnInfo(name = "input_text", defaultValue = "")
+    @ColumnInfo(name = "input_text")
     val inputText: String = "", // 訊息原文
-    @ColumnInfo(name = "output_text", defaultValue = "")
+    @ColumnInfo(name = "output_text")
     val outputText: String = "", // 訊息密文
-    @ColumnInfo(name = "sampled_message", defaultValue = "")
+    @ColumnInfo(name = "sampled_message")
     val sampledMessage: String = "",
-    @ColumnInfo(name = "sample_size", defaultValue = "0")
+    @ColumnInfo(name = "sample_size")
     val sampleSize: Int = 0,
-    @ColumnInfo(name = "sample_index", defaultValue = "0")
-    val sampleIndex: Int = 0,
-    @ColumnInfo(name = "prefix", defaultValue = "")
-    val prefix: String = "",
-    @ColumnInfo(name = "suffix", defaultValue = "")
-    val suffix: String = ""
+    @ColumnInfo(name = "sample_index")
+    val sampleIndex: Int = 0
 ) {
     companion object {
         const val TABLE_NAME = "noteInfoTable"
