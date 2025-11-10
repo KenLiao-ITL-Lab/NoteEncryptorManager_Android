@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.dimensionResource
@@ -47,6 +49,7 @@ import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonReturn
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.component.TableDivider
 import com.itl.kglab.noteEncryptorManager.ui.component.TitleFuncButtons
+import com.itl.kglab.noteEncryptorManager.ui.dialog.LoadingDialog
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.DetailViewModel
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.NoteInfoTableData
@@ -108,7 +111,6 @@ class DetailActivity : ComponentActivity() {
                             viewModel.sampleMessage()
                         }
                     )
-
                     DetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -120,6 +122,11 @@ class DetailActivity : ComponentActivity() {
                         noteInfoTableData = viewModel.noteInfoState,
                         sampleSettingData = viewModel.settingState
                     )
+
+                    if (viewModel.uiState.isLoading) {
+                        LoadingDialog()
+                    }
+
                 }
             }
         }

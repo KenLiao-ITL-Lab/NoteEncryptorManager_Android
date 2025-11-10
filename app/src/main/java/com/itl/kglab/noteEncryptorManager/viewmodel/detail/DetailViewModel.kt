@@ -3,7 +3,6 @@ package com.itl.kglab.noteEncryptorManager.viewmodel.detail
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
@@ -24,6 +23,10 @@ class DetailViewModel @Inject constructor(
         private set
 
     var settingState by mutableStateOf(SampleSettingData())
+        private set
+
+    // UI State
+    var uiState by mutableStateOf(DetailScreenUiState())
         private set
 
     fun setInput(input: String) {
@@ -54,17 +57,20 @@ class DetailViewModel @Inject constructor(
 
     fun convertMessage() {
         viewModelScope.launch {
+            isShowLoading(true)
             val tool = getHashTool()
             val hashMessage = tool.hashMessage(settingState.input)
             settingState = settingState.copy(
                 output = hashMessage
             )
+            isShowLoading(false)
         }
     }
 
     fun sampleMessage() {
         if (settingState.output.isEmpty()) return
         viewModelScope.launch {
+            isShowLoading(true)
             val tool = getHashTool()
             val index = checkIndexString(settingState.sampleIndex)
             val size = checkSizeString(settingState.sampleSize)
@@ -78,6 +84,7 @@ class DetailViewModel @Inject constructor(
                 sampleSize = size.toString(),
                 sampledMessage = sampledMessage
             )
+            isShowLoading(false)
         }
     }
 
@@ -120,6 +127,10 @@ class DetailViewModel @Inject constructor(
             sampleIndex = column.sampleIndex.toString(),
             sampleSize = column.sampleSize.toString()
         )
+    }
+
+    private fun isShowLoading(isShow: Boolean) {
+        uiState =  uiState.copy(isLoading = isShow)
     }
 
 }
