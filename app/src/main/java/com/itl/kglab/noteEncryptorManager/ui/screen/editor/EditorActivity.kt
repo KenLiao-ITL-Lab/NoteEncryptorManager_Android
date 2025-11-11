@@ -218,7 +218,6 @@ fun ContextTable(
             modifier = Modifier
                 .height(200.dp)
                 .padding(vertical = 8.dp),
-            titleLabel = "輸入",
             supportingText = "長按可複製",
             contentText = noteInfo.inputText
         )
@@ -228,7 +227,6 @@ fun ContextTable(
             modifier = Modifier
                 .height(200.dp)
                 .padding(vertical = 8.dp),
-            titleLabel = "輸出",
             supportingText = "長按可複製",
             contentText = noteInfo.outputText
         )

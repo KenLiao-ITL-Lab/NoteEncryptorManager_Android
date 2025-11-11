@@ -77,7 +77,7 @@ fun MainRoute(
     }
 
     val screenModifier = Modifier
-        .background(Color.White)
+//        .background(Color.White)
         .fillMaxSize()
         .padding(
             horizontal = dimensionResource(id = R.dimen.screen_table_padding)

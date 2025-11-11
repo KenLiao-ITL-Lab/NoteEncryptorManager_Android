@@ -115,7 +115,6 @@ fun ConverterResultSection(
     ContentTextCard(
         modifier = Modifier
             .height(200.dp),
-        titleLabel = stringResource(id = R.string.screen_converter_output_label),
         contentText = resultText,
         supportingText = stringResource(id = R.string.screen_converter_output_supporting_desc),
         onContentLongClicked = onContentLongClicked
