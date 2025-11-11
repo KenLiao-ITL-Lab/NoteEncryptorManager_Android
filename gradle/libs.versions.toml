@@ -14,7 +14,7 @@ navigation = "2.9.3"
 
 datastore = "1.1.7"
 
-room = "2.7.2"
+room = "2.8.3"
 
 hilt = "2.57.1" # upgrade to 2.50 fixed the issue
 

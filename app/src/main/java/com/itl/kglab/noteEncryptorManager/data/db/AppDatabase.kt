@@ -9,9 +9,8 @@ import androidx.room.RoomDatabase
     entities = [
         NoteInfoColumn::class
     ],
-    version = 2,
-    exportSchema = true,
-    autoMigrations = []
+    version = 1,
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
 
