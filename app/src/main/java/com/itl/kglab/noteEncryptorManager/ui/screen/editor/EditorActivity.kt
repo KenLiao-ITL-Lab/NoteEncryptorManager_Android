@@ -76,22 +76,23 @@ class EditorActivity : ComponentActivity() {
     private fun initViewData() {
         val bundle = intent.extras
         bundle?.let {
-            val isEditor = it.getBoolean(ARG_IS_EDIT)
-            if (isEditor) {
-                val id = bundle.getLong(ARG_ID)
-                viewModel.findNoteInfo(id = id)
-            } else {
+            val id = bundle.getLong(ARG_ID, -1)
+
+            if (id == ARG_DEFAULT_ID) {
                 val noteInfo = NoteInfoColumn(
                     id = 0,
                     inputText = it.getString(ARG_INPUT) ?: "",
                     outputText = it.getString(ARG_OUTPUT) ?: ""
                 )
                 viewModel.updateNoteInfo(noteInfo)
+            } else {
+                viewModel.findNoteInfo(id)
             }
         }
     }
 
     companion object {
+        const val ARG_DEFAULT_ID = -1L
         const val ARG_IS_EDIT = "IS_EDIT_BOOLEAN"
         const val ARG_ID = "ID_LONG"
         const val ARG_INPUT = "INPUT_STRING"

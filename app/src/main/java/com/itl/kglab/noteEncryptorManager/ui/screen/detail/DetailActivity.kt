@@ -1,6 +1,7 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.detail
 
 import android.content.ClipData
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,6 +26,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -40,6 +45,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
@@ -50,6 +58,7 @@ import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.component.TableDivider
 import com.itl.kglab.noteEncryptorManager.ui.component.TitleFuncButtons
 import com.itl.kglab.noteEncryptorManager.ui.dialog.LoadingDialog
+import com.itl.kglab.noteEncryptorManager.ui.screen.editor.EditorActivity
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.DetailViewModel
 import com.itl.kglab.noteEncryptorManager.viewmodel.detail.NoteInfoTableData
@@ -65,10 +74,24 @@ class DetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        initViewData()
         setContent {
+
+            val lifecycleOwner = LocalLifecycleOwner.current
+            val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
+
+            LaunchedEffect(lifecycleState) {
+                when(lifecycleState) {
+                    Lifecycle.State.RESUMED -> {
+                        initViewData()
+                    }
+                    else -> {}
+                }
+            }
+
+            val keyboardManager = LocalSoftwareKeyboardController.current
             val clipboardManager = LocalClipboard.current
             val coroutineScope = rememberCoroutineScope()
+            val context = LocalContext.current
 
             NoteEncryptorManagerTheme {
                 Scaffold(
@@ -118,6 +141,16 @@ class DetailActivity : ComponentActivity() {
                         onBackClicked = {
                             finish()
                         },
+                        onEditClicked = {
+                            keyboardManager?.hide()
+                            val bundle = Bundle().apply {
+                                putLong(EditorActivity.ARG_ID, viewModel.noteInfoState.id)
+                            }
+                            val intent = Intent(context, EditorActivity::class.java).apply {
+                                putExtras(bundle)
+                            }
+                            context.startActivity(intent)
+                        },
                         sampleTableEvent = sampleTableEvent,
                         noteInfoTableData = viewModel.noteInfoState,
                         sampleSettingData = viewModel.settingState
@@ -149,6 +182,7 @@ class DetailActivity : ComponentActivity() {
 fun DetailScreen(
     modifier: Modifier,
     onBackClicked: () -> Unit,
+    onEditClicked: () -> Unit,
     sampleTableEvent: SampleTableEvent,
     noteInfoTableData: NoteInfoTableData = NoteInfoTableData(),
     sampleSettingData: SampleSettingData = SampleSettingData()
@@ -162,7 +196,7 @@ fun DetailScreen(
                 IconButtonReturn { onBackClicked.invoke() }
             },
             rightButton = {
-                IconButtonEdit {  }
+                IconButtonEdit { onEditClicked.invoke() }
             }
         )
 
@@ -454,6 +488,7 @@ fun PreviewDetailScreen() {
     DetailScreen(
         modifier = Modifier,
         onBackClicked = {},
+        onEditClicked = {},
         sampleTableEvent = SampleTableEvent(
             onInputValueChange = {},
             onConvertClicked = {},
