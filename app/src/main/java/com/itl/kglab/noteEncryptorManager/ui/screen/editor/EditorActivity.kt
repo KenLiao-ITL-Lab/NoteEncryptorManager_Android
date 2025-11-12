@@ -6,18 +6,20 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
@@ -145,7 +147,7 @@ fun EditorScreen(
                 onTableChanged.invoke(noteInfo.copy(note = it))
             },
             onPrivateSwitchChange = {
-                onTableChanged.invoke(noteInfo.copy(isPrivate = it))
+//                onTableChanged.invoke(noteInfo.copy(isPrivate = it))
             }
         )
 
@@ -213,10 +215,32 @@ fun ContextTable(
             )
         )
 
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Checkbox(
+//                modifier = Modifier,
+//                checked = false,
+//                onCheckedChange = onPrivateSwitchChange,
+//            )
+//
+//            Text(
+//                modifier = Modifier,
+//                text = "是否鎖定"
+//            )
+//        }
+
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 16.dp)
+                .fillMaxWidth()
+        )
+
         // Input
         ContentTextCard(
             modifier = Modifier
-                .height(200.dp)
                 .padding(vertical = 8.dp),
             supportingText = "長按可複製",
             contentText = noteInfo.inputText
@@ -225,13 +249,10 @@ fun ContextTable(
         // Output
         ContentTextCard(
             modifier = Modifier
-                .height(200.dp)
                 .padding(vertical = 8.dp),
             supportingText = "長按可複製",
             contentText = noteInfo.outputText
         )
-
-        HorizontalDivider()
 
     }
 }
