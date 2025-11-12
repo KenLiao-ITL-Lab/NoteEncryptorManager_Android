@@ -14,6 +14,7 @@ interface MainRepositoryInterface {
     suspend fun getNoteList(): List<NoteInfoColumn>
     suspend fun getNoteInfoById(id: Long): NoteInfoColumn
     suspend fun deleteNoteInfo(info: NoteInfoColumn)
+    suspend fun deleteNoteById(id: Long)
 
     suspend fun clearPreviousPreferences()
 

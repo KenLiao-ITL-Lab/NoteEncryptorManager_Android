@@ -243,12 +243,12 @@ fun MainRoute(
                 },
                 onItemDeleteClicked = { info ->
                     val func = {
-                        viewModel.deleteNoteInfo(info)
+                        viewModel.deleteNoteInfoById(info.id)
                     }
 
                     if (info.isPrivate) {
                         bioAuthState = bioAuthState.copy(
-                            func = { viewModel.deleteNoteInfo(info) }
+                            func = { viewModel.deleteNoteInfoById(info.id) }
                         )
                         bioAuthManager.showBiometricPrompt(
                             title = "身份驗證",

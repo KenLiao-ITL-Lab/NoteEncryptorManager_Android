@@ -83,14 +83,21 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val list = repository.getNoteList()
             state = state.copy(
-                noteInfoList = list
+                noteInfoList = list.map { source ->
+                    NoteInfoListInfoData(
+                        id = source.id,
+                        title = source.title,
+                        note = source.note,
+                        isPrivate = source.isPrivate
+                    )
+                }
             )
         }
     }
 
-    fun deleteNoteInfo(info: NoteInfoColumn) {
+    fun deleteNoteInfoById(id: Long) {
         viewModelScope.launch {
-            repository.deleteNoteInfo(info)
+            repository.deleteNoteById(id)
             getNoteInfoList()
         }
     }

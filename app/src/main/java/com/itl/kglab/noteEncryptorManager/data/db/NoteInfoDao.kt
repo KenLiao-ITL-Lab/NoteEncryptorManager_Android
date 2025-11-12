@@ -21,6 +21,9 @@ interface NoteInfoDao {
     @Delete
     fun deleteInfo(info: NoteInfoColumn)
 
+    @Query("DELETE FROM noteInfoTable WHERE id = :id")
+    fun deleteInfoById(id: Long)
+
     @Query("SELECT * FROM noteInfoTable")
     fun getInfoList(): List<NoteInfoColumn>
 

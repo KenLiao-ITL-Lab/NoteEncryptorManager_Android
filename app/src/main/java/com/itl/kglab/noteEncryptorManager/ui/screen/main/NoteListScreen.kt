@@ -35,17 +35,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itl.kglab.noteEncryptorManager.R
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.ui.data.DeleteNoteDataEvent
 import com.itl.kglab.noteEncryptorManager.ui.dialog.DeleteConfirmDialog
+import com.itl.kglab.noteEncryptorManager.viewmodel.main.NoteInfoListInfoData
 
 @Composable
 fun NoteListScreen(
     modifier: Modifier = Modifier,
-    noteList: List<NoteInfoColumn>,
-    onItemCardClicked: (NoteInfoColumn) -> Unit,
-    onItemEditClicked: (NoteInfoColumn) -> Unit,
-    onItemDeleteClicked: (NoteInfoColumn) -> Unit
+    noteList: List<NoteInfoListInfoData>,
+    onItemCardClicked: (NoteInfoListInfoData) -> Unit,
+    onItemEditClicked: (NoteInfoListInfoData) -> Unit,
+    onItemDeleteClicked: (NoteInfoListInfoData) -> Unit
 ) {
 
     var deleteEventState by remember {
@@ -118,7 +118,7 @@ fun NoteListScreen(
 @Composable
 fun NoteListItem(
     modifier: Modifier = Modifier,
-    info: NoteInfoColumn,
+    info: NoteInfoListInfoData,
     onItemCardClicked: () -> Unit,
     onItemEditClicked: () -> Unit,
     onItemDeleteClicked: () -> Unit
@@ -142,7 +142,7 @@ fun NoteListItem(
                 modifier = Modifier,
                 isLocked = info.isPrivate,
                 title = info.title,
-                desc = info.timeDesc,
+                desc = info.time,
                 menuExpanded = menuExpanded,
                 onMenuClicked = {
                     menuExpanded = true
@@ -294,14 +294,12 @@ fun NoteListScreenEmptyPreview() {
 @Preview(showBackground = true)
 @Composable
 fun NoteListScreenPreview() {
-    val list = mutableListOf<NoteInfoColumn>().apply {
+    val list = mutableListOf<NoteInfoListInfoData>().apply {
         repeat(15) { index ->
             add(
-                NoteInfoColumn(
+                NoteInfoListInfoData(
                     title = "Item Title $index",
-                    timeDesc = "xxxx-xx-xx",
-                    inputText = "Input Text $index",
-                    outputText = "Output Text $index",
+                    time = "xxxx-xx-xx",
                     note = "Test Note Content",
                     isPrivate = (index % 2) == 0
                 )
@@ -322,13 +320,11 @@ fun NoteListScreenPreview() {
 @Composable
 fun NoteListItemPreview() {
 
-    val noteInfo = NoteInfoColumn(
+    val noteInfo = NoteInfoListInfoData(
         id = 0,
         title = "測試標題測試標題測試標題測試標題測試標題",
-        timeDesc = "2024/12/25 16:40",
-        note = "Note內容",
-        inputText = "輸入 ContentText",
-        outputText = "輸出 ContentText"
+        time = "2024/12/25 16:40",
+        note = "Note內容"
     )
 
     NoteListItem(

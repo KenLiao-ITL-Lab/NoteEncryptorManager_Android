@@ -1,8 +1,8 @@
 package com.itl.kglab.noteEncryptorManager.ui.data
 
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
+import com.itl.kglab.noteEncryptorManager.viewmodel.main.NoteInfoListInfoData
 
 data class DeleteNoteDataEvent(
-    val noteInfo: NoteInfoColumn? = null,
+    val noteInfo: NoteInfoListInfoData? = null,
     val isShowConfirmDialog: Boolean = false
 )
