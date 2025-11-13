@@ -6,20 +6,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
@@ -27,13 +24,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.R
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonReturn
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonSave
 import com.itl.kglab.noteEncryptorManager.ui.component.TitleFuncButtons
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
+import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorNoteInfoData
 import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -60,10 +57,13 @@ class EditorActivity : ComponentActivity() {
                         ,
                         noteInfo = noteInfo,
                         onTableChanged = {
-                            viewModel.updateNoteInfo(it)
+                            viewModel.updateNoteInfo(
+                                title = it.title,
+                                note = it.note
+                            )
                         },
                         onSaveClicked = {
-                            viewModel.saveNoteInfo(it)
+                            viewModel.saveNoteInfo()
                             finish()
                         },
                         onCancelClicked = {
@@ -78,15 +78,13 @@ class EditorActivity : ComponentActivity() {
     private fun initViewData() {
         val bundle = intent.extras
         bundle?.let {
-            val id = bundle.getLong(ARG_ID, -1)
+            val id = bundle.getLong(ARG_ID, -1L)
 
             if (id == ARG_DEFAULT_ID) {
-                val noteInfo = NoteInfoColumn(
-                    id = 0,
-                    inputText = it.getString(ARG_INPUT) ?: "",
-                    outputText = it.getString(ARG_OUTPUT) ?: ""
+                viewModel.setNewInfo(
+                    input = it.getString(ARG_INPUT) ?: "",
+                    output = it.getString(ARG_OUTPUT) ?: ""
                 )
-                viewModel.updateNoteInfo(noteInfo)
             } else {
                 viewModel.findNoteInfo(id)
             }
@@ -106,8 +104,8 @@ class EditorActivity : ComponentActivity() {
 @Composable
 fun EditorScreen(
     modifier: Modifier,
-    noteInfo: NoteInfoColumn,
-    onTableChanged: (NoteInfoColumn) -> Unit,
+    noteInfo: EditorNoteInfoData,
+    onTableChanged: (EditorNoteInfoData) -> Unit,
     onSaveClicked: (NoteEventData) -> Unit,
     onCancelClicked: () -> Unit
 ) {
@@ -127,8 +125,8 @@ fun EditorScreen(
                 IconButtonSave {
                     val data = NoteEventData(
                         title = noteInfo.title,
-                        inputMessage = noteInfo.inputText,
-                        outputMessage = noteInfo.outputText,
+                        inputMessage = noteInfo.input,
+                        outputMessage = noteInfo.output,
                         note = noteInfo.note,
                         isPrivate = noteInfo.isPrivate
                     )
@@ -158,7 +156,7 @@ fun EditorScreen(
 @Composable
 fun ContextTable(
     modifier: Modifier = Modifier,
-    noteInfo: NoteInfoColumn,
+    noteInfo: EditorNoteInfoData,
     onTitleTextChange: (String) -> Unit,
     onNoteTextChange: (String) -> Unit,
     onPrivateSwitchChange: (Boolean) -> Unit
@@ -177,7 +175,7 @@ fun ContextTable(
                     end = 8.dp
                 ),
             textAlign = TextAlign.End,
-            text = noteInfo.timeDesc
+            text = noteInfo.time
         )
 
         // Title
@@ -243,7 +241,7 @@ fun ContextTable(
             modifier = Modifier
                 .padding(vertical = 8.dp),
             supportingText = "長按可複製",
-            contentText = noteInfo.inputText
+            contentText = noteInfo.input
         )
 
         // Output
@@ -251,7 +249,7 @@ fun ContextTable(
             modifier = Modifier
                 .padding(vertical = 8.dp),
             supportingText = "長按可複製",
-            contentText = noteInfo.outputText
+            contentText = noteInfo.output
         )
 
     }
@@ -260,13 +258,10 @@ fun ContextTable(
 @Preview(showBackground = true)
 @Composable
 fun PreviewEditorScreen() {
-    val noteInfo = NoteInfoColumn(
-        timeDesc = "2025-11-01"
-    )
     EditorScreen(
         modifier = Modifier
             .fillMaxSize(),
-        noteInfo = noteInfo,
+        noteInfo = EditorNoteInfoData(),
         onTableChanged = {},
         onSaveClicked = {},
         onCancelClicked = {}
@@ -278,12 +273,12 @@ fun PreviewEditorScreen() {
 @Composable
 fun PreviewContextTable() {
 
-    val noteInfo = NoteInfoColumn(
-        timeDesc = "2025/11/01",
+    val noteInfo = EditorNoteInfoData(
+        time = "2025/11/01",
         title = "標題",
         note = "訊息備註",
-        inputText = "輸日訊息",
-        outputText = "輸出訊息",
+        input = "輸日訊息",
+        output = "輸出訊息",
         isPrivate = true
     )
 

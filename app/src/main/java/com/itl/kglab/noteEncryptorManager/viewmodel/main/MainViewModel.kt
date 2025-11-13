@@ -88,6 +88,7 @@ class MainViewModel @Inject constructor(
                         id = source.id,
                         title = source.title,
                         note = source.note,
+                        time = source.timeDesc,
                         isPrivate = source.isPrivate
                     )
                 }

@@ -10,7 +10,7 @@ interface MainRepositoryInterface {
     suspend fun setSettingInfo(settingInfo: SettingInfo)
     fun getSettingInfo(): Flow<SettingInfo>
 
-    suspend fun saveNoteInfo(info: NoteInfoColumn)
+    suspend fun createNoteInfo(info: NoteInfoColumn)
     suspend fun getNoteList(): List<NoteInfoColumn>
     suspend fun getNoteInfoById(id: Long): NoteInfoColumn
     suspend fun deleteNoteInfo(info: NoteInfoColumn)

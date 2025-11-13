@@ -29,7 +29,7 @@ class MainRepository @Inject constructor (
         return preferencesManager.getSettingInfo()
     }
 
-    override suspend fun saveNoteInfo(info: NoteInfoColumn) =
+    override suspend fun createNoteInfo(info: NoteInfoColumn) =
         withContext(ioDispatcher) {
             val dao = database.noteInfoDao()
             dao.insertInfo(info)
