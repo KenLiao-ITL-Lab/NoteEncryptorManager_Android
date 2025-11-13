@@ -172,7 +172,8 @@ fun NoteListItem(
                     .height(60.dp)
                     .fillMaxWidth(),
                 text = info.note,
-                maxLines = 3
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
         }
