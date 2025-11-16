@@ -17,8 +17,8 @@ android {
         applicationId = "com.itl.kglab.noteEncryptorManager"
         minSdk = 29
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.1"
+        versionCode = 5
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
