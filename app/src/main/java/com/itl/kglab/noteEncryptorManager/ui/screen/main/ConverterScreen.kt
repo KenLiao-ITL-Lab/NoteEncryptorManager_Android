@@ -3,12 +3,10 @@ package com.itl.kglab.noteEncryptorManager.ui.screen.main
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.itl.kglab.noteEncryptorManager.R
+import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.OutlinedStyleButton
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 
@@ -79,8 +78,9 @@ fun ConverterInputSection(
     onInputChange: (String) -> Unit,
     onConvertClicked: () -> Unit
 ) {
-
-    Column {
+    Column(
+        modifier = Modifier
+    ) {
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -109,20 +109,16 @@ fun ConverterInputSection(
 
 @Composable
 fun ConverterResultSection(
-    resultText: String
+    resultText: String,
+    onContentLongClicked: (() -> Unit)? = null
 ) {
-    OutlinedCard(
+    ContentTextCard(
         modifier = Modifier
-            .height(200.dp)
-            .padding(vertical = 8.dp)
-    ) {
-        Text(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            text = resultText
-        )
-    }
+            .height(200.dp),
+        contentText = resultText,
+        supportingText = stringResource(id = R.string.screen_converter_output_supporting_desc),
+        onContentLongClicked = onContentLongClicked
+    )
 }
 
 @Composable
@@ -191,4 +187,17 @@ fun PreviewFunctionButtonGroup() {
         onSaveClicked = {},
         onClearClicked = {}
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewScreen() {
+    ConverterScreen(
+        resultText = "Result Text",
+        onConvertClicked = {},
+        onDuplicateClicked = {},
+        onSaveClicked = {},
+        onClearClicked = {}
+    )
+
 }

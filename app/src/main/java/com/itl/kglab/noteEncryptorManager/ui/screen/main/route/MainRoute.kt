@@ -1,5 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.main.route
 
+import android.content.ClipData
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -9,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -17,8 +19,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -40,6 +46,7 @@ import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.NoteListScreen
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.SettingScreen
 import com.itl.kglab.noteEncryptorManager.viewmodel.main.MainViewModel
+import kotlinx.coroutines.launch
 
 /**
  *  關於Type safety in Kotlin DSL and Navigation Compose 可參考下列文件
@@ -70,6 +77,7 @@ fun MainRoute(
     }
 
     val screenModifier = Modifier
+//        .background(Color.White)
         .fillMaxSize()
         .padding(
             horizontal = dimensionResource(id = R.dimen.screen_table_padding)
@@ -81,9 +89,6 @@ fun MainRoute(
             when(result) {
                 is BiometricPromptManager.BioAuthResult.AuthenticationError -> {
                     Log.d("TAG", "AuthenticationError: ${result.errorMessage}")
-                }
-                BiometricPromptManager.BioAuthResult.AuthenticationFailed -> {
-                    Log.d("TAG", "AuthenticationFailed")
                 }
                 BiometricPromptManager.BioAuthResult.AuthenticationFailed -> {
                     Log.d("TAG", "AuthenticationFailed")
@@ -135,7 +140,8 @@ fun MainRoute(
 
         composable<MainBottomNavigationItem.Converter> {
             val keyboardManager = LocalSoftwareKeyboardController.current
-            val clipboardManager = LocalClipboardManager.current
+            val clipboardManager = LocalClipboard.current
+            val coroutineScope = rememberCoroutineScope()
 
             ConverterScreen(
                 modifier = screenModifier,
@@ -147,7 +153,13 @@ fun MainRoute(
                 onDuplicateClicked = {
                     keyboardManager?.hide()
                     if (viewModel.resultState.isNotBlank()) {
-                        clipboardManager.setText(AnnotatedString(viewModel.resultState))
+                        val clipData = ClipData.newPlainText(
+                            "plain text",
+                            viewModel.resultState
+                        )
+                        coroutineScope.launch {
+                            clipboardManager.setClipEntry(ClipEntry(clipData))
+                        }
                     }
                 },
                 onSaveClicked = { data ->
@@ -231,12 +243,12 @@ fun MainRoute(
                 },
                 onItemDeleteClicked = { info ->
                     val func = {
-                        viewModel.deleteNoteInfo(info)
+                        viewModel.deleteNoteInfoById(info.id)
                     }
 
                     if (info.isPrivate) {
                         bioAuthState = bioAuthState.copy(
-                            func = { viewModel.deleteNoteInfo(info) }
+                            func = { viewModel.deleteNoteInfoById(info.id) }
                         )
                         bioAuthManager.showBiometricPrompt(
                             title = "身份驗證",

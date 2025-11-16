@@ -16,7 +16,7 @@ sealed class MainBottomNavigationItem(
     data object Converter : MainBottomNavigationItem(
         route = "Converter",
         label = R.string.bottom_nav_item_converter,
-        icon = R.drawable.icon_enhanced_encryption_24
+        icon = R.drawable.icon_converter_24
     )
 
     @Serializable

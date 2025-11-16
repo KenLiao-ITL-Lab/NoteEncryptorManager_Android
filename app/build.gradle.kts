@@ -4,18 +4,19 @@ plugins {
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.google.hilt.android)
     alias(libs.plugins.androidx.room)
+    alias(libs.plugins.kotlin.compose)
 
-    kotlin("plugin.serialization") version "1.9.23"
+    kotlin("plugin.serialization") version "2.2.10"
 }
 
 android {
     namespace = "com.itl.kglab.noteEncryptorManager"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.itl.kglab.noteEncryptorManager"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 3
         versionName = "1.1"
 
@@ -46,11 +47,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true

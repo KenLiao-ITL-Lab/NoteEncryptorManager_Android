@@ -5,11 +5,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfo
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,6 +23,7 @@ class MainViewModel @Inject constructor(
     private lateinit var hashTools: HashTools
 
     var state by mutableStateOf(ScreenState())
+        private set
 
     var resultState by mutableStateOf("")
         private set
@@ -29,6 +31,12 @@ class MainViewModel @Inject constructor(
     init {
         getSettingInfo()
         getNoteInfoList()
+    }
+
+    private fun clearPreviousPreferences() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.clearPreviousPreferences()
+        }
     }
 
     fun convertInput(input: String) {
@@ -75,14 +83,22 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val list = repository.getNoteList()
             state = state.copy(
-                noteInfoList = list
+                noteInfoList = list.map { source ->
+                    NoteInfoListInfoData(
+                        id = source.id,
+                        title = source.title,
+                        note = source.note,
+                        time = source.timeDesc,
+                        isPrivate = source.isPrivate
+                    )
+                }
             )
         }
     }
 
-    fun deleteNoteInfo(info: NoteInfo) {
+    fun deleteNoteInfoById(id: Long) {
         viewModelScope.launch {
-            repository.deleteNoteInfo(info)
+            repository.deleteNoteById(id)
             getNoteInfoList()
         }
     }

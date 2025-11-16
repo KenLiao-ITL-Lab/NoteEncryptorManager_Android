@@ -6,23 +6,40 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
+import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.NoteInfoUpdate
 
 @Dao
 interface NoteInfoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertInfo(info: NoteInfo)
+    fun insertInfo(info: NoteInfoColumn)
 
-    @Update(entity = NoteInfo::class)
-    fun updateInfo(info: NoteInfo)
+    @Update(entity = NoteInfoColumn::class)
+    fun updateInfo(info: NoteInfoColumn)
 
     @Delete
-    fun deleteInfo(info: NoteInfo)
+    fun deleteInfo(info: NoteInfoColumn)
+
+    @Query("DELETE FROM noteInfoTable WHERE id = :id")
+    fun deleteInfoById(id: Long)
 
     @Query("SELECT * FROM noteInfoTable")
-    fun getInfoList(): List<NoteInfo>
+    fun getInfoList(): List<NoteInfoColumn>
 
     @Query("SELECT * FROM noteInfoTable WHERE id = :id")
-    fun getInfoById(id: Long): NoteInfo
+    fun getInfoById(id: Long): NoteInfoColumn
+
+    @Update(
+        onConflict = OnConflictStrategy.REPLACE,
+        entity = NoteInfoColumn::class
+    )
+    fun updateNoteInfo(vararg category: NoteInfoUpdate)
+
+    @Update(
+//        onConflict = OnConflictStrategy.REPLACE,
+        entity = NoteInfoColumn::class
+    )
+    fun updateInfoSetting(data: InfoSettingUpdate)
 
 }

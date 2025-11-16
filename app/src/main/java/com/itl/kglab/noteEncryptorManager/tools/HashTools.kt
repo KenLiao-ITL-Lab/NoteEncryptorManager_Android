@@ -19,26 +19,33 @@ class HashTools(
         val result = Base64.encodeToString(hashArray, Base64.URL_SAFE).apply {
             replace(Char(10), Char(40))
         }
-        return sampleMessage(result)
+        return result
     }
 
-    private fun sampleMessage(message: String): String {
+
+    private fun hash(message: String): ByteArray {
+        messageDigest.update(message.toByteArray())
+
+        val resultByte = messageDigest.digest()
+
+        messageDigest.reset()
+
+        return resultByte
+    }
+
+    fun sampleMessage(
+        message: String,
+        index: Int,
+        size: Int
+    ): String {
 
         val builder = StringBuilder()
 
         // 取樣大小為0，則預設全部取樣
-        var resultLength = if (settingInfo.samplingSize == 0) {
-            message.length -1
-        } else {
-            settingInfo.samplingSize - 1
-        }
+        var resultLength = if (size == 0) { message.length -1 } else { size - 1 }
 
         // 指標不為0，則取餘數
-        var index = if (settingInfo.sampleIndex != 0) {
-            (settingInfo.sampleIndex % (message.length))
-        } else {
-            settingInfo.sampleIndex
-        }
+        var index = if (index != 0) { (index % (message.length)) } else { index }
 
         while (resultLength >= 0) {
             if (index >= message.length) index = 0
@@ -55,30 +62,33 @@ class HashTools(
         return builder.toString()
     }
 
-    private fun hash(message: String): ByteArray {
-
-        val builder = StringBuilder()
-
-        builder.apply {
-            append(settingInfo.prefixText)
-            append(message)
-            append(settingInfo.suffixText)
-        }
-
-        messageDigest.update(builder.toString().toByteArray())
-
-        val resultByte = messageDigest.digest()
-
-        messageDigest.reset()
-
-        return resultByte
-    }
-
 
 
     companion object {
         fun getHashTypeList(): List<HashAlgorithmType> {
             return HashAlgorithmType.getList()
+        }
+
+        fun getAlgorithmListIndexByName(algorithmName: String): Int {
+            val index = getHashTypeList().map { it.algorithmName }.indexOf(algorithmName)
+            return if (index == -1) 0 else index
+        }
+    }
+}
+
+sealed class HashAlgorithmType(
+    val algorithmName: String
+) {
+
+    data object Sha256 : HashAlgorithmType("SHA-256")
+    data object Sha512 : HashAlgorithmType("SHA-512")
+
+    companion object {
+        fun getList(): List<HashAlgorithmType> {
+            return listOf(
+                Sha256,
+                Sha512
+            )
         }
     }
 }

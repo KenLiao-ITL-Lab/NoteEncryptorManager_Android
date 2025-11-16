@@ -5,10 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-
 @Database(
     entities = [
-        NoteInfo::class
+        NoteInfoColumn::class
     ],
     version = 1,
     exportSchema = true

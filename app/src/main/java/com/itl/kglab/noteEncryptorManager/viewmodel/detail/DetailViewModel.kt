@@ -1,26 +1,155 @@
 package com.itl.kglab.noteEncryptorManager.viewmodel.detail
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
+import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
-import com.itl.kglab.noteEncryptorManager.ui.screen.detail.DetailViewState
+import com.itl.kglab.noteEncryptorManager.tools.HashTools
+import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val repository: MainRepository
+    private val repository: MainRepository,
 ): ViewModel() {
 
-    var viewState = DetailViewState()
+    var noteInfoState by mutableStateOf(NoteInfoTableData())
         private set
+
+    var settingState by mutableStateOf(SampleSettingData())
+        private set
+
+    // UI State
+    var uiState by mutableStateOf(DetailScreenUiState())
+        private set
+
+    fun setInput(input: String) {
+        settingState = settingState.copy(
+            input = input
+        )
+    }
+
+    fun setSampleIndex(indexString: String) {
+        settingState = settingState.copy(
+            sampleIndex = indexString
+        )
+    }
+
+    fun setSampleSize(sizeString: String) {
+        settingState = settingState.copy(
+            sampleSize = sizeString
+        )
+    }
 
     fun getNoteInfoById(id: Long) {
         viewModelScope.launch {
             val info = repository.getNoteInfoById(id)
-            viewState.updateNoteInfo(info)
+            noteInfoState = convertNoteInfoTable(info)
+            settingState = convertSampleSetting(info)
         }
+    }
+
+    fun convertMessage() {
+        viewModelScope.launch {
+            showLoading(true)
+            val tool = getHashTool()
+            val hashMessage = tool.hashMessage(settingState.input)
+            settingState = settingState.copy(
+                output = hashMessage
+            )
+            updateSampleSetting()
+            showLoading(false)
+        }
+    }
+
+    fun sampleMessage() {
+        if (settingState.output.isEmpty()) return
+        viewModelScope.launch {
+            showLoading(true)
+            val tool = getHashTool()
+            val index = checkIndexString(settingState.sampleIndex)
+            val size = checkSizeString(settingState.sampleSize)
+            val sampledMessage = tool.sampleMessage(
+                message = settingState.output,
+                index = index,
+                size =  size
+            )
+            settingState = settingState.copy(
+                sampleIndex = index.toString(),
+                sampleSize = size.toString(),
+                sampledMessage = sampledMessage
+            )
+            updateSampleSetting()
+            showLoading(false)
+        }
+    }
+
+    private fun checkIndexString(indexString: String): Int {
+        return if (indexString.matches(SettingInputRegex.sampleIndexCheckRegex))
+            indexString.toInt()
+        else
+            SettingInputRegex.DEFAULT_INDEX
+    }
+
+    private fun checkSizeString(sizeString: String): Int {
+        return if (sizeString.matches(SettingInputRegex.sampleSizeCheckRegex))
+            sizeString.toInt()
+        else
+            SettingInputRegex.DEFAULT_SIZE
+    }
+
+    private suspend fun getHashTool(): HashTools {
+        val info = repository.getSettingInfo().stateIn(viewModelScope).value
+        return HashTools(info)
+    }
+
+    private fun convertNoteInfoTable(
+        column: NoteInfoColumn
+    ): NoteInfoTableData {
+        return NoteInfoTableData(
+            id = column.id,
+            title = column.title,
+            note = column.note,
+            time = column.timeDesc,
+            isPrivate = column.isPrivate
+        )
+    }
+
+    private fun convertSampleSetting(
+        column: NoteInfoColumn
+    ): SampleSettingData {
+        return SampleSettingData(
+            id = column.id,
+            input = column.inputText,
+            output = column.outputText,
+            sampledMessage = column.sampledMessage,
+            sampleIndex = column.sampleIndex.toString(),
+            sampleSize = column.sampleSize.toString()
+        )
+    }
+
+    private suspend fun updateSampleSetting() {
+        val id = noteInfoState.id
+        val sampleSetting = InfoSettingUpdate(
+            id = id,
+            inputText = settingState.input,
+            outputText = settingState.output,
+            sampledMessage = settingState.sampledMessage,
+            sampleIndex = settingState.sampleIndex.toInt(),
+            sampleSize = settingState.sampleSize.toInt()
+        )
+        repository.updateNoteSampleSetting(sampleSetting)
+    }
+
+    private fun showLoading(visible: Boolean) {
+        uiState =  uiState.copy(isLoading = visible)
     }
 
 }
