@@ -39,7 +39,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.manager.BiometricPromptManager
-import com.itl.kglab.noteEncryptorManager.ui.data.BioAuthEvent
+import com.itl.kglab.noteEncryptorManager.ui.data.PendingAuthAction
 import com.itl.kglab.noteEncryptorManager.ui.screen.detail.DetailActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.editor.EditorActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreen
@@ -72,8 +72,10 @@ fun MainRoute(
         onResult = {}
     )
 
-    var bioAuthState by remember {
-        mutableStateOf(BioAuthEvent())
+    // 記錄準備執行、但需要先經過生物辨識(指紋/臉部)的意圖動作 (Intent Action)
+    // 辨識成功後，會在 LaunchedEffect 內根據這個狀態來決定要開啟哪一頁或執行哪個行為
+    var pendingAuthAction by remember {
+        mutableStateOf<PendingAuthAction?>(null)
     }
 
     val screenModifier = Modifier
@@ -95,10 +97,33 @@ fun MainRoute(
                 }
                 BiometricPromptManager.BioAuthResult.AuthenticationSuccess -> {
                     Log.d("TAG", "AuthenticationSuccess")
-                    bioAuthState.func?.invoke() ?: run { }
-                    bioAuthState = bioAuthState.copy(
-                        func = null
-                    )
+                    
+                    when (val action = pendingAuthAction) {
+                        is PendingAuthAction.OpenDetail -> {
+                            val bundle = Bundle().apply {
+                                putLong(DetailActivity.ARG_ID, action.id)
+                            }
+                            val intent = Intent(context, DetailActivity::class.java).apply {
+                                putExtras(bundle)
+                            }
+                            context.startActivity(intent)
+                        }
+                        is PendingAuthAction.EditNote -> {
+                            val bundle = Bundle().apply {
+                                putBoolean(EditorActivity.ARG_IS_EDIT, true)
+                                putLong(EditorActivity.ARG_ID, action.id)
+                            }
+                            val intent = Intent(context, EditorActivity::class.java).apply {
+                                putExtras(bundle)
+                            }
+                            context.startActivity(intent)
+                        }
+                        is PendingAuthAction.DeleteNote -> {
+                            viewModel.deleteNoteInfoById(action.id)
+                        }
+                        null -> {}
+                    }
+                    pendingAuthAction = null
                 }
                 BiometricPromptManager.BioAuthResult.FeatureUnavailable -> {
                     Log.d("TAG", "FeatureUnavailable")
@@ -184,11 +209,16 @@ fun MainRoute(
                 modifier = screenModifier,
                 noteList = viewModel.state.noteInfoList,
                 onItemCardClicked = { info ->
+                    if (info.isPrivate) {
+                        pendingAuthAction = PendingAuthAction.OpenDetail(info.id)
 
-                    val func = {
-                        val id = info.id
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = "請驗證身份查看「${info.title}」內容"
+                        )
+                    } else {
                         val bundle = Bundle().apply {
-                            putLong(DetailActivity.ARG_ID, id)
+                            putLong(DetailActivity.ARG_ID, info.id)
                         }
 
                         val intent = Intent(context, DetailActivity::class.java).apply {
@@ -197,27 +227,19 @@ fun MainRoute(
 
                         context.startActivity(intent)
                     }
-
+                },
+                onItemEditClicked = { info ->
                     if (info.isPrivate) {
-                        bioAuthState = bioAuthState.copy(
-                            func = func
-                        )
+                        pendingAuthAction = PendingAuthAction.EditNote(info.id)
 
                         bioAuthManager.showBiometricPrompt(
                             title = "身份驗證",
-                            desc = "請驗證身份查看「${info.title}」內容"
+                            desc = "請驗證身份編輯「${info.title}」"
                         )
                     } else {
-                        func.invoke()
-                    }
-
-                },
-                onItemEditClicked = { info ->
-                    val func = {
-                        val id = info.id
                         val bundle = Bundle().apply {
                             putBoolean(EditorActivity.ARG_IS_EDIT, true)
-                            putLong(EditorActivity.ARG_ID, id)
+                            putLong(EditorActivity.ARG_ID, info.id)
                         }
 
                         val intent = Intent(context, EditorActivity::class.java).apply {
@@ -226,36 +248,17 @@ fun MainRoute(
 
                         context.startActivity(intent)
                     }
-
-                    if (info.isPrivate) {
-                        bioAuthState = bioAuthState.copy(
-                            func = func
-                        )
-
-                        bioAuthManager.showBiometricPrompt(
-                            title = "身份驗證",
-                            desc = "請驗證身份編輯「${info.title}」"
-                        )
-                    } else {
-                        func.invoke()
-                    }
-
                 },
                 onItemDeleteClicked = { info ->
-                    val func = {
-                        viewModel.deleteNoteInfoById(info.id)
-                    }
-
                     if (info.isPrivate) {
-                        bioAuthState = bioAuthState.copy(
-                            func = { viewModel.deleteNoteInfoById(info.id) }
-                        )
+                        pendingAuthAction = PendingAuthAction.DeleteNote(info.id)
+                        
                         bioAuthManager.showBiometricPrompt(
                             title = "身份驗證",
                             desc = "請驗證身份，隨後將刪除「${info.title}」"
                         )
                     } else {
-                        func.invoke()
+                        viewModel.deleteNoteInfoById(info.id)
                     }
                 }
             )
