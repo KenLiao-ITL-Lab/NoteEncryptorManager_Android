@@ -10,12 +10,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,8 +30,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.currentStateAsState
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -63,10 +60,6 @@ fun MainRoute(
 
     val context = LocalContext.current
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
-
-    val biometricResult by bioAuthManager.promptResult.collectAsState(initial = BiometricPromptManager.BioAuthResult.Init)
     val enrollLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = {}
@@ -85,9 +78,9 @@ fun MainRoute(
             horizontal = dimensionResource(id = R.dimen.screen_table_padding)
         )
 
-    // Result判斷，當biometricResult狀態改變即執行一次
-    LaunchedEffect(biometricResult) {
-        biometricResult.let { result ->
+    // Result判斷，直接收集 (collect) 事件流，避免透過 State 可能造成的遺漏或重複觸發
+    LaunchedEffect(bioAuthManager) {
+        bioAuthManager.promptResult.collect { result ->
             when(result) {
                 is BiometricPromptManager.BioAuthResult.AuthenticationError -> {
                     Log.d("TAG", "AuthenticationError: ${result.errorMessage}")
@@ -148,13 +141,9 @@ fun MainRoute(
         }
     }
 
-    LaunchedEffect(lifecycleState) {
-        when(lifecycleState) {
-            Lifecycle.State.RESUMED -> {
-                viewModel.getNoteInfoList() // 更新資料
-            }
-            else -> {}
-        }
+    // 專門為 Compose Lifecycle 事件設計的 Effect，取代手動觀察 currentState
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.getNoteInfoList() // 更新資料
     }
 
     NavHost(
