@@ -4,5 +4,6 @@ import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 
 data class SettingScreenInfo(
     val algorithmIndex: Int = 0,
+    val isBiometricEnabled: Boolean = false,
     val info: SettingInfo = SettingInfo()
 )

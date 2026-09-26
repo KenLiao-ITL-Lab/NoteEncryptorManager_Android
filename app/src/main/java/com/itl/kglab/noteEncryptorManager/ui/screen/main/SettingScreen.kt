@@ -15,6 +15,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +42,7 @@ fun SettingScreen(
     onSaveSettingClicked: (SettingScreenInfo) -> Unit
 ) {
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(settingInfo.algorithmIndex) }
+    var isBiometricEnabled by rememberSaveable { mutableStateOf(settingInfo.isBiometricEnabled) }
 
     Column(
         modifier = modifier,
@@ -60,6 +62,31 @@ fun SettingScreen(
             )
         }
 
+        OutlinedCard(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "啟用生物辨識驗證",
+                    modifier = Modifier.weight(1f)
+                )
+                Switch(
+                    checked = isBiometricEnabled,
+                    onCheckedChange = { checked ->
+                        isBiometricEnabled = checked
+                    }
+                )
+            }
+        }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
@@ -72,14 +99,17 @@ fun SettingScreen(
                     onSaveSettingClicked(
                         SettingScreenInfo(
                             algorithmIndex = selectedItemIndex,
+                            isBiometricEnabled = isBiometricEnabled,
                             info = SettingInfo(
                                 algorithmName = hashTypeList[selectedItemIndex],
+                                isBiometricEnabled = isBiometricEnabled
                             ),
                         )
                     )
                 },
                 onCancelClicked = {
                     selectedItemIndex = settingInfo.algorithmIndex
+                    isBiometricEnabled = settingInfo.isBiometricEnabled
                 }
             )
         }

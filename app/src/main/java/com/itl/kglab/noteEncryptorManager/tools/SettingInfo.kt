@@ -1,6 +1,7 @@
 package com.itl.kglab.noteEncryptorManager.tools
 
 data class SettingInfo(
-    val algorithmName: String = ""
+    val algorithmName: String = "",
+    val isBiometricEnabled: Boolean = false
 )
 
