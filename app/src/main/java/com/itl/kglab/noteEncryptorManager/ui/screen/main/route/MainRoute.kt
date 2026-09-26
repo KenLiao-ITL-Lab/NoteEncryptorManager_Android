@@ -6,12 +6,16 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +64,8 @@ fun MainRoute(
 
     val context = LocalContext.current
 
+    var showEnrollDialog by remember { mutableStateOf(false) }
+    
     val enrollLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = {}
@@ -114,6 +120,14 @@ fun MainRoute(
                         is PendingAuthAction.DeleteNote -> {
                             viewModel.deleteNoteInfoById(action.id)
                         }
+                        is PendingAuthAction.ToggleBiometric -> {
+                            val currentSetting = viewModel.state.settingInfo
+                            val newSetting = currentSetting.copy(
+                                isBiometricEnabled = action.targetState,
+                                info = currentSetting.info.copy(isBiometricEnabled = action.targetState)
+                            )
+                            viewModel.saveSettingInfo(newSetting)
+                        }
                         null -> {}
                     }
                     pendingAuthAction = null
@@ -125,15 +139,7 @@ fun MainRoute(
                     Log.d("TAG", "HardwareUnavailable")
                 }
                 BiometricPromptManager.BioAuthResult.AuthenticationNotSet -> {
-                    if (Build.VERSION.SDK_INT >= 30) {
-                        val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                            putExtra(
-                                Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-                            )
-                        }
-                        enrollLauncher.launch(enrollIntent)
-                    }
+                    showEnrollDialog = true
                 }
 
                 BiometricPromptManager.BioAuthResult.Init -> {}
@@ -144,6 +150,42 @@ fun MainRoute(
     // 專門為 Compose Lifecycle 事件設計的 Effect，取代手動觀察 currentState
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.getNoteInfoList() // 更新資料
+    }
+
+    if (showEnrollDialog) {
+        AlertDialog(
+            onDismissRequest = { showEnrollDialog = false },
+            title = { Text("尚未設定生物辨識") },
+            text = { Text("您的裝置支援生物辨識，但系統尚未設定，是否前往系統設定進行設定？") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showEnrollDialog = false
+                        if (Build.VERSION.SDK_INT >= 30) {
+                            val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                                putExtra(
+                                    Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                                    BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+                                )
+                            }
+                            enrollLauncher.launch(enrollIntent)
+                        } else {
+                            val enrollIntent = Intent(Settings.ACTION_SECURITY_SETTINGS)
+                            enrollLauncher.launch(enrollIntent)
+                        }
+                    }
+                ) {
+                    Text("前往設定")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showEnrollDialog = false }
+                ) {
+                    Text("取消")
+                }
+            }
+        )
     }
 
     NavHost(
@@ -194,11 +236,13 @@ fun MainRoute(
             )
         }
         composable<MainBottomNavigationItem.NoteList> {
+            val isBiometricEnabled = viewModel.state.settingInfo.isBiometricEnabled
+
             NoteListScreen(
                 modifier = screenModifier,
                 noteList = viewModel.state.noteInfoList,
                 onItemCardClicked = { info ->
-                    if (info.isPrivate) {
+                    if (info.isPrivate && isBiometricEnabled) {
                         pendingAuthAction = PendingAuthAction.OpenDetail(info.id)
 
                         bioAuthManager.showBiometricPrompt(
@@ -218,7 +262,7 @@ fun MainRoute(
                     }
                 },
                 onItemEditClicked = { info ->
-                    if (info.isPrivate) {
+                    if (info.isPrivate && isBiometricEnabled) {
                         pendingAuthAction = PendingAuthAction.EditNote(info.id)
 
                         bioAuthManager.showBiometricPrompt(
@@ -239,7 +283,7 @@ fun MainRoute(
                     }
                 },
                 onItemDeleteClicked = { info ->
-                    if (info.isPrivate) {
+                    if (info.isPrivate && isBiometricEnabled) {
                         pendingAuthAction = PendingAuthAction.DeleteNote(info.id)
                         
                         bioAuthManager.showBiometricPrompt(
@@ -259,6 +303,21 @@ fun MainRoute(
                 settingInfo = viewModel.state.settingInfo,
                 onSaveSettingClicked = { info ->
                     viewModel.saveSettingInfo(info)
+                },
+                onToggleBiometric = { targetState ->
+                    val supportState = bioAuthManager.checkBiometricSupport()
+                    if (supportState == BiometricPromptManager.BioAuthResult.HardwareUnavailable || 
+                        supportState == BiometricPromptManager.BioAuthResult.FeatureUnavailable) {
+                        Toast.makeText(context, "此裝置不支援生物辨識功能", Toast.LENGTH_SHORT).show()
+                    } else if (targetState && supportState == BiometricPromptManager.BioAuthResult.AuthenticationNotSet) {
+                        showEnrollDialog = true
+                    } else {
+                        pendingAuthAction = PendingAuthAction.ToggleBiometric(targetState)
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = if (targetState) "請驗證身份以啟用生物辨識" else "請驗證身份以關閉生物辨識"
+                        )
+                    }
                 }
             )
         }

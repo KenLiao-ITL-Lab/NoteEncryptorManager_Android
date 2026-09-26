@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,10 +40,15 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     hashTypeList: List<String>,
     settingInfo: SettingScreenInfo,
-    onSaveSettingClicked: (SettingScreenInfo) -> Unit
+    onSaveSettingClicked: (SettingScreenInfo) -> Unit,
+    onToggleBiometric: (Boolean) -> Unit
 ) {
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(settingInfo.algorithmIndex) }
     var isBiometricEnabled by rememberSaveable { mutableStateOf(settingInfo.isBiometricEnabled) }
+
+    LaunchedEffect(settingInfo.isBiometricEnabled) {
+        isBiometricEnabled = settingInfo.isBiometricEnabled
+    }
 
     Column(
         modifier = modifier,
@@ -81,7 +87,7 @@ fun SettingScreen(
                 Switch(
                     checked = isBiometricEnabled,
                     onCheckedChange = { checked ->
-                        isBiometricEnabled = checked
+                        onToggleBiometric(checked)
                     }
                 )
             }
@@ -251,7 +257,8 @@ fun PreviewSettingScreen() {
         modifier = Modifier.fillMaxSize(),
         hashTypeList = emptyList(),
         settingInfo = SettingScreenInfo(info = SettingInfo()),
-        onSaveSettingClicked = {}
+        onSaveSettingClicked = {},
+        onToggleBiometric = {}
     )
 }
 

@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
 import kotlinx.coroutines.flow.Flow
@@ -29,8 +30,10 @@ class PreferencesManager(
     fun getSettingInfo(): Flow<SettingInfo> {
         return dataStore.data.map { pref ->
             val algorithm = pref[SETTING_ALGORITHM] ?: ""
+            val isBiometricEnabled = pref[SETTING_BIOMETRIC_ENABLED] ?: false
             SettingInfo(
                 algorithmName = algorithm,
+                isBiometricEnabled = isBiometricEnabled
             )
         }
     }
@@ -40,11 +43,13 @@ class PreferencesManager(
     ) {
         dataStore.edit { pref ->
             pref[SETTING_ALGORITHM] = settingInfo.algorithmName
+            pref[SETTING_BIOMETRIC_ENABLED] = settingInfo.isBiometricEnabled
         }
     }
 
     companion object {
         val SETTING_ALGORITHM = stringPreferencesKey("setting_algorithm")
+        val SETTING_BIOMETRIC_ENABLED = booleanPreferencesKey("setting_biometric_enabled")
         val SETTING_PREFIX = stringPreferencesKey("setting_prefix")
         val SETTING_SUFFIX = stringPreferencesKey("setting_suffix")
         val SETTING_SAMPLE_INDEX = intPreferencesKey("setting_sample_index")
