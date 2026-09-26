@@ -1,7 +1,9 @@
 package com.itl.kglab.noteEncryptorManager.di
 
 import android.content.Context
+import androidx.room.Room
 import com.itl.kglab.noteEncryptorManager.data.db.AppDatabase
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoDao
 import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
 import com.itl.kglab.noteEncryptorManager.data.pref.datastore
 import dagger.Module
@@ -32,7 +34,16 @@ object DataSourceProviderModule {
     fun providerDatabase(
         @ApplicationContext appContext: Context
     ): AppDatabase {
-        return AppDatabase.invoke(appContext)
+        return Room.databaseBuilder(
+            context = appContext,
+            klass = AppDatabase::class.java,
+            name = "NoteInfoData"
+        ).build()
+    }
+
+    @Provides
+    fun provideNoteInfoDao(database: AppDatabase): NoteInfoDao {
+        return database.noteInfoDao()
     }
 
     @Provides

@@ -1,6 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.di
 
-import com.itl.kglab.noteEncryptorManager.data.db.AppDatabase
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoDao
 import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
 import dagger.Module
@@ -18,12 +18,12 @@ class RepositoryProviderModule {
     @Provides
     fun provideMainRepository(
         preferencesManager: PreferencesManager,
-        database: AppDatabase,
+        noteInfoDao: NoteInfoDao,
         ioDispatcher: CoroutineDispatcher
     ): MainRepository {
         return MainRepository(
             preferencesManager = preferencesManager,
-            database = database,
+            noteInfoDao = noteInfoDao,
             ioDispatcher = ioDispatcher
         )
     }

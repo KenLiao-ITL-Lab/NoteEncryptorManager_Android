@@ -1,7 +1,7 @@
 package com.itl.kglab.noteEncryptorManager.repository
 
-import com.itl.kglab.noteEncryptorManager.data.db.AppDatabase
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
+import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoDao
 import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
 import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.NoteInfoUpdate
 import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
@@ -15,7 +15,7 @@ import kotlin.io.encoding.Base64
 
 class MainRepository @Inject constructor (
     private val preferencesManager: PreferencesManager,
-    private val database: AppDatabase,
+    private val noteInfoDao: NoteInfoDao,
     private val ioDispatcher: CoroutineDispatcher
 ): MainRepositoryInterface {
 
@@ -33,54 +33,47 @@ class MainRepository @Inject constructor (
 
     override suspend fun createNoteInfo(info: NoteInfoColumn) =
         withContext(ioDispatcher) {
-            val dao = database.noteInfoDao()
-            dao.insertInfo(encryptInfoColumn(info))
+            noteInfoDao.insertInfo(encryptInfoColumn(info))
         }
 
     override suspend fun getNoteList(): List<NoteInfoColumn> =
         withContext(ioDispatcher) {
-            val dao = database.noteInfoDao()
-            dao.getInfoList().map { decryptInfoColumn(it) }
+            noteInfoDao.getInfoList().map { decryptInfoColumn(it) }
         }
 
     override suspend fun getNoteInfoById(id: Long): NoteInfoColumn =
         withContext(ioDispatcher) {
-            val dao = database.noteInfoDao()
-            decryptInfoColumn(dao.getInfoById(id))
+            decryptInfoColumn(noteInfoDao.getInfoById(id))
         }
 
     override suspend fun deleteNoteInfo(info: NoteInfoColumn) =
         withContext(ioDispatcher) {
-            val dao = database.noteInfoDao()
-            dao.deleteInfo(info)
+            noteInfoDao.deleteInfo(info)
         }
 
     override suspend fun deleteNoteById(id: Long) {
         withContext(ioDispatcher) {
-            val dao = database.noteInfoDao()
-            dao.deleteInfoById(id)
+            noteInfoDao.deleteInfoById(id)
         }
     }
 
     override suspend fun updateNoteInfo(info: NoteInfoUpdate) {
         withContext(ioDispatcher) {
-            val dao = database.noteInfoDao()
             val encryptedInfo = info.copy(
                 note = encryptMessage(info.note)
             )
-            dao.updateNoteInfo(encryptedInfo)
+            noteInfoDao.updateNoteInfo(encryptedInfo)
         }
     }
 
     override suspend fun updateNoteSampleSetting(info: InfoSettingUpdate) {
         withContext(ioDispatcher) {
-            val dao = database.noteInfoDao()
             val encryptedInfo = info.copy(
                 inputText = encryptMessage(info.inputText),
                 outputText = encryptMessage(info.outputText),
                 sampledMessage = encryptMessage(info.sampledMessage)
             )
-            dao.updateInfoSetting(encryptedInfo)
+            noteInfoDao.updateInfoSetting(encryptedInfo)
         }
     }
 
