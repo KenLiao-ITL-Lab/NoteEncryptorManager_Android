@@ -36,11 +36,13 @@ class EditorViewState {
 
     fun updateNoteInfo(
         title: String,
-        note: String
+        note: String,
+        isPrivate: Boolean
     ) {
         _noteInfo = _noteInfo.copy(
             title = title,
-            note = note
+            note = note,
+            isPrivate = isPrivate
         )
     }
 }

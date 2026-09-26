@@ -6,17 +6,20 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
@@ -59,7 +62,8 @@ class EditorActivity : ComponentActivity() {
                         onTableChanged = {
                             viewModel.updateNoteInfo(
                                 title = it.title,
-                                note = it.note
+                                note = it.note,
+                                isPrivate = it.isPrivate
                             )
                         },
                         onSaveClicked = {
@@ -145,7 +149,7 @@ fun EditorScreen(
                 onTableChanged.invoke(noteInfo.copy(note = it))
             },
             onPrivateSwitchChange = {
-//                onTableChanged.invoke(noteInfo.copy(isPrivate = it))
+                onTableChanged.invoke(noteInfo.copy(isPrivate = it))
             }
         )
 
@@ -196,6 +200,23 @@ fun ContextTable(
             )
         )
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                modifier = Modifier,
+                checked = noteInfo.isPrivate,
+                onCheckedChange = onPrivateSwitchChange,
+            )
+
+            Text(
+                modifier = Modifier,
+                text = "是否啟用生物驗證"
+            )
+        }
+
         // Note
         OutlinedTextField(
             modifier = Modifier
@@ -213,30 +234,11 @@ fun ContextTable(
             )
         )
 
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Checkbox(
-//                modifier = Modifier,
-//                checked = false,
-//                onCheckedChange = onPrivateSwitchChange,
-//            )
-//
-//            Text(
-//                modifier = Modifier,
-//                text = "是否鎖定"
-//            )
-//        }
-
         HorizontalDivider(
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 16.dp)
                 .fillMaxWidth()
-        )
-
-        // Input
+        )        // Input
         ContentTextCard(
             modifier = Modifier
                 .padding(vertical = 8.dp),

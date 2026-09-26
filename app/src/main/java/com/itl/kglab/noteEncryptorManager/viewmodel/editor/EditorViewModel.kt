@@ -34,11 +34,13 @@ class EditorViewModel @Inject constructor (
 
     fun updateNoteInfo(
         title: String,
-        note: String
+        note: String,
+        isPrivate: Boolean
     ) {
         viewState.updateNoteInfo(
             title = title,
-            note = note
+            note = note,
+            isPrivate = isPrivate
         )
     }
 
