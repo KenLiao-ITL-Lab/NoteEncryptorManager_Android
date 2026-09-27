@@ -12,6 +12,7 @@ import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +24,9 @@ class MainViewModel @Inject constructor(
     private lateinit var hashTools: HashTools
 
     var state by mutableStateOf(ScreenState())
+        private set
+
+    var inputState by mutableStateOf("")
         private set
 
     var resultState by mutableStateOf("")
@@ -39,11 +43,16 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun updateInput(input: String) {
+        inputState = input
+    }
+
     fun convertInput(input: String) {
         resultState = hashTools.hashMessage(input)
     }
 
     fun clear() {
+        inputState = ""
         resultState = ""
     }
 
@@ -53,10 +62,11 @@ class MainViewModel @Inject constructor(
 
     private fun getSettingInfo() {
         viewModelScope.launch {
-            val info = repository.getSettingInfo().stateIn(viewModelScope).value
+            val info = repository.getSettingInfo().first()
 
             val screenInfo = SettingScreenInfo(
                 algorithmIndex = getAlgorithmListIndexByName(info.algorithmName),
+                isBiometricEnabled = info.isBiometricEnabled,
                 info = info,
             )
             state = state.copy(

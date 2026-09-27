@@ -2,8 +2,8 @@ package com.itl.kglab.noteEncryptorManager.manager
 
 import android.os.Build
 import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
-import androidx.biometric.BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt.PromptInfo
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.channels.Channel
@@ -25,7 +25,7 @@ class BiometricPromptManager(
         val manager = BiometricManager.from(context)
 
         val authenticators = if (Build.VERSION.SDK_INT >= 30) {
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or ERROR_NO_DEVICE_CREDENTIAL
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or DEVICE_CREDENTIAL
         } else {
             BiometricManager.Authenticators.BIOMETRIC_STRONG
         }
@@ -46,6 +46,22 @@ class BiometricPromptManager(
         prompt.authenticate(promptInfo)
     }
 
+    fun checkBiometricSupport(): BioAuthResult {
+        val manager = BiometricManager.from(context)
+        val authenticators = if (Build.VERSION.SDK_INT >= 30) {
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+        } else {
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
+        }
+        return when(manager.canAuthenticate(authenticators)) {
+            BiometricManager.BIOMETRIC_SUCCESS -> BioAuthResult.AuthenticationSuccess
+            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> BioAuthResult.HardwareUnavailable
+            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> BioAuthResult.FeatureUnavailable
+            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> BioAuthResult.AuthenticationNotSet
+            else -> BioAuthResult.FeatureUnavailable
+        }
+    }
+
     private fun getPromptInfo(
         title: String,
         desc: String,
@@ -55,7 +71,9 @@ class BiometricPromptManager(
             setTitle(title)
             setDescription(desc)
             setAllowedAuthenticators(authenticators)
-            setNegativeButtonText("取消")
+            if ((authenticators and DEVICE_CREDENTIAL) == 0) {
+                setNegativeButtonText("取消")
+            }
         }.build()
 
     }

@@ -1,21 +1,24 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.main.route
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,14 +35,13 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.currentStateAsState
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.itl.kglab.noteEncryptorManager.R
 import com.itl.kglab.noteEncryptorManager.manager.BiometricPromptManager
-import com.itl.kglab.noteEncryptorManager.ui.data.BioAuthEvent
+import com.itl.kglab.noteEncryptorManager.ui.data.PendingAuthAction
 import com.itl.kglab.noteEncryptorManager.ui.screen.detail.DetailActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.editor.EditorActivity
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.ConverterScreen
@@ -63,17 +65,26 @@ fun MainRoute(
 
     val context = LocalContext.current
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
-
-    val biometricResult by bioAuthManager.promptResult.collectAsState(initial = BiometricPromptManager.BioAuthResult.Init)
+    var showEnrollDialog by remember { mutableStateOf(false) }
+    
     val enrollLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = {}
     )
 
-    var bioAuthState by remember {
-        mutableStateOf(BioAuthEvent())
+    val editorLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                viewModel.clear()
+            }
+        }
+    )
+
+    // 記錄準備執行、但需要先經過生物辨識(指紋/臉部)的意圖動作 (Intent Action)
+    // 辨識成功後，會在 LaunchedEffect 內根據這個狀態來決定要開啟哪一頁或執行哪個行為
+    var pendingAuthAction by remember {
+        mutableStateOf<PendingAuthAction?>(null)
     }
 
     val screenModifier = Modifier
@@ -83,9 +94,9 @@ fun MainRoute(
             horizontal = dimensionResource(id = R.dimen.screen_table_padding)
         )
 
-    // Result判斷，當biometricResult狀態改變即執行一次
-    LaunchedEffect(biometricResult) {
-        biometricResult.let { result ->
+    // Result判斷，直接收集 (collect) 事件流，避免透過 State 可能造成的遺漏或重複觸發
+    LaunchedEffect(bioAuthManager) {
+        bioAuthManager.promptResult.collect { result ->
             when(result) {
                 is BiometricPromptManager.BioAuthResult.AuthenticationError -> {
                     Log.d("TAG", "AuthenticationError: ${result.errorMessage}")
@@ -95,10 +106,41 @@ fun MainRoute(
                 }
                 BiometricPromptManager.BioAuthResult.AuthenticationSuccess -> {
                     Log.d("TAG", "AuthenticationSuccess")
-                    bioAuthState.func?.invoke() ?: run { }
-                    bioAuthState = bioAuthState.copy(
-                        func = null
-                    )
+                    
+                    when (val action = pendingAuthAction) {
+                        is PendingAuthAction.OpenDetail -> {
+                            val bundle = Bundle().apply {
+                                putLong(DetailActivity.ARG_ID, action.id)
+                            }
+                            val intent = Intent(context, DetailActivity::class.java).apply {
+                                putExtras(bundle)
+                            }
+                            context.startActivity(intent)
+                        }
+                        is PendingAuthAction.EditNote -> {
+                            val bundle = Bundle().apply {
+                                putBoolean(EditorActivity.ARG_IS_EDIT, true)
+                                putLong(EditorActivity.ARG_ID, action.id)
+                            }
+                            val intent = Intent(context, EditorActivity::class.java).apply {
+                                putExtras(bundle)
+                            }
+                            context.startActivity(intent)
+                        }
+                        is PendingAuthAction.DeleteNote -> {
+                            viewModel.deleteNoteInfoById(action.id)
+                        }
+                        is PendingAuthAction.ToggleBiometric -> {
+                            val currentSetting = viewModel.state.settingInfo
+                            val newSetting = currentSetting.copy(
+                                isBiometricEnabled = action.targetState,
+                                info = currentSetting.info.copy(isBiometricEnabled = action.targetState)
+                            )
+                            viewModel.saveSettingInfo(newSetting)
+                        }
+                        null -> {}
+                    }
+                    pendingAuthAction = null
                 }
                 BiometricPromptManager.BioAuthResult.FeatureUnavailable -> {
                     Log.d("TAG", "FeatureUnavailable")
@@ -107,15 +149,7 @@ fun MainRoute(
                     Log.d("TAG", "HardwareUnavailable")
                 }
                 BiometricPromptManager.BioAuthResult.AuthenticationNotSet -> {
-                    if (Build.VERSION.SDK_INT >= 30) {
-                        val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                            putExtra(
-                                Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-                            )
-                        }
-                        enrollLauncher.launch(enrollIntent)
-                    }
+                    showEnrollDialog = true
                 }
 
                 BiometricPromptManager.BioAuthResult.Init -> {}
@@ -123,13 +157,45 @@ fun MainRoute(
         }
     }
 
-    LaunchedEffect(lifecycleState) {
-        when(lifecycleState) {
-            Lifecycle.State.RESUMED -> {
-                viewModel.getNoteInfoList() // 更新資料
+    // 專門為 Compose Lifecycle 事件設計的 Effect，取代手動觀察 currentState
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.getNoteInfoList() // 更新資料
+    }
+
+    if (showEnrollDialog) {
+        AlertDialog(
+            onDismissRequest = { showEnrollDialog = false },
+            title = { Text("尚未設定生物辨識") },
+            text = { Text("您的裝置支援生物辨識，但系統尚未設定，是否前往系統設定進行設定？") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showEnrollDialog = false
+                        if (Build.VERSION.SDK_INT >= 30) {
+                            val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                                putExtra(
+                                    Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                                    BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+                                )
+                            }
+                            enrollLauncher.launch(enrollIntent)
+                        } else {
+                            val enrollIntent = Intent(Settings.ACTION_SECURITY_SETTINGS)
+                            enrollLauncher.launch(enrollIntent)
+                        }
+                    }
+                ) {
+                    Text("前往設定")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showEnrollDialog = false }
+                ) {
+                    Text("取消")
+                }
             }
-            else -> {}
-        }
+        )
     }
 
     NavHost(
@@ -145,6 +211,10 @@ fun MainRoute(
 
             ConverterScreen(
                 modifier = screenModifier,
+                inputText = viewModel.inputState,
+                onInputChange = {
+                    viewModel.updateInput(it)
+                },
                 resultText = viewModel.resultState,
                 onConvertClicked = { input ->
                     keyboardManager?.hide()
@@ -172,7 +242,7 @@ fun MainRoute(
                     val intent = Intent(context, EditorActivity::class.java).apply {
                         putExtras(bundle)
                     }
-                    context.startActivity(intent)
+                    editorLauncher.launch(intent)
                 },
                 onClearClicked = {
                     viewModel.clear()
@@ -180,15 +250,22 @@ fun MainRoute(
             )
         }
         composable<MainBottomNavigationItem.NoteList> {
+            val isBiometricEnabled = viewModel.state.settingInfo.isBiometricEnabled
+
             NoteListScreen(
                 modifier = screenModifier,
                 noteList = viewModel.state.noteInfoList,
                 onItemCardClicked = { info ->
+                    if (info.isPrivate && isBiometricEnabled) {
+                        pendingAuthAction = PendingAuthAction.OpenDetail(info.id)
 
-                    val func = {
-                        val id = info.id
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = "請驗證身份查看「${info.title}」內容"
+                        )
+                    } else {
                         val bundle = Bundle().apply {
-                            putLong(DetailActivity.ARG_ID, id)
+                            putLong(DetailActivity.ARG_ID, info.id)
                         }
 
                         val intent = Intent(context, DetailActivity::class.java).apply {
@@ -197,27 +274,19 @@ fun MainRoute(
 
                         context.startActivity(intent)
                     }
-
-                    if (info.isPrivate) {
-                        bioAuthState = bioAuthState.copy(
-                            func = func
-                        )
+                },
+                onItemEditClicked = { info ->
+                    if (info.isPrivate && isBiometricEnabled) {
+                        pendingAuthAction = PendingAuthAction.EditNote(info.id)
 
                         bioAuthManager.showBiometricPrompt(
                             title = "身份驗證",
-                            desc = "請驗證身份查看「${info.title}」內容"
+                            desc = "請驗證身份編輯「${info.title}」"
                         )
                     } else {
-                        func.invoke()
-                    }
-
-                },
-                onItemEditClicked = { info ->
-                    val func = {
-                        val id = info.id
                         val bundle = Bundle().apply {
                             putBoolean(EditorActivity.ARG_IS_EDIT, true)
-                            putLong(EditorActivity.ARG_ID, id)
+                            putLong(EditorActivity.ARG_ID, info.id)
                         }
 
                         val intent = Intent(context, EditorActivity::class.java).apply {
@@ -226,36 +295,17 @@ fun MainRoute(
 
                         context.startActivity(intent)
                     }
-
-                    if (info.isPrivate) {
-                        bioAuthState = bioAuthState.copy(
-                            func = func
-                        )
-
-                        bioAuthManager.showBiometricPrompt(
-                            title = "身份驗證",
-                            desc = "請驗證身份編輯「${info.title}」"
-                        )
-                    } else {
-                        func.invoke()
-                    }
-
                 },
                 onItemDeleteClicked = { info ->
-                    val func = {
-                        viewModel.deleteNoteInfoById(info.id)
-                    }
-
-                    if (info.isPrivate) {
-                        bioAuthState = bioAuthState.copy(
-                            func = { viewModel.deleteNoteInfoById(info.id) }
-                        )
+                    if (info.isPrivate && isBiometricEnabled) {
+                        pendingAuthAction = PendingAuthAction.DeleteNote(info.id)
+                        
                         bioAuthManager.showBiometricPrompt(
                             title = "身份驗證",
                             desc = "請驗證身份，隨後將刪除「${info.title}」"
                         )
                     } else {
-                        func.invoke()
+                        viewModel.deleteNoteInfoById(info.id)
                     }
                 }
             )
@@ -267,6 +317,21 @@ fun MainRoute(
                 settingInfo = viewModel.state.settingInfo,
                 onSaveSettingClicked = { info ->
                     viewModel.saveSettingInfo(info)
+                },
+                onToggleBiometric = { targetState ->
+                    val supportState = bioAuthManager.checkBiometricSupport()
+                    if (supportState == BiometricPromptManager.BioAuthResult.HardwareUnavailable || 
+                        supportState == BiometricPromptManager.BioAuthResult.FeatureUnavailable) {
+                        Toast.makeText(context, "此裝置不支援生物辨識功能", Toast.LENGTH_SHORT).show()
+                    } else if (targetState && supportState == BiometricPromptManager.BioAuthResult.AuthenticationNotSet) {
+                        showEnrollDialog = true
+                    } else {
+                        pendingAuthAction = PendingAuthAction.ToggleBiometric(targetState)
+                        bioAuthManager.showBiometricPrompt(
+                            title = "身份驗證",
+                            desc = if (targetState) "請驗證身份以啟用生物辨識" else "請驗證身份以關閉生物辨識"
+                        )
+                    }
                 }
             )
         }
