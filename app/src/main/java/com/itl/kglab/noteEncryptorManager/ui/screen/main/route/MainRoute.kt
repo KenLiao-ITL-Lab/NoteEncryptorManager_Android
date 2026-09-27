@@ -1,5 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.main.route
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.Intent
 import android.os.Build
@@ -69,6 +70,15 @@ fun MainRoute(
     val enrollLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = {}
+    )
+
+    val editorLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                viewModel.clear()
+            }
+        }
     )
 
     // 記錄準備執行、但需要先經過生物辨識(指紋/臉部)的意圖動作 (Intent Action)
@@ -201,6 +211,10 @@ fun MainRoute(
 
             ConverterScreen(
                 modifier = screenModifier,
+                inputText = viewModel.inputState,
+                onInputChange = {
+                    viewModel.updateInput(it)
+                },
                 resultText = viewModel.resultState,
                 onConvertClicked = { input ->
                     keyboardManager?.hide()
@@ -228,7 +242,7 @@ fun MainRoute(
                     val intent = Intent(context, EditorActivity::class.java).apply {
                         putExtras(bundle)
                     }
-                    context.startActivity(intent)
+                    editorLauncher.launch(intent)
                 },
                 onClearClicked = {
                     viewModel.clear()

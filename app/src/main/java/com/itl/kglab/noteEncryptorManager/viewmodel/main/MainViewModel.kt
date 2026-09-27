@@ -26,6 +26,9 @@ class MainViewModel @Inject constructor(
     var state by mutableStateOf(ScreenState())
         private set
 
+    var inputState by mutableStateOf("")
+        private set
+
     var resultState by mutableStateOf("")
         private set
 
@@ -40,11 +43,16 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun updateInput(input: String) {
+        inputState = input
+    }
+
     fun convertInput(input: String) {
         resultState = hashTools.hashMessage(input)
     }
 
     fun clear() {
+        inputState = ""
         resultState = ""
     }
 

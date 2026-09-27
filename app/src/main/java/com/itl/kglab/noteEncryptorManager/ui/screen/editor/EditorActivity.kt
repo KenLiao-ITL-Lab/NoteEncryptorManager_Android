@@ -1,5 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.editor
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -68,6 +69,8 @@ class EditorActivity : ComponentActivity() {
                         },
                         onSaveClicked = {
                             viewModel.saveNoteInfo()
+                            // TODO 後續要加上是否儲存成功判斷。
+                            setResult(RESULT_OK)
                             finish()
                         },
                         onCancelClicked = {

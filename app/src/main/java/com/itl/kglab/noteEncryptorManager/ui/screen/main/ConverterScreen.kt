@@ -27,26 +27,24 @@ import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
 @Composable
 fun ConverterScreen(
     modifier: Modifier = Modifier,
+    inputText: String,
+    onInputChange: (String) -> Unit,
     resultText: String,
     onConvertClicked: (String) -> Unit,
     onDuplicateClicked: () -> Unit,
     onSaveClicked: (NoteEventData) -> Unit,
     onClearClicked: () -> Unit
 ) {
-    var inputValue by rememberSaveable { mutableStateOf("") }
-
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
         ConverterInputSection(
-            inputValue = inputValue,
-            onInputChange = { input ->
-                inputValue = input
-            },
+            inputValue = inputText,
+            onInputChange = onInputChange,
             onConvertClicked = {
-                onConvertClicked.invoke(inputValue)
+                onConvertClicked.invoke(inputText)
             }
         )
         ConverterResultSection(
@@ -58,7 +56,7 @@ fun ConverterScreen(
                 // 不是空白才儲存
                 if (resultText.isNotBlank()) {
                     val saveInfo = NoteEventData(
-                        inputMessage = inputValue,
+                        inputMessage = inputText,
                         outputMessage = resultText
                     )
                     onSaveClicked.invoke(saveInfo)
@@ -66,7 +64,6 @@ fun ConverterScreen(
             },
             onClearClicked = {
                 onClearClicked.invoke()
-                inputValue = ""
             }
         )
     }
@@ -193,6 +190,8 @@ fun PreviewFunctionButtonGroup() {
 @Composable
 fun PreviewScreen() {
     ConverterScreen(
+        inputText = "Input Text",
+        onInputChange = {},
         resultText = "Result Text",
         onConvertClicked = {},
         onDuplicateClicked = {},
