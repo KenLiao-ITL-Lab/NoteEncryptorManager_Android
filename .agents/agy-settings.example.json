@@ -1,0 +1,31 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/settings.json",
+  "enableTerminalSandbox": true,
+  "permissions": {
+    "deny": [
+      "read_file(local.properties)",
+      "read_file(keystore.properties)",
+      "read_file(signing.properties)",
+      "read_file(google-services.json)",
+      "read_file(.env)",
+      "read_file(app/release)",
+      "write_file(.git/)",
+      "command(rm -rf)",
+      "command(sudo)",
+      "command(keytool)",
+      "command(jarsigner)",
+      "command(apksigner)"
+    ],
+    "ask": [
+      "command(git push)",
+      "command(./gradlew bundleRelease)",
+      "command(./gradlew assembleRelease)",
+      "command(adb)"
+    ],
+    "allow": [
+      "command(./gradlew assembleDebug)",
+      "command(./gradlew testDebugUnitTest)",
+      "command(./gradlew lintDebug)"
+    ]
+  }
+}
