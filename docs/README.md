@@ -33,3 +33,4 @@
 | [features-and-screens.md](./features-and-screens.md) | 三大 Activity、底部導覽畫面、ViewModel 狀態管理與生物辨識互動流程 |
 | [data-and-security.md](./data-and-security.md) | Room 資料表結構、DataStore 設定鍵值、欄位加密機制、雜湊取樣演算法與生物辨識實作 |
 | [development-guide.md](./development-guide.md) | 開發環境設定、常用 Gradle 指令、Room 升版流程、測試與 Antigravity CLI（`agy`）協作規範 |
+| [ui-viewmodel-review.md](./ui-viewmodel-review.md) | UI 元件與 ViewModel 健檢問題清單、風險分級與修復追蹤 |
