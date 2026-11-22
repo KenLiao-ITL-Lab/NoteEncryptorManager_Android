@@ -60,6 +60,35 @@ class MainViewModel @Inject constructor(
         pendingAuthAction = null
     }
 
+    fun updateSystemBiometricReady(isReady: Boolean) {
+        if (state.isSystemBiometricReady != isReady) {
+            state = state.copy(isSystemBiometricReady = isReady)
+        }
+    }
+
+    fun disableBiometricBecauseSystemRemoved() {
+        clearPendingAuthAction()
+        val currentSetting = state.settingInfo
+        val updatedSetting = currentSetting.copy(
+            isBiometricEnabled = false,
+            info = currentSetting.info.copy(isBiometricEnabled = false)
+        )
+        state = state.copy(
+            settingInfo = updatedSetting,
+            isSystemBiometricReady = false
+        )
+        viewModelScope.launch {
+            repository.setSettingInfo(updatedSetting.info)
+        }
+    }
+
+    fun checkPrivateNoteCount(onResult: (Int) -> Unit) {
+        viewModelScope.launch {
+            val count = repository.getPrivateNoteCount()
+            onResult(count)
+        }
+    }
+
     fun getHashTypeList(): List<String> {
         return HashTools.getHashTypeList().map { it.algorithmName }
     }
@@ -74,7 +103,8 @@ class MainViewModel @Inject constructor(
                 info = info,
             )
             state = state.copy(
-                settingInfo = screenInfo
+                settingInfo = screenInfo,
+                isSettingLoaded = true
             )
 
             hashTools = HashTools(state.settingInfo.info)

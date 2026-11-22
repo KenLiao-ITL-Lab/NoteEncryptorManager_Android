@@ -10,6 +10,7 @@ import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.NoteInfoUpdate
 import com.itl.kglab.noteEncryptorManager.repository.MainRepositoryInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -31,8 +32,21 @@ class EditorViewModel @Inject constructor(
     var isSaving by mutableStateOf(false)
         private set
 
+    var isAppBiometricEnabled by mutableStateOf(false)
+        private set
+
     private val saveCompletedChannel = Channel<Unit>(Channel.BUFFERED)
     val saveCompleted = saveCompletedChannel.receiveAsFlow()
+
+    init {
+        refreshBiometricSetting()
+    }
+
+    fun refreshBiometricSetting() {
+        viewModelScope.launch {
+            isAppBiometricEnabled = repository.getSettingInfo().first().isBiometricEnabled
+        }
+    }
 
     fun setNewInfoIfNeeded(
         input: String,

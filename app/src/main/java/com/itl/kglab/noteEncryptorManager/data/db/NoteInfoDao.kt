@@ -30,6 +30,9 @@ interface NoteInfoDao {
     @Query("SELECT * FROM noteInfoTable WHERE id = :id")
     fun getInfoById(id: Long): NoteInfoColumn
 
+    @Query("SELECT COUNT(*) FROM noteInfoTable WHERE is_private = 1")
+    fun countPrivateNotes(): Int
+
     @Update(
         onConflict = OnConflictStrategy.REPLACE,
         entity = NoteInfoColumn::class

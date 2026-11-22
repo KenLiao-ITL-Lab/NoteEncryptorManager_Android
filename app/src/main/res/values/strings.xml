@@ -29,6 +29,7 @@
 
     <!-- Note List Screen -->
     <string name="screen_list_empty_list_desc">尚未儲存Note資料</string>
+    <string name="screen_list_biometric_disabled_hint">尚未設定或開啟身份辨識</string>
 
     <!-- Setting Screen -->
     <string name="screen_setting_algorithm_menu_label">選擇演算法</string>
@@ -78,4 +79,9 @@
     <string name="biometric_prompt_delete_note">請驗證身份，隨後將刪除「%1$s」</string>
     <string name="biometric_prompt_enable">請驗證身份以啟用生物辨識</string>
     <string name="biometric_prompt_disable">請驗證身份以關閉生物辨識</string>
+    <string name="biometric_editor_disabled_toast">請先至設定選單開啟身份辨識功能</string>
+    <string name="dialog_disable_biometric_title">確定要關閉身份辨識？</string>
+    <string name="dialog_disable_biometric_message">目前有 %1$d 筆筆記已啟用身份辨識保護，關閉後將不需驗證即可查看與操作，確定要關閉嗎？</string>
+    <string name="dialog_system_biometric_removed_title">身份辨識已關閉</string>
+    <string name="dialog_system_biometric_removed_message">系統已取消身份辨識設定，應用程式的身份辨識功能已自動關閉。若需重新啟用，請先於系統設定完成後再開啟。</string>
 </resources>

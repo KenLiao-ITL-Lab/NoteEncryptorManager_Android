@@ -1,5 +1,6 @@
 package com.itl.kglab.noteEncryptorManager.manager
 
+import android.content.Context
 import android.os.Build
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -131,5 +132,20 @@ class BiometricPromptManager(
         data object AuthenticationFailed: BioAuthResult()
 
         data class AuthenticationError(val errorMessage: String): BioAuthResult()
+    }
+
+    companion object {
+        fun allowedAuthenticators(): Int {
+            return if (Build.VERSION.SDK_INT >= 30) {
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+            } else {
+                BiometricManager.Authenticators.BIOMETRIC_STRONG
+            }
+        }
+
+        fun isSystemBiometricReady(context: Context): Boolean {
+            val manager = BiometricManager.from(context)
+            return manager.canAuthenticate(allowedAuthenticators()) == BiometricManager.BIOMETRIC_SUCCESS
+        }
     }
 }

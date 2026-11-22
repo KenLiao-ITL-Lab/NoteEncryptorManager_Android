@@ -32,6 +32,19 @@ class DetailViewModel @Inject constructor(
     var uiState by mutableStateOf(DetailScreenUiState())
         private set
 
+    var isAppBiometricEnabled by mutableStateOf(false)
+        private set
+
+    init {
+        refreshBiometricSetting()
+    }
+
+    fun refreshBiometricSetting() {
+        viewModelScope.launch {
+            isAppBiometricEnabled = repository.getSettingInfo().first().isBiometricEnabled
+        }
+    }
+
     fun setInput(input: String) {
         settingState = settingState.copy(
             input = input

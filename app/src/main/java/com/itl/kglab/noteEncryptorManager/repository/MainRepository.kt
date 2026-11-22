@@ -46,6 +46,11 @@ class MainRepository @Inject constructor (
             decryptInfoColumn(noteInfoDao.getInfoById(id))
         }
 
+    override suspend fun getPrivateNoteCount(): Int =
+        withContext(ioDispatcher) {
+            noteInfoDao.countPrivateNotes()
+        }
+
     override suspend fun deleteNoteInfo(info: NoteInfoColumn) =
         withContext(ioDispatcher) {
             noteInfoDao.deleteInfo(info)

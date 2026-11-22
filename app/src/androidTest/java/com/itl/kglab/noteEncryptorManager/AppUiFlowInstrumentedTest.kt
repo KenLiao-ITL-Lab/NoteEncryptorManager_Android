@@ -55,16 +55,20 @@ class AppUiFlowInstrumentedTest {
             composeRule.onNodeWithText("清除").performScrollTo().performClick()
             composeRule.waitForIdle()
 
-            // 3. Switch to NoteList tab and verify selected state (Fix #4)
+            // 3. Switch to NoteList tab and verify selected state + biometric disabled banner (Fix #4 & AC-4)
             navList.performClick()
             composeRule.waitForIdle()
             navList.assertIsSelected()
             navConverter.assertIsNotSelected()
             navSetting.assertIsNotSelected()
 
-            // 4. Switch to Setting tab and verify selected state + algorithm dropdown (Fix #4 & #6)
-            navSetting.performClick()
+            // Clicking the bottom biometric hint banner should navigate directly to Setting tab (AC-4)
+            composeRule.onNodeWithText("尚未設定或開啟身份辨識")
+                .assertIsDisplayed()
+                .performClick()
             composeRule.waitForIdle()
+
+            // 4. Setting tab should now be selected (Fix #4, #6 & AC-4)
             navSetting.assertIsSelected()
             navConverter.assertIsNotSelected()
             navList.assertIsNotSelected()
@@ -92,6 +96,10 @@ class AppUiFlowInstrumentedTest {
             // Verify both ContentTextCards render their actual content visibly (not collapsed to 0 height)
             composeRule.onNodeWithText("SampleSecretInput").performScrollTo().assertIsDisplayed()
             composeRule.onNodeWithText("SampleHashOutput1234567890").performScrollTo().assertIsDisplayed()
+
+            // When App biometric is disabled, tapping the biometric Switch row must not crash or enable lock (AC-1)
+            composeRule.onNodeWithText("是否啟用生物驗證").performScrollTo().assertIsDisplayed().performClick()
+            composeRule.waitForIdle()
 
             composeRule.onNode(hasSetTextAction() and hasText("標題")).performScrollTo().performTextInput(uniqueTitle)
             composeRule.onNode(hasSetTextAction() and hasText("備註")).performScrollTo().performTextInput("初始備註內容")

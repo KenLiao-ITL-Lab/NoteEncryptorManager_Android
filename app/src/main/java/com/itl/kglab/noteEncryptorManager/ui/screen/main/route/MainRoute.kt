@@ -61,6 +61,8 @@ fun MainRoute(
     val context = LocalContext.current
 
     var showEnrollDialog by rememberSaveable { mutableStateOf(false) }
+    var showSystemBiometricRemovedDialog by rememberSaveable { mutableStateOf(false) }
+    var disableBiometricPrivateCount by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val enrollLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -76,11 +78,45 @@ fun MainRoute(
         }
     )
 
+    fun openSystemBiometricSettings() {
+        val enrollIntent = if (Build.VERSION.SDK_INT >= 30) {
+            Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                putExtra(
+                    Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                    BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+                )
+            }
+        } else {
+            Intent(Settings.ACTION_SECURITY_SETTINGS)
+        }
+        enrollLauncher.launch(enrollIntent)
+    }
+
+    fun checkSystemBiometricConsistency() {
+        val isReady = BiometricPromptManager.isSystemBiometricReady(context)
+        viewModel.updateSystemBiometricReady(isReady)
+        if (viewModel.state.isSettingLoaded &&
+            viewModel.state.settingInfo.isBiometricEnabled &&
+            !isReady
+        ) {
+            viewModel.disableBiometricBecauseSystemRemoved()
+            showSystemBiometricRemovedDialog = true
+        }
+    }
+
     val screenModifier = Modifier
         .fillMaxSize()
         .padding(
             horizontal = dimensionResource(id = R.dimen.screen_table_padding)
         )
+
+    // 首次設定載入完成或設定變動時檢查系統身份辨識一致性（需求 5）
+    LaunchedEffect(
+        viewModel.state.isSettingLoaded,
+        viewModel.state.settingInfo.isBiometricEnabled
+    ) {
+        checkSystemBiometricConsistency()
+    }
 
     // 直接收集 (collect) 生物辨識事件流，並由 ViewModel 保存 pendingAuthAction 以跨組態變更
     LaunchedEffect(bioAuthManager) {
@@ -155,8 +191,10 @@ fun MainRoute(
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.getNoteInfoList()
+        checkSystemBiometricConsistency()
     }
 
+    // 系統尚未設定生物辨識引導對話框
     if (showEnrollDialog) {
         AlertDialog(
             onDismissRequest = { showEnrollDialog = false },
@@ -166,18 +204,7 @@ fun MainRoute(
                 TextButton(
                     onClick = {
                         showEnrollDialog = false
-                        if (Build.VERSION.SDK_INT >= 30) {
-                            val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                                putExtra(
-                                    Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                                    BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-                                )
-                            }
-                            enrollLauncher.launch(enrollIntent)
-                        } else {
-                            val enrollIntent = Intent(Settings.ACTION_SECURITY_SETTINGS)
-                            enrollLauncher.launch(enrollIntent)
-                        }
+                        openSystemBiometricSettings()
                     }
                 ) {
                     Text(stringResource(id = R.string.biometric_enroll_dialog_go_settings))
@@ -186,6 +213,69 @@ fun MainRoute(
             dismissButton = {
                 TextButton(
                     onClick = { showEnrollDialog = false }
+                ) {
+                    Text(stringResource(id = R.string.common_cancel))
+                }
+            }
+        )
+    }
+
+    // 需求 5：系統取消身份辨識後的自動關閉提醒對話框
+    if (showSystemBiometricRemovedDialog) {
+        AlertDialog(
+            onDismissRequest = { showSystemBiometricRemovedDialog = false },
+            title = { Text(stringResource(id = R.string.dialog_system_biometric_removed_title)) },
+            text = { Text(stringResource(id = R.string.dialog_system_biometric_removed_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSystemBiometricRemovedDialog = false
+                        openSystemBiometricSettings()
+                    }
+                ) {
+                    Text(stringResource(id = R.string.biometric_enroll_dialog_go_settings))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showSystemBiometricRemovedDialog = false }
+                ) {
+                    Text(stringResource(id = R.string.common_confirm))
+                }
+            }
+        )
+    }
+
+    // 需求 2：關閉 App 身份辨識時，若資料庫已有上鎖筆記則跳出確認對話框
+    disableBiometricPrivateCount?.let { privateCount ->
+        AlertDialog(
+            onDismissRequest = { disableBiometricPrivateCount = null },
+            title = { Text(stringResource(id = R.string.dialog_disable_biometric_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        id = R.string.dialog_disable_biometric_message,
+                        privateCount
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        disableBiometricPrivateCount = null
+                        viewModel.updatePendingAuthAction(PendingAuthAction.ToggleBiometric(false))
+                        bioAuthManager.showBiometricPrompt(
+                            title = context.getString(R.string.biometric_auth_title),
+                            desc = context.getString(R.string.biometric_prompt_disable)
+                        )
+                    }
+                ) {
+                    Text(stringResource(id = R.string.common_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { disableBiometricPrivateCount = null }
                 ) {
                     Text(stringResource(id = R.string.common_cancel))
                 }
@@ -249,13 +339,20 @@ fun MainRoute(
             )
         }
         composable<MainBottomNavigationItem.NoteList> {
-            val isBiometricEnabled = viewModel.state.settingInfo.isBiometricEnabled
+            val isBiometricEffective = viewModel.state.isBiometricEffective
 
             NoteListScreen(
                 modifier = screenModifier,
                 noteList = viewModel.state.noteInfoList,
+                isBiometricEffective = isBiometricEffective,
+                onBiometricHintClicked = {
+                    navHostController.navigate(MainBottomNavigationItem.Setting) {
+                        popUpTo(navHostController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                },
                 onItemCardClicked = { info ->
-                    if (info.isPrivate && isBiometricEnabled) {
+                    if (info.isPrivate && isBiometricEffective) {
                         viewModel.updatePendingAuthAction(PendingAuthAction.OpenDetail(info.id))
                         bioAuthManager.showBiometricPrompt(
                             title = context.getString(R.string.biometric_auth_title),
@@ -272,7 +369,7 @@ fun MainRoute(
                     }
                 },
                 onItemEditClicked = { info ->
-                    if (info.isPrivate && isBiometricEnabled) {
+                    if (info.isPrivate && isBiometricEffective) {
                         viewModel.updatePendingAuthAction(PendingAuthAction.EditNote(info.id))
                         bioAuthManager.showBiometricPrompt(
                             title = context.getString(R.string.biometric_auth_title),
@@ -290,7 +387,7 @@ fun MainRoute(
                     }
                 },
                 onItemDeleteClicked = { info ->
-                    if (info.isPrivate && isBiometricEnabled) {
+                    if (info.isPrivate && isBiometricEffective) {
                         viewModel.updatePendingAuthAction(PendingAuthAction.DeleteNote(info.id))
                         bioAuthManager.showBiometricPrompt(
                             title = context.getString(R.string.biometric_auth_title),
@@ -322,14 +419,24 @@ fun MainRoute(
                         ).show()
                     } else if (targetState && supportState == BiometricPromptManager.BioAuthResult.AuthenticationNotSet) {
                         showEnrollDialog = true
+                    } else if (!targetState) {
+                        // 需求 2：關閉前檢查資料庫是否有上鎖筆記
+                        viewModel.checkPrivateNoteCount { privateCount ->
+                            if (privateCount > 0) {
+                                disableBiometricPrivateCount = privateCount
+                            } else {
+                                viewModel.updatePendingAuthAction(PendingAuthAction.ToggleBiometric(false))
+                                bioAuthManager.showBiometricPrompt(
+                                    title = context.getString(R.string.biometric_auth_title),
+                                    desc = context.getString(R.string.biometric_prompt_disable)
+                                )
+                            }
+                        }
                     } else {
-                        viewModel.updatePendingAuthAction(PendingAuthAction.ToggleBiometric(targetState))
+                        viewModel.updatePendingAuthAction(PendingAuthAction.ToggleBiometric(true))
                         bioAuthManager.showBiometricPrompt(
                             title = context.getString(R.string.biometric_auth_title),
-                            desc = context.getString(
-                                if (targetState) R.string.biometric_prompt_enable
-                                else R.string.biometric_prompt_disable
-                            )
+                            desc = context.getString(R.string.biometric_prompt_enable)
                         )
                     }
                 }

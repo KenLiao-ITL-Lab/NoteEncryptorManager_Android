@@ -2,7 +2,9 @@ package com.itl.kglab.noteEncryptorManager.ui.screen.main
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -20,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,53 +49,96 @@ import com.itl.kglab.noteEncryptorManager.viewmodel.main.NoteInfoListInfoData
 fun NoteListScreen(
     modifier: Modifier = Modifier,
     noteList: List<NoteInfoListInfoData>,
+    isBiometricEffective: Boolean = false,
+    onBiometricHintClicked: () -> Unit = {},
     onItemCardClicked: (NoteInfoListInfoData) -> Unit,
     onItemEditClicked: (NoteInfoListInfoData) -> Unit,
     onItemDeleteClicked: (NoteInfoListInfoData) -> Unit
 ) {
-
     var deleteEventState by remember {
         mutableStateOf(DeleteNoteDataEvent())
     }
 
-    if (noteList.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+    Column(
+        modifier = modifier
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         ) {
-            Text(
-                text = stringResource(id = R.string.screen_list_empty_list_desc),
-                textAlign = TextAlign.Center
-            )
-        }
-    } else {
-        LazyColumn(
-            modifier = modifier
-                .padding(top = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            items(
-                items = noteList,
-                key = { it.id }
-            ) { noteInfo ->
-                NoteListItem(
-                    info = noteInfo,
-                    onItemCardClicked = {
-                        onItemCardClicked.invoke(noteInfo)
-                    },
-                    onItemEditClicked = {
-                        onItemEditClicked.invoke(noteInfo)
-                    },
-                    onItemDeleteClicked = {
-                        // 將當下的NoteInfo帶進DeleteEventState
-                        deleteEventState = deleteEventState.copy(
-                            noteInfo = noteInfo,
-                            isShowConfirmDialog = true
+            if (noteList.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.screen_list_empty_list_desc),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(
+                        items = noteList,
+                        key = { it.id }
+                    ) { noteInfo ->
+                        NoteListItem(
+                            info = noteInfo,
+                            showLockIcon = noteInfo.isPrivate && isBiometricEffective,
+                            onItemCardClicked = {
+                                onItemCardClicked.invoke(noteInfo)
+                            },
+                            onItemEditClicked = {
+                                onItemEditClicked.invoke(noteInfo)
+                            },
+                            onItemDeleteClicked = {
+                                deleteEventState = deleteEventState.copy(
+                                    noteInfo = noteInfo,
+                                    isShowConfirmDialog = true
+                                )
+                            }
                         )
                     }
-                )
+                }
+            }
+        }
+
+        if (!isBiometricEffective) {
+            val bannerShape = RoundedCornerShape(12.dp)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clip(bannerShape)
+                    .clickable(onClick = onBiometricHintClicked),
+                shape = bannerShape,
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(id = R.string.screen_list_biometric_disabled_hint),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
@@ -100,14 +149,12 @@ fun NoteListScreen(
                 noteTitle = info.title,
                 onConfirmClicked = {
                     onItemDeleteClicked(info)
-                    // 還原DeleteEventState
                     deleteEventState = deleteEventState.copy(
                         noteInfo = null,
                         isShowConfirmDialog = false
                     )
                 },
                 onDismissRequest = {
-                    // 還原DeleteEventState
                     deleteEventState = deleteEventState.copy(
                         noteInfo = null,
                         isShowConfirmDialog = false
@@ -122,11 +169,11 @@ fun NoteListScreen(
 fun NoteListItem(
     modifier: Modifier = Modifier,
     info: NoteInfoListInfoData,
+    showLockIcon: Boolean = info.isPrivate,
     onItemCardClicked: () -> Unit,
     onItemEditClicked: () -> Unit,
     onItemDeleteClicked: () -> Unit
 ) {
-
     var menuExpanded by remember {
         mutableStateOf(false)
     }
@@ -142,10 +189,9 @@ fun NoteListItem(
                     onItemCardClicked.invoke()
                 }
         ) {
-
             NoteItemTitle(
                 modifier = Modifier,
-                isLocked = info.isPrivate,
+                isLocked = showLockIcon,
                 title = info.title,
                 desc = info.time,
                 menuExpanded = menuExpanded,
@@ -180,7 +226,6 @@ fun NoteListItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-
         }
     }
 }
@@ -207,7 +252,6 @@ fun NoteItemTitle(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             if (isLocked) {
                 Icon(
                     modifier = Modifier.padding(horizontal = 2.dp),
@@ -250,7 +294,6 @@ fun NoteItemTitle(
     }
 }
 
-
 @Composable
 fun NoteItemMenu(
     modifier: Modifier = Modifier,
@@ -259,7 +302,6 @@ fun NoteItemMenu(
     onEditClicked: (() -> Unit)? = null,
     onDeleteClicked: (() -> Unit)? = null
 ) {
-
     Column(
         modifier = modifier
     ) {
@@ -267,7 +309,6 @@ fun NoteItemMenu(
             expanded = menuExpanded,
             onDismissRequest = onDismissRequest
         ) {
-
             DropdownMenuItem(
                 text = { Text(text = stringResource(id = R.string.title_func_button_edit)) },
                 onClick = {
@@ -289,8 +330,9 @@ fun NoteItemMenu(
 @Composable
 fun NoteListScreenEmptyPreview() {
     NoteListScreen(
-        modifier = Modifier,
+        modifier = Modifier.fillMaxSize(),
         noteList = emptyList(),
+        isBiometricEffective = false,
         onItemCardClicked = {},
         onItemEditClicked = {},
         onItemDeleteClicked = {}
@@ -304,6 +346,7 @@ fun NoteListScreenPreview() {
         repeat(15) { index ->
             add(
                 NoteInfoListInfoData(
+                    id = index.toLong(),
                     title = "Item Title $index",
                     time = "xxxx-xx-xx",
                     note = "Test Note Content",
@@ -314,18 +357,18 @@ fun NoteListScreenPreview() {
     }
 
     NoteListScreen(
+        modifier = Modifier.fillMaxSize(),
         noteList = list,
+        isBiometricEffective = true,
         onItemCardClicked = {},
         onItemEditClicked = {},
         onItemDeleteClicked = {}
     )
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun NoteListItemPreview() {
-
     val noteInfo = NoteInfoListInfoData(
         id = 0,
         title = "測試標題測試標題測試標題測試標題測試標題",

@@ -56,7 +56,8 @@ flowchart LR
 * **狀態來源**：`MainViewModel.state.noteInfoList`（`List<NoteInfoListInfoData>`），且 `MainRoute` 會於 `Lifecycle.Event.ON_RESUME` 自動重新查詢最新清單。
 * **顯示內容**：
   * 清單為空時顯示空狀態提示文字。
-  * 每筆卡片（`NoteListItem`）顯示：鎖頭圖示（若 `isPrivate == true`）、單行標題（過長省略）、建立／更新時間、最多兩行的備註預覽，以及右上角選單（編輯／刪除）。
+  * 每筆卡片（`NoteListItem`）顯示：鎖頭圖示（僅在 `isPrivate == true` 且 App 與系統身份辨識皆啟用時顯示）、單行標題（過長省略）、建立／更新時間、最多兩行的備註預覽，以及右上角選單（編輯／刪除）。
+  * 當 App 或系統尚未啟用身份辨識時，畫面底部固定顯示「尚未設定或開啟身份辨識」提示條，點擊可直接切換至「設定」分頁。
 * **刪除保護**：點擊「刪除」後會先跳出 `DeleteConfirmDialog` 二次確認；若該筆筆記啟用密語保護且全域生物辨識已開啟，確認後仍需通過生物辨識才會真正刪除。
 
 ### 2.3 設定頁（`SettingScreen`）
@@ -102,7 +103,7 @@ flowchart LR
 * **兩種進入模式**（依據 Intent `ARG_ID` 判斷，且僅於首次初始化載入，旋轉螢幕時保留使用者編輯中狀態）：
   * **新增模式**（`ARG_ID` 未傳入或為 `ARG_DEFAULT_ID = -1L`）：讀取 `ARG_INPUT`、`ARG_OUTPUT`，呼叫 `EditorViewModel.setNewInfo()`（將內部 `id` 設為 `0L`）。
   * **編輯模式**（傳入既有 `ARG_ID`）：呼叫 `EditorViewModel.findNoteInfo(id)` 自資料庫讀取解密後的完整筆記（包含原始建立時間 `timeDesc`）。
-* **可編輯欄位**：標題（單行）、`是否啟用生物驗證`（`Checkbox`，對應 `isPrivate`）、備註；下方以唯讀 `ContentTextCard` 顯示關聯的原文與雜湊密文（皆支援長按複製）。
+* **可編輯欄位**：標題（單行）、`是否啟用生物驗證`（`Switch`，對應 `isPrivate`；若 App 或系統尚未開啟身份辨識則反灰禁用，點擊以 `Toast` 提醒至設定選單開啟）、備註；下方以唯讀 `ContentTextCard` 顯示關聯的原文與雜湊密文（皆支援長按複製）。
 * **儲存行為**：
   * `id == 0L`：建立新紀錄（時間格式為 `yyyy-MM-dd HH:mm`，語系 `Locale.TAIWAN`），寫入 Room 時自動加密敏感欄位。
   * `id != 0L`：以 `NoteInfoUpdate` 執行局部更新（更新標題、備註與 `isPrivate`，保留原始建立時間 `timeDesc` 及原本的原文、密文與取樣設定）。

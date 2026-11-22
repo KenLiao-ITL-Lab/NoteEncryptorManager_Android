@@ -7,6 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,16 +17,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -34,7 +42,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.itl.kglab.noteEncryptorManager.R
+import com.itl.kglab.noteEncryptorManager.manager.BiometricPromptManager
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonReturn
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonSave
@@ -61,6 +72,17 @@ class EditorActivity : ComponentActivity() {
             val clipboardManager = LocalClipboard.current
             val coroutineScope = rememberCoroutineScope()
             val context = LocalContext.current
+
+            var isSystemBiometricReady by remember {
+                mutableStateOf(BiometricPromptManager.isSystemBiometricReady(context))
+            }
+
+            LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+                isSystemBiometricReady = BiometricPromptManager.isSystemBiometricReady(context)
+                viewModel.refreshBiometricSetting()
+            }
+
+            val isBiometricEffective = viewModel.isAppBiometricEnabled && isSystemBiometricReady
 
             LaunchedEffect(Unit) {
                 viewModel.saveCompleted.collect {
@@ -92,12 +114,20 @@ class EditorActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .padding(horizontal = dimensionResource(id = R.dimen.screen_table_padding)),
                         noteInfo = noteInfo,
+                        isBiometricEnabled = isBiometricEffective,
                         onTableChanged = {
                             viewModel.updateNoteInfo(
                                 title = it.title,
                                 note = it.note,
                                 isPrivate = it.isPrivate
                             )
+                        },
+                        onBiometricDisabledClicked = {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.biometric_editor_disabled_toast),
+                                Toast.LENGTH_SHORT
+                            ).show()
                         },
                         onSaveClicked = {
                             viewModel.saveNoteInfo()
@@ -147,7 +177,9 @@ class EditorActivity : ComponentActivity() {
 fun EditorScreen(
     modifier: Modifier,
     noteInfo: EditorNoteInfoData,
+    isBiometricEnabled: Boolean = false,
     onTableChanged: (EditorNoteInfoData) -> Unit,
+    onBiometricDisabledClicked: () -> Unit = {},
     onSaveClicked: (NoteEventData) -> Unit,
     onCancelClicked: () -> Unit,
     onContentLongClicked: (String) -> Unit = {}
@@ -179,6 +211,7 @@ fun EditorScreen(
         ContextTable(
             modifier = Modifier.padding(horizontal = 8.dp),
             noteInfo = noteInfo,
+            isBiometricEnabled = isBiometricEnabled,
             onTitleTextChange = {
                 onTableChanged.invoke(noteInfo.copy(title = it))
             },
@@ -188,6 +221,7 @@ fun EditorScreen(
             onPrivateSwitchChange = {
                 onTableChanged.invoke(noteInfo.copy(isPrivate = it))
             },
+            onBiometricDisabledClicked = onBiometricDisabledClicked,
             onContentLongClicked = onContentLongClicked
         )
     }
@@ -197,9 +231,11 @@ fun EditorScreen(
 fun ContextTable(
     modifier: Modifier = Modifier,
     noteInfo: EditorNoteInfoData,
+    isBiometricEnabled: Boolean = false,
     onTitleTextChange: (String) -> Unit,
     onNoteTextChange: (String) -> Unit,
     onPrivateSwitchChange: (Boolean) -> Unit,
+    onBiometricDisabledClicked: () -> Unit = {},
     onContentLongClicked: (String) -> Unit = {}
 ) {
     Column(
@@ -235,18 +271,32 @@ fun ContextTable(
 
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .clickable {
+                    if (isBiometricEnabled) {
+                        onPrivateSwitchChange(!noteInfo.isPrivate)
+                    } else {
+                        onBiometricDisabledClicked()
+                    }
+                }
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Checkbox(
-                modifier = Modifier,
-                checked = noteInfo.isPrivate,
-                onCheckedChange = onPrivateSwitchChange,
+            Text(
+                modifier = Modifier.weight(1f),
+                text = stringResource(id = R.string.screen_editor_private_checkbox_label),
+                color = if (isBiometricEnabled) {
+                    Color.Unspecified
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                }
             )
 
-            Text(
-                modifier = Modifier,
-                text = stringResource(id = R.string.screen_editor_private_checkbox_label)
+            Switch(
+                checked = noteInfo.isPrivate,
+                onCheckedChange = null,
+                enabled = isBiometricEnabled
             )
         }
 

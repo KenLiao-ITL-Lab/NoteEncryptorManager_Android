@@ -5,5 +5,10 @@ import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 data class ScreenState(
     val settingInfo: SettingScreenInfo = SettingScreenInfo(),
     val noteInfoList: List<NoteInfoListInfoData> = emptyList(),
-    val isLoading: Boolean = false
-)
+    val isLoading: Boolean = false,
+    val isSettingLoaded: Boolean = false,
+    val isSystemBiometricReady: Boolean = false
+) {
+    val isBiometricEffective: Boolean
+        get() = settingInfo.isBiometricEnabled && isSystemBiometricReady
+}

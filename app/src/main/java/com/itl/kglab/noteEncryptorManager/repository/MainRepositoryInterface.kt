@@ -13,6 +13,7 @@ interface MainRepositoryInterface {
     suspend fun createNoteInfo(info: NoteInfoColumn)
     suspend fun getNoteList(): List<NoteInfoColumn>
     suspend fun getNoteInfoById(id: Long): NoteInfoColumn
+    suspend fun getPrivateNoteCount(): Int
     suspend fun deleteNoteInfo(info: NoteInfoColumn)
     suspend fun deleteNoteById(id: Long)
 

@@ -28,7 +28,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
@@ -42,7 +46,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.itl.kglab.noteEncryptorManager.R
+import com.itl.kglab.noteEncryptorManager.manager.BiometricPromptManager
 import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
 import com.itl.kglab.noteEncryptorManager.ui.component.ContentTextCard
 import com.itl.kglab.noteEncryptorManager.ui.component.DescInputItem
@@ -75,6 +82,17 @@ class DetailActivity : ComponentActivity() {
             val clipboardManager = LocalClipboard.current
             val coroutineScope = rememberCoroutineScope()
             val context = LocalContext.current
+
+            var isSystemBiometricReady by remember {
+                mutableStateOf(BiometricPromptManager.isSystemBiometricReady(context))
+            }
+
+            LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+                isSystemBiometricReady = BiometricPromptManager.isSystemBiometricReady(context)
+                viewModel.refreshBiometricSetting()
+            }
+
+            val isBiometricEffective = viewModel.isAppBiometricEnabled && isSystemBiometricReady
 
             LaunchedEffect(noteId) {
                 if (noteId > 0L) {
@@ -154,6 +172,7 @@ class DetailActivity : ComponentActivity() {
                         onNoteLongClicked = { content ->
                             copyToClipboard(content)
                         },
+                        showLockIcon = viewModel.noteInfoState.isPrivate && isBiometricEffective,
                         sampleTableEvent = sampleTableEvent,
                         noteInfoTableData = viewModel.noteInfoState,
                         sampleSettingData = viewModel.settingState
@@ -178,6 +197,7 @@ fun DetailScreen(
     onBackClicked: () -> Unit,
     onEditClicked: () -> Unit,
     onNoteLongClicked: (String) -> Unit = {},
+    showLockIcon: Boolean = false,
     sampleTableEvent: SampleTableEvent,
     noteInfoTableData: NoteInfoTableData = NoteInfoTableData(),
     sampleSettingData: SampleSettingData = SampleSettingData()
@@ -201,6 +221,7 @@ fun DetailScreen(
                 )
                 .verticalScroll(rememberScrollState()),
             onNoteLongClicked = onNoteLongClicked,
+            showLockIcon = showLockIcon,
             sampleTableEvent = sampleTableEvent,
             noteInfoTableData = noteInfoTableData,
             sampleSettingData = sampleSettingData
@@ -212,6 +233,7 @@ fun DetailScreen(
 fun DetailTable(
     modifier: Modifier = Modifier,
     onNoteLongClicked: (String) -> Unit,
+    showLockIcon: Boolean = false,
     sampleTableEvent: SampleTableEvent,
     noteInfoTableData: NoteInfoTableData = NoteInfoTableData(),
     sampleSettingData: SampleSettingData = SampleSettingData()
@@ -223,6 +245,7 @@ fun DetailTable(
             modifier = Modifier
                 .fillMaxWidth(),
             noteInfoTableData = noteInfoTableData,
+            showLockIcon = showLockIcon,
             onContentLongClicked = onNoteLongClicked,
         )
 
@@ -273,6 +296,7 @@ fun InformationTitleCard(
 fun NoteInfoDetailTable(
     modifier: Modifier,
     noteInfoTableData: NoteInfoTableData,
+    showLockIcon: Boolean = noteInfoTableData.isPrivate,
     onContentLongClicked: (String) -> Unit,
 ) {
     Column(
@@ -289,7 +313,7 @@ fun NoteInfoDetailTable(
                 InformationTitleCard(
                     title = noteInfoTableData.title,
                     timeDesc = noteInfoTableData.time,
-                    isPrivate = noteInfoTableData.isPrivate
+                    isPrivate = showLockIcon
                 )
 
                 TableDivider(
