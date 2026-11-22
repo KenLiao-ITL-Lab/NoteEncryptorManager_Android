@@ -113,6 +113,7 @@ fun ConverterResultSection(
             .height(200.dp),
         contentText = resultText,
         supportingText = stringResource(id = R.string.screen_converter_output_supporting_desc),
+        isScrollable = true,
         onContentLongClicked = onContentLongClicked
     )
 }

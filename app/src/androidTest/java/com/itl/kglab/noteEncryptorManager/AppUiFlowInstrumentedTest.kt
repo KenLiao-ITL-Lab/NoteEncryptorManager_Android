@@ -89,9 +89,13 @@ class AppUiFlowInstrumentedTest {
             )
         }
         ActivityScenario.launch<EditorActivity>(createIntent).use {
-            composeRule.onNode(hasSetTextAction() and hasText("標題")).performTextInput(uniqueTitle)
-            composeRule.onNode(hasSetTextAction() and hasText("備註")).performTextInput("初始備註內容")
-            composeRule.onNodeWithText("儲存").performClick()
+            // Verify both ContentTextCards render their actual content visibly (not collapsed to 0 height)
+            composeRule.onNodeWithText("SampleSecretInput").performScrollTo().assertIsDisplayed()
+            composeRule.onNodeWithText("SampleHashOutput1234567890").performScrollTo().assertIsDisplayed()
+
+            composeRule.onNode(hasSetTextAction() and hasText("標題")).performScrollTo().performTextInput(uniqueTitle)
+            composeRule.onNode(hasSetTextAction() and hasText("備註")).performScrollTo().performTextInput("初始備註內容")
+            composeRule.onNodeWithText("儲存").performScrollTo().performClick()
 
             // Wait until EditorActivity finishes after async Room insert completes
             composeRule.waitUntil(timeoutMillis = 5_000) {
@@ -111,6 +115,8 @@ class AppUiFlowInstrumentedTest {
             composeRule.waitUntil(timeoutMillis = 5_000) {
                 composeRule.onAllNodesWithText("取樣設定").fetchSemanticsNodes().isNotEmpty()
             }
+            // Verify note ContentTextCard is visibly rendered inside DetailActivity
+            composeRule.onNodeWithText("初始備註內容").performScrollTo().assertIsDisplayed()
             composeRule.onNodeWithText("請輸入 1 ~ 99 整數（空白或 0 預設 8）")
                 .performScrollTo()
                 .assertIsDisplayed()

@@ -27,6 +27,7 @@ fun ContentTextCard(
     modifier: Modifier = Modifier,
     contentText: String = "",
     supportingText: String = "",
+    isScrollable: Boolean = false,
     onContentLongClicked: (() -> Unit)? = null
 ) {
     val cardShape = RoundedCornerShape(8.dp)
@@ -34,28 +35,29 @@ fun ContentTextCard(
     Column(
         modifier = modifier
     ) {
-        val baseCardModifier = Modifier
-            .fillMaxWidth()
-            .weight(1f, fill = false)
+        var boxModifier: Modifier = Modifier.fillMaxWidth()
+        if (isScrollable) {
+            boxModifier = boxModifier.weight(1f)
+        }
+        boxModifier = boxModifier
             .clip(cardShape)
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outlineVariant,
                 shape = cardShape
             )
-        val interactiveModifier = if (onContentLongClicked != null) {
-            baseCardModifier.combinedClickable(
+        if (onContentLongClicked != null) {
+            boxModifier = boxModifier.combinedClickable(
                 onClick = {},
                 onLongClick = onContentLongClicked
             )
-        } else {
-            baseCardModifier
+        }
+        if (isScrollable) {
+            boxModifier = boxModifier.verticalScroll(rememberScrollState())
         }
 
         Box(
-            modifier = interactiveModifier
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+            modifier = boxModifier.padding(16.dp)
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
