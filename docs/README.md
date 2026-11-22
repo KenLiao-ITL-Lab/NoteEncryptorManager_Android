@@ -35,3 +35,4 @@
 | [development-guide.md](./development-guide.md) | 開發環境設定、常用 Gradle 指令、Room 升版流程、測試與 Antigravity CLI（`agy`）協作規範 |
 | [ui-viewmodel-review.md](./ui-viewmodel-review.md) | UI 元件與 ViewModel 健檢問題清單、風險分級與修復追蹤 |
 | [sdk37-agp952-upgrade-checklist.md](./sdk37-agp952-upgrade-checklist.md) | SDK 37（Android 17）與 AGP 9.5.2 升級盤點與驗證清單 |
+| [biometric-reminder-spec.md](./biometric-reminder-spec.md) | 系統身份辨識提醒與狀態一致性功能規格書 |
