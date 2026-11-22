@@ -6,6 +6,7 @@ import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.PromptInfo
 import androidx.fragment.app.FragmentActivity
+import com.itl.kglab.noteEncryptorManager.R
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
@@ -72,7 +73,7 @@ class BiometricPromptManager(
             setDescription(desc)
             setAllowedAuthenticators(authenticators)
             if ((authenticators and DEVICE_CREDENTIAL) == 0) {
-                setNegativeButtonText("取消")
+                setNegativeButtonText(context.getString(R.string.common_cancel))
             }
         }.build()
 

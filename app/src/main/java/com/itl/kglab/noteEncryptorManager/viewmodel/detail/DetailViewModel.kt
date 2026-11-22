@@ -7,18 +7,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
 import com.itl.kglab.noteEncryptorManager.data.db.updateInfo.InfoSettingUpdate
-import com.itl.kglab.noteEncryptorManager.repository.MainRepository
+import com.itl.kglab.noteEncryptorManager.repository.MainRepositoryInterface
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
 import com.itl.kglab.noteEncryptorManager.tools.SettingInputRegex
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    private val repository: MainRepository,
-): ViewModel() {
+    private val repository: MainRepositoryInterface,
+) : ViewModel() {
+
+    private var loadedNoteId: Long? = null
 
     var noteInfoState by mutableStateOf(NoteInfoTableData())
         private set
@@ -48,6 +50,12 @@ class DetailViewModel @Inject constructor(
         )
     }
 
+    fun loadNoteInfoIfNeeded(id: Long) {
+        if (loadedNoteId == id) return
+        loadedNoteId = id
+        getNoteInfoById(id)
+    }
+
     fun getNoteInfoById(id: Long) {
         viewModelScope.launch {
             val info = repository.getNoteInfoById(id)
@@ -56,16 +64,26 @@ class DetailViewModel @Inject constructor(
         }
     }
 
+    fun refreshNoteInfo(id: Long) {
+        viewModelScope.launch {
+            val info = repository.getNoteInfoById(id)
+            noteInfoState = convertNoteInfoTable(info)
+        }
+    }
+
     fun convertMessage() {
         viewModelScope.launch {
             showLoading(true)
-            val tool = getHashTool()
-            val hashMessage = tool.hashMessage(settingState.input)
-            settingState = settingState.copy(
-                output = hashMessage
-            )
-            updateSampleSetting()
-            showLoading(false)
+            try {
+                val tool = getHashTool()
+                val hashMessage = tool.hashMessage(settingState.input)
+                settingState = settingState.copy(
+                    output = hashMessage
+                )
+                updateSampleSetting()
+            } finally {
+                showLoading(false)
+            }
         }
     }
 
@@ -73,40 +91,45 @@ class DetailViewModel @Inject constructor(
         if (settingState.output.isEmpty()) return
         viewModelScope.launch {
             showLoading(true)
-            val tool = getHashTool()
-            val index = checkIndexString(settingState.sampleIndex)
-            val size = checkSizeString(settingState.sampleSize)
-            val sampledMessage = tool.sampleMessage(
-                message = settingState.output,
-                index = index,
-                size =  size
-            )
-            settingState = settingState.copy(
-                sampleIndex = index.toString(),
-                sampleSize = size.toString(),
-                sampledMessage = sampledMessage
-            )
-            updateSampleSetting()
-            showLoading(false)
+            try {
+                val tool = getHashTool()
+                val index = checkIndexString(settingState.sampleIndex)
+                val size = checkSizeString(settingState.sampleSize)
+                val sampledMessage = tool.sampleMessage(
+                    message = settingState.output,
+                    index = index,
+                    size = size
+                )
+                settingState = settingState.copy(
+                    sampleIndex = index.toString(),
+                    sampleSize = size.toString(),
+                    sampledMessage = sampledMessage
+                )
+                updateSampleSetting()
+            } finally {
+                showLoading(false)
+            }
         }
     }
 
     private fun checkIndexString(indexString: String): Int {
-        return if (indexString.matches(SettingInputRegex.sampleIndexCheckRegex))
+        return if (indexString.matches(SettingInputRegex.sampleIndexCheckRegex)) {
             indexString.toInt()
-        else
+        } else {
             SettingInputRegex.DEFAULT_INDEX
+        }
     }
 
     private fun checkSizeString(sizeString: String): Int {
-        return if (sizeString.matches(SettingInputRegex.sampleSizeCheckRegex))
+        return if (sizeString.matches(SettingInputRegex.sampleSizeCheckRegex)) {
             sizeString.toInt()
-        else
+        } else {
             SettingInputRegex.DEFAULT_SIZE
+        }
     }
 
     private suspend fun getHashTool(): HashTools {
-        val info = repository.getSettingInfo().stateIn(viewModelScope).value
+        val info = repository.getSettingInfo().first()
         return HashTools(info)
     }
 
@@ -137,19 +160,21 @@ class DetailViewModel @Inject constructor(
 
     private suspend fun updateSampleSetting() {
         val id = noteInfoState.id
+        if (id <= 0L) return
+        val safeIndex = settingState.sampleIndex.toIntOrNull() ?: SettingInputRegex.DEFAULT_INDEX
+        val safeSize = settingState.sampleSize.toIntOrNull() ?: SettingInputRegex.DEFAULT_SIZE
         val sampleSetting = InfoSettingUpdate(
             id = id,
             inputText = settingState.input,
             outputText = settingState.output,
             sampledMessage = settingState.sampledMessage,
-            sampleIndex = settingState.sampleIndex.toInt(),
-            sampleSize = settingState.sampleSize.toInt()
+            sampleIndex = safeIndex,
+            sampleSize = safeSize
         )
         repository.updateNoteSampleSetting(sampleSetting)
     }
 
     private fun showLoading(visible: Boolean) {
-        uiState =  uiState.copy(isLoading = visible)
+        uiState = uiState.copy(isLoading = visible)
     }
-
 }

@@ -1,7 +1,8 @@
 package com.itl.kglab.noteEncryptorManager.ui.screen.editor
 
-import android.app.Activity
+import android.content.ClipData
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,9 +21,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,10 +40,12 @@ import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonReturn
 import com.itl.kglab.noteEncryptorManager.ui.component.IconButtonSave
 import com.itl.kglab.noteEncryptorManager.ui.component.TitleFuncButtons
 import com.itl.kglab.noteEncryptorManager.ui.data.NoteEventData
+import com.itl.kglab.noteEncryptorManager.ui.dialog.LoadingDialog
 import com.itl.kglab.noteEncryptorManager.ui.theme.NoteEncryptorManagerTheme
 import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorNoteInfoData
 import com.itl.kglab.noteEncryptorManager.viewmodel.editor.EditorViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class EditorActivity : ComponentActivity() {
@@ -49,6 +58,30 @@ class EditorActivity : ComponentActivity() {
         initViewData()
 
         setContent {
+            val clipboardManager = LocalClipboard.current
+            val coroutineScope = rememberCoroutineScope()
+            val context = LocalContext.current
+
+            LaunchedEffect(Unit) {
+                viewModel.saveCompleted.collect {
+                    setResult(RESULT_OK)
+                    finish()
+                }
+            }
+
+            fun copyToClipboard(content: String) {
+                if (content.isBlank()) return
+                val clipData = ClipData.newPlainText("plain text", content)
+                coroutineScope.launch {
+                    clipboardManager.setClipEntry(ClipEntry(clipData))
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.common_copied_to_clipboard),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
             NoteEncryptorManagerTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
@@ -57,8 +90,7 @@ class EditorActivity : ComponentActivity() {
                     EditorScreen(
                         modifier = Modifier
                             .padding(innerPadding)
-                            .padding(horizontal = dimensionResource(id = R.dimen.screen_table_padding))
-                        ,
+                            .padding(horizontal = dimensionResource(id = R.dimen.screen_table_padding)),
                         noteInfo = noteInfo,
                         onTableChanged = {
                             viewModel.updateNoteInfo(
@@ -69,14 +101,18 @@ class EditorActivity : ComponentActivity() {
                         },
                         onSaveClicked = {
                             viewModel.saveNoteInfo()
-                            // TODO 後續要加上是否儲存成功判斷。
-                            setResult(RESULT_OK)
-                            finish()
                         },
                         onCancelClicked = {
                             finish()
+                        },
+                        onContentLongClicked = { content ->
+                            copyToClipboard(content)
                         }
                     )
+
+                    if (viewModel.isSaving) {
+                        LoadingDialog()
+                    }
                 }
             }
         }
@@ -85,15 +121,15 @@ class EditorActivity : ComponentActivity() {
     private fun initViewData() {
         val bundle = intent.extras
         bundle?.let {
-            val id = bundle.getLong(ARG_ID, -1L)
+            val id = bundle.getLong(ARG_ID, ARG_DEFAULT_ID)
 
             if (id == ARG_DEFAULT_ID) {
-                viewModel.setNewInfo(
+                viewModel.setNewInfoIfNeeded(
                     input = it.getString(ARG_INPUT) ?: "",
                     output = it.getString(ARG_OUTPUT) ?: ""
                 )
             } else {
-                viewModel.findNoteInfo(id)
+                viewModel.findNoteInfoIfNeeded(id)
             }
         }
     }
@@ -107,21 +143,19 @@ class EditorActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun EditorScreen(
     modifier: Modifier,
     noteInfo: EditorNoteInfoData,
     onTableChanged: (EditorNoteInfoData) -> Unit,
     onSaveClicked: (NoteEventData) -> Unit,
-    onCancelClicked: () -> Unit
+    onCancelClicked: () -> Unit,
+    onContentLongClicked: (String) -> Unit = {}
 ) {
-
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
     ) {
-
         TitleFuncButtons(
             leftButton = {
                 IconButtonReturn {
@@ -153,12 +187,11 @@ fun EditorScreen(
             },
             onPrivateSwitchChange = {
                 onTableChanged.invoke(noteInfo.copy(isPrivate = it))
-            }
+            },
+            onContentLongClicked = onContentLongClicked
         )
-
     }
 }
-
 
 @Composable
 fun ContextTable(
@@ -166,12 +199,12 @@ fun ContextTable(
     noteInfo: EditorNoteInfoData,
     onTitleTextChange: (String) -> Unit,
     onNoteTextChange: (String) -> Unit,
-    onPrivateSwitchChange: (Boolean) -> Unit
+    onPrivateSwitchChange: (Boolean) -> Unit,
+    onContentLongClicked: (String) -> Unit = {}
 ) {
     Column(
         modifier = modifier
     ) {
-
         Text(
             modifier = Modifier
                 .fillMaxWidth()
@@ -185,18 +218,15 @@ fun ContextTable(
             text = noteInfo.time
         )
 
-        // Title
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    vertical = 8.dp
-                ),
+                .padding(vertical = 8.dp),
             value = noteInfo.title,
             maxLines = 1,
             onValueChange = onTitleTextChange,
             label = {
-                Text(text = "標題")
+                Text(text = stringResource(id = R.string.screen_editor_title_label))
             },
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next
@@ -216,21 +246,18 @@ fun ContextTable(
 
             Text(
                 modifier = Modifier,
-                text = "是否啟用生物驗證"
+                text = stringResource(id = R.string.screen_editor_private_checkbox_label)
             )
         }
 
-        // Note
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    vertical = 8.dp,
-                ),
+                .padding(vertical = 8.dp),
             value = noteInfo.note,
             onValueChange = onNoteTextChange,
             label = {
-                Text(text = "備註")
+                Text(text = stringResource(id = R.string.screen_editor_note_label))
             },
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Done
@@ -241,22 +268,27 @@ fun ContextTable(
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 16.dp)
                 .fillMaxWidth()
-        )        // Input
+        )
+
         ContentTextCard(
             modifier = Modifier
                 .padding(vertical = 8.dp),
-            supportingText = "長按可複製",
-            contentText = noteInfo.input
+            supportingText = stringResource(id = R.string.common_long_press_to_copy),
+            contentText = noteInfo.input,
+            onContentLongClicked = {
+                onContentLongClicked(noteInfo.input)
+            }
         )
 
-        // Output
         ContentTextCard(
             modifier = Modifier
                 .padding(vertical = 8.dp),
-            supportingText = "長按可複製",
-            contentText = noteInfo.output
+            supportingText = stringResource(id = R.string.common_long_press_to_copy),
+            contentText = noteInfo.output,
+            onContentLongClicked = {
+                onContentLongClicked(noteInfo.output)
+            }
         )
-
     }
 }
 
@@ -273,11 +305,9 @@ fun PreviewEditorScreen() {
     )
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewContextTable() {
-
     val noteInfo = EditorNoteInfoData(
         time = "2025/11/01",
         title = "標題",

@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -46,15 +46,18 @@ fun SettingScreen(
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(settingInfo.algorithmIndex) }
     var isBiometricEnabled by rememberSaveable { mutableStateOf(settingInfo.isBiometricEnabled) }
 
+    LaunchedEffect(settingInfo.algorithmIndex) {
+        selectedItemIndex = settingInfo.algorithmIndex
+    }
+
     LaunchedEffect(settingInfo.isBiometricEnabled) {
         isBiometricEnabled = settingInfo.isBiometricEnabled
     }
 
     Column(
-        modifier = modifier,
+        modifier = modifier.verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         OutlinedCard(
             modifier = Modifier
                 .padding(vertical = 8.dp)
@@ -81,7 +84,7 @@ fun SettingScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "啟用生物辨識驗證",
+                    text = stringResource(id = R.string.screen_setting_biometric_toggle_label),
                     modifier = Modifier.weight(1f)
                 )
                 Switch(
@@ -93,32 +96,28 @@ fun SettingScreen(
             }
         }
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center
-        ) {
-            SettingButtonGroup(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                onConfirmClicked = {
-                    onSaveSettingClicked(
-                        SettingScreenInfo(
-                            algorithmIndex = selectedItemIndex,
-                            isBiometricEnabled = isBiometricEnabled,
-                            info = SettingInfo(
-                                algorithmName = hashTypeList[selectedItemIndex],
-                                isBiometricEnabled = isBiometricEnabled
-                            ),
-                        )
+        SettingButtonGroup(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+            onConfirmClicked = {
+                val selectedAlgorithm = hashTypeList.getOrNull(selectedItemIndex) ?: return@SettingButtonGroup
+                onSaveSettingClicked(
+                    SettingScreenInfo(
+                        algorithmIndex = selectedItemIndex,
+                        isBiometricEnabled = isBiometricEnabled,
+                        info = SettingInfo(
+                            algorithmName = selectedAlgorithm,
+                            isBiometricEnabled = isBiometricEnabled
+                        ),
                     )
-                },
-                onCancelClicked = {
-                    selectedItemIndex = settingInfo.algorithmIndex
-                    isBiometricEnabled = settingInfo.isBiometricEnabled
-                }
-            )
-        }
+                )
+            },
+            onCancelClicked = {
+                selectedItemIndex = settingInfo.algorithmIndex
+                isBiometricEnabled = settingInfo.isBiometricEnabled
+            }
+        )
     }
 }
 
@@ -128,7 +127,6 @@ fun SettingTable(
     selectedItemIndex: Int,
     onSelectedItemIndex: (Int) -> Unit,
 ) {
-
     val itemPadding = 8.dp
 
     Column(
@@ -158,7 +156,6 @@ fun SettingButtonGroup(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center
     ) {
-
         OutlinedStyleButton(
             modifier = Modifier
                 .fillMaxWidth()
@@ -188,27 +185,21 @@ fun DropMenuItem(
     selectedItemIndex: Int,
     onSelectedItemIndex: (Int) -> Unit
 ) {
-
-    val defaultItemName = if (list.isEmpty()) "" else list[selectedItemIndex]
-
+    val selectedItemName = list.getOrNull(selectedItemIndex).orEmpty()
     var expanded by remember { mutableStateOf(false) }
-
-    val textFieldState = rememberTextFieldState(defaultItemName)
 
     Column(
         modifier = modifier
     ) {
-
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded}
+            onExpandedChange = { expanded = !expanded }
         ) {
-
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
-                value = defaultItemName,
+                value = selectedItemName,
                 label = { Text(text = label) },
                 onValueChange = {},
                 readOnly = true,
@@ -238,7 +229,6 @@ fun DropMenuItem(
                     DropdownMenuItem(
                         text = { Text(text = item) },
                         onClick = {
-                            textFieldState.setTextAndPlaceCursorAtEnd(item)
                             onSelectedItemIndex(index)
                             expanded = false
                         },

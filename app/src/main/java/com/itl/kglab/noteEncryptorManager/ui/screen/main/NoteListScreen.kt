@@ -18,6 +18,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,7 +70,10 @@ fun NoteListScreen(
             verticalArrangement = Arrangement.spacedBy(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(noteList) { noteInfo ->
+            items(
+                items = noteList,
+                key = { it.id }
+            ) { noteInfo ->
                 NoteListItem(
                     info = noteInfo,
                     onItemCardClicked = {
@@ -128,9 +131,11 @@ fun NoteListItem(
         mutableStateOf(false)
     }
 
-    OutlinedCard {
+    OutlinedCard(
+        modifier = modifier
+    ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
                 .clickable {
@@ -164,7 +169,7 @@ fun NoteListItem(
                 modifier = Modifier
                     .padding(vertical = 12.dp)
                     .height(1.dp),
-                color = Color.LightGray
+                color = MaterialTheme.colorScheme.outlineVariant
             )
 
             Text(
@@ -240,7 +245,7 @@ fun NoteItemTitle(
 
         Text(
             text = desc,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -264,14 +269,14 @@ fun NoteItemMenu(
         ) {
 
             DropdownMenuItem(
-                text = { Text(text = "編輯") },
+                text = { Text(text = stringResource(id = R.string.title_func_button_edit)) },
                 onClick = {
                     onEditClicked?.invoke()
                 }
             )
 
             DropdownMenuItem(
-                text = { Text(text = "刪除") },
+                text = { Text(text = stringResource(id = R.string.common_delete)) },
                 onClick = {
                     onDeleteClicked?.invoke()
                 }

@@ -47,9 +47,10 @@ flowchart LR
 * **狀態來源**：`MainViewModel.inputState`、`MainViewModel.resultState`。
 * **主要操作**：
   * **轉換**：收合鍵盤，使用目前設定的 `HashTools`（`SHA-256` 或 `SHA-512`）計算雜湊值並更新結果卡片。
-  * **複製**：將非空白的雜湊結果寫入系統剪貼簿（`LocalClipboard`）。
-  * **儲存**：結果非空白時，將原文（`ARG_INPUT`）與雜湊結果（`ARG_OUTPUT`）透過 `editorLauncher` 傳入 `EditorActivity`；當編輯頁回傳 `Activity.RESULT_OK` 時，自動呼叫 `MainViewModel.clear()` 清空輸入與結果欄位。
+  * **複製／長按結果卡**：點擊「複製」按鈕或長按結果卡片（`ContentTextCard`）時，若雜湊結果非空白，將結果寫入系統剪貼簿（`LocalClipboard`）並提示已複製。
+  * **儲存**：結果非空白時才觸發（空白不動作），將原文（`ARG_INPUT`）與雜湊結果（`ARG_OUTPUT`）透過 `editorLauncher` 傳入 `EditorActivity`；當編輯頁儲存完成並回傳 `Activity.RESULT_OK` 時，自動呼叫 `MainViewModel.clear()` 清空輸入與結果欄位。
   * **清除**：清空目前輸入與轉換結果。
+  * **捲動適配**：外層支援垂直捲動，確保在橫向或分割畫面下仍可操作底部按鈕。
 
 ### 2.2 筆記清單（`NoteListScreen`）
 * **狀態來源**：`MainViewModel.state.noteInfoList`（`List<NoteInfoListInfoData>`），且 `MainRoute` 會於 `Lifecycle.Event.ON_RESUME` 自動重新查詢最新清單。
@@ -59,7 +60,7 @@ flowchart LR
 * **刪除保護**：點擊「刪除」後會先跳出 `DeleteConfirmDialog` 二次確認；若該筆筆記啟用密語保護且全域生物辨識已開啟，確認後仍需通過生物辨識才會真正刪除。
 
 ### 2.3 設定頁（`SettingScreen`）
-* **雜湊演算法選擇**：透過 `ExposedDropdownMenuBox` 選擇 `SHA-256` 或 `SHA-512`，點擊「儲存」後寫入 DataStore 並重建 `HashTools` 實例；點擊「重設」則還原為已儲存的設定值。
+* **雜湊演算法選擇**：透過 `ExposedDropdownMenuBox` 選擇 `SHA-256` 或 `SHA-512`，點擊「儲存」後寫入 DataStore 並重建 `HashTools` 實例；點擊「重設」則還原為已儲存的設定值。演算法變更僅影響後續新執行的雜湊轉換，不會自動重算已儲存筆記的既有密文。
 * **生物辨識驗證開關**：
   * 切換 `Switch` 時不會直接變更狀態，而是先呼叫 `bioAuthManager.checkBiometricSupport()` 檢查硬體與設定狀態：
     * 硬體不支援或無法使用：顯示 `Toast` 提示。
@@ -86,23 +87,23 @@ flowchart LR
 ## 4. 筆記詳細與取樣頁（`DetailActivity`）
 
 * **傳入參數**：`DetailActivity.ARG_ID`（`Long`，筆記主鍵）。
-* **資料刷新**：監聽 `Lifecycle.State.RESUMED`，每次回到畫面（包含從 `EditorActivity` 編輯返回後）皆重新透過 `DetailViewModel.getNoteInfoById(id)` 載入最新解密資料。
+* **資料載入與刷新**：初次進入畫面時載入完整解密資料；當點擊右上角編輯並從 `EditorActivity` 返回 `RESULT_OK` 時，僅刷新筆記基本資訊（標題、時間、備註、`isPrivate`），避免在切回前台或旋轉螢幕時覆蓋使用者尚未送出的轉換／取樣輸入。
 * **畫面區塊**：
   1. **標題列（`TitleFuncButtons`）**：左側返回、右側編輯（開啟 `EditorActivity` 編輯標題與備註）。
-  2. **筆記基本資訊卡（`NoteInfoDetailTable`）**：顯示鎖頭圖示（若為密語）、標題、時間與備註內容。
-  3. **轉換器區塊（`SimpleTable` 上半部）**：可檢視或修改原文（`input`）並重新轉換為雜湊結果（`output`），運算完成後會自動呼叫 `updateNoteSampleSetting()` 回存資料庫。
-  4. **取樣設定區塊（`SimpleTable` 下半部）**：輸入「取樣起始（`sampleIndex`）」與「取樣長度（`sampleSize`）」（各限 0～99 兩位整數），點擊「取樣」產生 `sampledMessage` 並自動寫入資料庫。
+  2. **筆記基本資訊卡（`NoteInfoDetailTable`）**：顯示鎖頭圖示（若為密語）、標題、時間與備註內容（長按備註可複製）。
+  3. **轉換器區塊（`SimpleTable` 上半部）**：可檢視或修改原文（`input`，一般文字鍵盤）並重新轉換為雜湊結果（`output`，長按可複製），運算完成後會自動呼叫 `updateNoteSampleSetting()` 回存資料庫。
+  4. **取樣設定區塊（`SimpleTable` 下半部）**：輸入「取樣起始（`sampleIndex`，0～99 整數）」與「取樣長度（`sampleSize`，1～99 整數，空白或 0 預設為 8）」，點擊「取樣」產生 `sampledMessage`（長按可複製）並自動寫入資料庫。
   5. **載入指示**：進行轉換或取樣期間，依 `DetailViewModel.uiState.isLoading` 顯示 `LoadingDialog`。
 
 ---
 
 ## 5. 筆記新增／編輯頁（`EditorActivity`）
 
-* **兩種進入模式**（依據 Intent `ARG_ID` 判斷）：
+* **兩種進入模式**（依據 Intent `ARG_ID` 判斷，且僅於首次初始化載入，旋轉螢幕時保留使用者編輯中狀態）：
   * **新增模式**（`ARG_ID` 未傳入或為 `ARG_DEFAULT_ID = -1L`）：讀取 `ARG_INPUT`、`ARG_OUTPUT`，呼叫 `EditorViewModel.setNewInfo()`（將內部 `id` 設為 `0L`）。
-  * **編輯模式**（傳入既有 `ARG_ID`）：呼叫 `EditorViewModel.findNoteInfo(id)` 自資料庫讀取解密後的完整筆記。
-* **可編輯欄位**：標題（單行）、`是否啟用生物驗證`（`Checkbox`，對應 `isPrivate`）、備註；下方以唯讀 `ContentTextCard` 顯示關聯的原文與雜湊密文。
+  * **編輯模式**（傳入既有 `ARG_ID`）：呼叫 `EditorViewModel.findNoteInfo(id)` 自資料庫讀取解密後的完整筆記（包含原始建立時間 `timeDesc`）。
+* **可編輯欄位**：標題（單行）、`是否啟用生物驗證`（`Checkbox`，對應 `isPrivate`）、備註；下方以唯讀 `ContentTextCard` 顯示關聯的原文與雜湊密文（皆支援長按複製）。
 * **儲存行為**：
   * `id == 0L`：建立新紀錄（時間格式為 `yyyy-MM-dd HH:mm`，語系 `Locale.TAIWAN`），寫入 Room 時自動加密敏感欄位。
-  * `id != 0L`：以 `NoteInfoUpdate` 執行局部更新（僅更新標題、時間、備註與 `isPrivate`，保留原本的原文、密文與取樣設定）。
-  * 儲存後設定 `setResult(RESULT_OK)` 並結束畫面。
+  * `id != 0L`：以 `NoteInfoUpdate` 執行局部更新（更新標題、備註與 `isPrivate`，保留原始建立時間 `timeDesc` 及原本的原文、密文與取樣設定）。
+  * 須待資料庫非同步寫入完成後，再由事件通知 UI 呼叫 `setResult(RESULT_OK)` 並結束畫面，避免寫入中斷或前頁讀到舊資料。

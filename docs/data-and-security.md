@@ -89,7 +89,7 @@ flowchart LR
 ### 4.2 循環取樣（`sampleMessage`）
 * **輸入檢核（`SettingInputRegex`）**：
   * 即時輸入限制：`^[0-9]{0,2}$`（最多兩位數字）。
-  * 送出檢核：`sampleIndexCheckRegex = ^[1-9][0-9]?$`（未符合時預設為 `DEFAULT_INDEX = 0`）；`sampleSizeCheckRegex = [1-9][0-9]?$`（未符合時預設為 `DEFAULT_SIZE = 8`）。
+  * 送出檢核：`sampleIndexCheckRegex = ^[1-9][0-9]?$`（空白或 `0` 預設為 `DEFAULT_INDEX = 0`）；`sampleSizeCheckRegex = [1-9][0-9]?$`（有效範圍 `1 ~ 99`，空白或 `0` 預設為 `DEFAULT_SIZE = 8`）。
 * **取樣規則**：
   * 若 `size == 0`，預設取樣整個字串長度。
   * 起始索引會先對訊息長度取餘數（`index % message.length`）。

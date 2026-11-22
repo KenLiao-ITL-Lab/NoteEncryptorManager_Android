@@ -1,27 +1,26 @@
 package com.itl.kglab.noteEncryptorManager.viewmodel.main
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoColumn
-import com.itl.kglab.noteEncryptorManager.repository.MainRepository
+import com.itl.kglab.noteEncryptorManager.repository.MainRepositoryInterface
 import com.itl.kglab.noteEncryptorManager.tools.HashTools
+import com.itl.kglab.noteEncryptorManager.tools.SettingInfo
+import com.itl.kglab.noteEncryptorManager.ui.data.PendingAuthAction
 import com.itl.kglab.noteEncryptorManager.ui.screen.main.data.SettingScreenInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: MainRepository
+    private val repository: MainRepositoryInterface
 ) : ViewModel() {
 
-    private lateinit var hashTools: HashTools
+    private var hashTools: HashTools = HashTools(SettingInfo())
 
     var state by mutableStateOf(ScreenState())
         private set
@@ -32,15 +31,12 @@ class MainViewModel @Inject constructor(
     var resultState by mutableStateOf("")
         private set
 
+    var pendingAuthAction by mutableStateOf<PendingAuthAction?>(null)
+        private set
+
     init {
         getSettingInfo()
         getNoteInfoList()
-    }
-
-    private fun clearPreviousPreferences() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.clearPreviousPreferences()
-        }
     }
 
     fun updateInput(input: String) {
@@ -54,6 +50,14 @@ class MainViewModel @Inject constructor(
     fun clear() {
         inputState = ""
         resultState = ""
+    }
+
+    fun updatePendingAuthAction(action: PendingAuthAction?) {
+        pendingAuthAction = action
+    }
+
+    fun clearPendingAuthAction() {
+        pendingAuthAction = null
     }
 
     fun getHashTypeList(): List<String> {
@@ -112,5 +116,4 @@ class MainViewModel @Inject constructor(
             getNoteInfoList()
         }
     }
-
 }

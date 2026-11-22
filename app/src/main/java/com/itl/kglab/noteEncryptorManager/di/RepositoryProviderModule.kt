@@ -1,31 +1,20 @@
 package com.itl.kglab.noteEncryptorManager.di
 
-import com.itl.kglab.noteEncryptorManager.data.db.NoteInfoDao
-import com.itl.kglab.noteEncryptorManager.data.pref.PreferencesManager
 import com.itl.kglab.noteEncryptorManager.repository.MainRepository
+import com.itl.kglab.noteEncryptorManager.repository.MainRepositoryInterface
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(ActivityComponent::class)
-class RepositoryProviderModule {
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryProviderModule {
 
-    @Provides
-    fun provideMainRepository(
-        preferencesManager: PreferencesManager,
-        noteInfoDao: NoteInfoDao,
-        ioDispatcher: CoroutineDispatcher
-    ): MainRepository {
-        return MainRepository(
-            preferencesManager = preferencesManager,
-            noteInfoDao = noteInfoDao,
-            ioDispatcher = ioDispatcher
-        )
-    }
-
+    @Binds
+    @Singleton
+    abstract fun bindMainRepository(
+        mainRepository: MainRepository
+    ): MainRepositoryInterface
 }

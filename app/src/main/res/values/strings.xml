@@ -1,13 +1,24 @@
 <resources>
     <string name="app_name">密語訊息筆記簿</string>
+
+    <!-- Common -->
+    <string name="common_confirm">確認</string>
+    <string name="common_cancel">取消</string>
+    <string name="common_delete">刪除</string>
+    <string name="common_copied_to_clipboard">已複製到剪貼簿</string>
+    <string name="common_long_press_to_copy">長按可複製</string>
+
+    <!-- Bottom Navigation -->
     <string name="bottom_nav_item_converter">轉換</string>
     <string name="bottom_nav_item_list">筆記</string>
     <string name="bottom_nav_item_setting">設定</string>
 
+    <!-- Title Function Buttons -->
     <string name="title_func_button_return">返回</string>
     <string name="title_func_button_edit">編輯</string>
     <string name="title_func_button_save">儲存</string>
 
+    <!-- Converter Screen -->
     <string name="screen_converter_input_label">輸入</string>
     <string name="screen_converter_convert_button">轉換</string>
     <string name="screen_converter_copy_button">複製</string>
@@ -16,10 +27,13 @@
     <string name="screen_converter_output_label">輸出</string>
     <string name="screen_converter_output_supporting_desc">長按可複製</string>
 
+    <!-- Note List Screen -->
     <string name="screen_list_empty_list_desc">尚未儲存Note資料</string>
 
+    <!-- Setting Screen -->
     <string name="screen_setting_algorithm_menu_label">選擇演算法</string>
     <string name="screen_setting_algorithm_desc">演算法會影響輸出結果</string>
+    <string name="screen_setting_biometric_toggle_label">啟用生物辨識驗證</string>
     <string name="screen_setting_prefix_label">前綴</string>
     <string name="screen_setting_prefix_desc">文字長度限制為10</string>
     <string name="screen_setting_suffix_label">後綴</string>
@@ -31,10 +45,37 @@
     <string name="screen_setting_save_button">儲存</string>
     <string name="screen_setting_reset">重置</string>
 
+    <!-- Editor Screen -->
     <string name="title_activity_editor">EditorActivity</string>
+    <string name="screen_editor_title_label">標題</string>
+    <string name="screen_editor_private_checkbox_label">是否啟用生物驗證</string>
+    <string name="screen_editor_note_label">備註</string>
 
-
+    <!-- Detail Screen -->
     <string name="title_activity_detail">DetailActivity</string>
     <string name="screen_detail_input">輸入</string>
+    <string name="screen_detail_converter_section">轉換器</string>
+    <string name="screen_detail_input_supporting">請輸入密文內容</string>
+    <string name="screen_detail_sample_section">取樣設定</string>
+    <string name="screen_detail_sample_button">取樣</string>
+    <string name="screen_detail_sample_index_label">取樣起始</string>
+    <string name="screen_detail_sample_index_supporting">請輸入 0 ~ 99 整數</string>
+    <string name="screen_detail_sample_size_label">取樣長度</string>
+    <string name="screen_detail_sample_size_supporting">請輸入 1 ~ 99 整數（空白或 0 預設 8）</string>
 
+    <!-- Dialogs & Biometric -->
+    <string name="dialog_delete_confirm_title">確定要刪除？</string>
+    <string name="dialog_delete_confirm_message">您即將刪除「%1$s」，一旦刪除將無法復原。</string>
+    <string name="biometric_auth_title">身份驗證</string>
+    <string name="biometric_auth_failed">身份驗證失敗，請再試一次</string>
+    <string name="biometric_unavailable">此裝置目前無法使用生物辨識功能</string>
+    <string name="biometric_not_supported">此裝置不支援生物辨識功能</string>
+    <string name="biometric_enroll_dialog_title">尚未設定生物辨識</string>
+    <string name="biometric_enroll_dialog_message">您的裝置支援生物辨識，但系統尚未設定，是否前往系統設定進行設定？</string>
+    <string name="biometric_enroll_dialog_go_settings">前往設定</string>
+    <string name="biometric_prompt_view_note">請驗證身份查看「%1$s」內容</string>
+    <string name="biometric_prompt_edit_note">請驗證身份編輯「%1$s」</string>
+    <string name="biometric_prompt_delete_note">請驗證身份，隨後將刪除「%1$s」</string>
+    <string name="biometric_prompt_enable">請驗證身份以啟用生物辨識</string>
+    <string name="biometric_prompt_disable">請驗證身份以關閉生物辨識</string>
 </resources>

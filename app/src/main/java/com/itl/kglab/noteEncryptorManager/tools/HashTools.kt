@@ -16,10 +16,7 @@ class HashTools(
 
     fun hashMessage(message: String): String {
         val hashArray = hash(message)
-        val result = Base64.encodeToString(hashArray, Base64.URL_SAFE).apply {
-            replace(Char(10), Char(40))
-        }
-        return result
+        return Base64.encodeToString(hashArray, Base64.URL_SAFE)
     }
 
 

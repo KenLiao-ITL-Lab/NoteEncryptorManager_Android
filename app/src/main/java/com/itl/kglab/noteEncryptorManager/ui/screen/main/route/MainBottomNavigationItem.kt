@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class MainBottomNavigationItem(
     val route: String,
-    @StringRes val label: Int,
-    @DrawableRes val icon: Int
+    @param:StringRes @get:StringRes val label: Int,
+    @param:DrawableRes @get:DrawableRes val icon: Int
 ) {
 
     @Serializable

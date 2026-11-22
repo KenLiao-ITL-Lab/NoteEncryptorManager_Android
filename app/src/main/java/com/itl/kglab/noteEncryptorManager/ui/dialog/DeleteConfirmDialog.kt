@@ -7,7 +7,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.itl.kglab.noteEncryptorManager.R
 
 @Composable
 fun DeleteConfirmDialog(
@@ -20,14 +22,14 @@ fun DeleteConfirmDialog(
             Icon(imageVector = Icons.Outlined.Delete, contentDescription = null)
         },
         title = {
-            Text(text = "確定要刪除？")
+            Text(text = stringResource(id = R.string.dialog_delete_confirm_title))
         },
         text = {
-            Text(text = "您即將刪除「$noteTitle」，一旦刪除將無法復原。")
+            Text(text = stringResource(id = R.string.dialog_delete_confirm_message, noteTitle))
         },
         confirmButton = {
             TextButton(onClick = onConfirmClicked) {
-                Text(text = "確認")
+                Text(text = stringResource(id = R.string.common_confirm))
             }
         },
         onDismissRequest = {
@@ -35,12 +37,11 @@ fun DeleteConfirmDialog(
         },
         dismissButton = {
             TextButton(onClick = { onDismissRequest() }) {
-                Text(text = "取消")
+                Text(text = stringResource(id = R.string.common_cancel))
             }
         }
     )
 }
-
 
 @Preview(showBackground = true)
 @Composable

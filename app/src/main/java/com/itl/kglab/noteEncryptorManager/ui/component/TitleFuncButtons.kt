@@ -95,7 +95,7 @@ private fun IconButton(
             modifier = Modifier
                 .padding(start = 8.dp),
             painter = painter,
-            contentDescription = "Return Icon"
+            contentDescription = null
         )
         Text(
             modifier = Modifier.padding(end = 8.dp),

@@ -95,9 +95,8 @@ flowchart TD
    * `AppDatabase`（`@Singleton`）：建立名為 `"NoteInfoData"` 的 Room 資料庫實例。
    * `NoteInfoDao`：由 `AppDatabase.noteInfoDao()` 提供。
    * `CoroutineDispatcher`：提供 `Dispatchers.IO` 供資料庫存取使用。
-2. **[RepositoryProviderModule.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/di/RepositoryProviderModule.kt)**（`@InstallIn(ActivityComponent::class)`）
-   * 提供 `MainRepository` 實例給 Activity 層級元件使用。
-   * 同時 `MainRepository` 本身亦標註 `@Inject constructor`，因此各 `@HiltViewModel`（`MainViewModel`、`DetailViewModel`、`EditorViewModel`）可直接透過建構子注入 `MainRepository`。
+2. **[RepositoryProviderModule.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/di/RepositoryProviderModule.kt)**（`@InstallIn(SingletonComponent::class)`）
+   * 透過 `@Binds` + `@Singleton` 將 `MainRepository` 綁定至 `MainRepositoryInterface`，供所有 `@HiltViewModel`（`MainViewModel`、`DetailViewModel`、`EditorViewModel`）以介面注入，提升可測試性。
 
 ---
 

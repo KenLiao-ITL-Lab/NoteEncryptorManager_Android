@@ -12,6 +12,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
@@ -20,13 +21,14 @@ fun MainBottomNavigationBar(navController: NavController) {
         val keyboardManager = LocalSoftwareKeyboardController.current
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
+        val currentDestination = navBackStackEntry?.destination
 
         MainBottomNavigationItem.getItemList().forEach { item ->
+            val isSelected = currentDestination?.hasRoute(item::class) == true
             NavigationBarItem(
-                selected = item.route == currentRoute,
+                selected = isSelected,
                 onClick = {
-                    if (currentRoute != item::class.qualifiedName) {
+                    if (!isSelected) {
                         navController.navigate(item) {
                             popUpTo(navController.graph.startDestinationId)
                             launchSingleTop = true
@@ -50,7 +52,8 @@ fun MainBottomNavigationBar(navController: NavController) {
     }
 }
 
-@Preview(showBackground = true,
+@Preview(
+    showBackground = true,
     uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL
 )
 @Composable
@@ -60,7 +63,7 @@ fun BottomNavigationPreview() {
         MainBottomNavigationItem.getItemList().forEach { item ->
             NavigationBarItem(
                 selected = item.route == currentRoute,
-                onClick = {  },
+                onClick = {},
                 icon = {
                     Icon(
                         painter = painterResource(id = item.icon),
