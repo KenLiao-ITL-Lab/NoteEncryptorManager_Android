@@ -2,7 +2,7 @@
 
 本文件盤點將 **NoteEncryptorManager（Android）** 從現行環境（`compileSdk / targetSdk = 36`、`AGP 9.4.0`）升級至 **`compileSdk / targetSdk = 37`（Android 17）** 與 **`AGP 9.5.2`** 時，所有需要調整的建置設定、相依套件、行為變更適配項目與驗證流程。
 
-> 盤點日期：2026-11-22
+> 盤點日期：2026-11-22｜升級執行日期：2026-11-22（AGP `9.5.2` ＋ `compileSdk / targetSdk = 37` 已套用）
 
 ---
 
@@ -23,36 +23,24 @@
 
 ## 2. 建置腳本與工具鏈調整（必要項目）
 
-### - [ ] 2.1 更新 AGP 版本與外掛宣告（[gradle/libs.versions.toml](../gradle/libs.versions.toml)）
-* 將 `agp = "9.4.0"` 更新為 `agp = "9.5.2"`。
-* 將目前硬編碼在 `app/build.gradle.kts` 第 12 行的 `kotlin("plugin.serialization") version "2.2.10"` 納入 `[plugins]` 管理：
-  ```toml
-  kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-  ```
-* 清理 `[plugins]` 中已未使用的 `jetbrains-kotlin-android`（AGP 9 預設啟用內建 Kotlin，已不需再掛載此舊外掛）。
+### - [x] 2.1 更新 AGP 版本與外掛宣告（[gradle/libs.versions.toml](../gradle/libs.versions.toml)）
+* 已將 `agp = "9.4.0"` 更新為 `agp = "9.5.2"`。
+* 已將 `kotlin("plugin.serialization") version "2.2.10"` 納入 `[plugins]` 管理（`kotlin-serialization`）並同步於根目錄 [build.gradle.kts](../build.gradle.kts) 宣告 `apply false`。
+* 已清理 `[plugins]` 中未使用的 `jetbrains-kotlin-android`。
 
-### - [ ] 2.2 更新 SDK 版本並清理過時 DSL（[app/build.gradle.kts](../app/build.gradle.kts)）
-* 第 17 行與第 22 行：將 `compileSdk = 36` 與 `targetSdk = 36` 更新為 `37`。
-* 第 12 行：將 `kotlin("plugin.serialization") version "2.2.10"` 改為 `alias(libs.plugins.kotlin.serialization)`。
-* 第 60～62 行：**移除過時的 `composeOptions { kotlinCompilerExtensionVersion = "1.5.12" }`**（專案已改用 Kotlin 2.x 的 `libs.plugins.kotlin.compose`，此區塊在新版 AGP 中無效且屬棄用寫法）。
-* **補齊 Kotlin `jvmTarget` 設定**：目前建置記錄顯示本機 JDK 為較新版本時出現 `Kotlin does not yet support 25 JDK target, falling back to Kotlin JVM_24 JVM target`，造成 Kotlin 編譯目標與 `compileOptions` 的 Java 17 不一致（檔案第 1～2 行已引入 `JvmTarget` 與 `KotlinJvmCompile`，但未套用）。建議明確加入：
-  ```kotlin
-  kotlin {
-      compilerOptions {
-          jvmTarget.set(JvmTarget.JVM_17)
-      }
-  }
-  ```
+### - [x] 2.2 更新 SDK 版本並清理過時 DSL（[app/build.gradle.kts](../app/build.gradle.kts)）
+* 已將 `compileSdk` 與 `targetSdk` 更新為 `37`。
+* 已改為 `alias(libs.plugins.kotlin.serialization)`。
+* 已移除過時的 `composeOptions { kotlinCompilerExtensionVersion = "1.5.12" }`。
+* 已加入 `kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_17) } }` 明確鎖定 Kotlin JVM 目標版本為 Java 17。
 
 ### - [ ] 2.3 處理 `android.disallowKotlinSourceSets=false` 實驗性開關（[gradle.properties](../gradle.properties#L25-L26)）
-* **現況**：`gradle.properties` 目前啟用 `android.disallowKotlinSourceSets=false` 以暫時繞過 KSP `2.2.10-2.0.2` 與 AGP 9 內建 Kotlin 的衝突，建置時已出現實驗性警告，且此逃生開關預計在未來 AGP 版本移除。
-* **調整方案**：
-  * **建議方案**：同步升級 Kotlin 與對應支援 AGP 9 built-in Kotlin 的 **KSP（例如 KSP `2.3.6+` 對應版本）**，完成後即可正式移除 `android.disallowKotlinSourceSets=false`。
-  * **過渡方案**：若本次僅先升 AGP 9.5.2 而不升 Kotlin／KSP，需先實測 `android.disallowKotlinSourceSets=false` 在 AGP 9.5.2 是否仍可正常編譯，並排程後續移除。
+* **現況**：`AGP 9.5.2` 搭配現行 Kotlin `2.2.10` + KSP `2.2.10-2.0.2` 仍需暫留 `android.disallowKotlinSourceSets=false`（建置正常通過，僅有實驗性警告）。
+* **後續排程**：待同步升級 Kotlin 與 KSP（支援 AGP 9 built-in Kotlin 之版本）後即可正式移除。
 
-### - [ ] 2.4 檢查 Gradle Wrapper 與本機 SDK 環境
-* [gradle-wrapper.properties](../gradle/wrapper/gradle-wrapper.properties#L4) 目前為 `gradle-9.7.1-bin.zip`，已滿足 AGP 9.5 最低 Gradle `9.6.0` 需求，升級後需確認無 Gradle 9.7 棄用錯誤。
-* 於 Android Studio SDK Manager 安裝 **Android 17（API 37）SDK Platform** 與最新 **Build Tools（≥ 36.0.0）**。
+### - [x] 2.4 檢查 Gradle Wrapper 與本機 SDK 環境
+* [gradle-wrapper.properties](../gradle/wrapper/gradle-wrapper.properties#L4) 為 `gradle-9.7.1-bin.zip`，已驗證與 AGP `9.5.2` 相容。
+* 本機已安裝 Android 17（API 37）SDK Platform，並完成 `assembleDebug`、`testDebugUnitTest` 與 `lintDebug` 驗證。
 
 ---
 
@@ -94,12 +82,12 @@
   * 鎖定筆記的檢視、編輯、刪除驗證流程
   * 未登錄生物辨識時透過 `Settings.ACTION_BIOMETRIC_ENROLL` 跳轉系統設定
 
-#### - [ ] AndroidKeyStore 加解密與 R8 混淆（Release 建置）
+#### - [x] AndroidKeyStore 加解密與 R8 混淆（Release 建置）
 * **檔案**：[CryptographicUtility.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/tools/CryptographicUtility.kt)、[app/proguard-rules.pro](../app/proguard-rules.pro)
-* **檢查重點**：
-  * `CryptographicUtility` 使用標準 `AndroidKeyStore` + `AES/CBC/PKCS7Padding`，無受影響之棄用 API，但仍須實測既有已加密 Room 資料可正常解密。
-  * Android 17 的 ART（Android Runtime，Android 執行時期）禁止透過反射修改 `static final` 欄位；升級後須建置並實測開啟 `isMinifyEnabled = true` 的 Release 版本，確認 Room、Hilt 與 Kotlinx Serialization 在 R8 下運作正常。
-  * [app/proguard-rules.pro](../app/proguard-rules.pro#L23-L25) 內的 `-optimizationpasses 5`、`-dontusemixedcaseclassnames` 為舊版 ProGuard 指令，R8 會忽略或發出提示，可視需要整理。
+* **驗證結果**：
+  * 已執行 `./gradlew assembleRelease` 通過（`:app:lintVitalRelease`、`:app:minifyReleaseWithR8`、`:app:optimizeReleaseResources` 皆零錯誤、零 R8 缺漏規則）。
+  * 已檢查 R8 `seeds.txt` 與 `mapping.txt`，確認 Room `AppDatabase`／`AppDatabase_Impl` 與 Navigation Compose Type-Safe 路由之 `MainBottomNavigationItem`（`Converter`／`NoteList`／`Setting`）`INSTANCE` 與 `KSerializer serializer()` 皆正確保留，其餘 ViewModel、DAO 與工具類別已正常混淆。
+  * [app/proguard-rules.pro](../app/proguard-rules.pro#L23-L27) 內的 `-optimizationpasses 5`、`-dontusemixedcaseclassnames` 與 `-verbose` 為舊版 ProGuard 指令（R8 會略過），不影響建置，後續可視需要清理。
 
 ### 4.3 已盤點但不受影響的 Android 17 變更
 

@@ -6,4 +6,5 @@ plugins {
     alias(libs.plugins.google.hilt.android) apply false
     alias(libs.plugins.androidx.room) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
 }

@@ -22,8 +22,8 @@
 | 本地資料庫 | Room `2.8.3` | 啟用 `exportSchema = true`，匯出至 `app/schemas/` |
 | 偏好設定 | DataStore Preferences `1.1.7` | 非同步儲存演算法與生物辨識開關設定 |
 | 生物辨識 | AndroidX Biometric `1.4.0-alpha02` | 整合 `BiometricPrompt` 與裝置憑證驗證 |
-| 建置工具 | Android Gradle Plugin（AGP）`9.4.0` / Java `17` | 採用 Version Catalog（[gradle/libs.versions.toml](../gradle/libs.versions.toml)） |
-| 支援系統版本 | `minSdk 29` / `compileSdk 36` / `targetSdk 36` | 支援 Android 10（API 29）以上裝置 |
+| 建置工具 | Android Gradle Plugin（AGP）`9.5.2` / Java `17` | 採用 Version Catalog（[gradle/libs.versions.toml](../gradle/libs.versions.toml)） |
+| 支援系統版本 | `minSdk 29` / `compileSdk 37` / `targetSdk 37` | 支援 Android 10（API 29）以上至 Android 17（API 37）裝置 |
 
 ## 文件導覽
 

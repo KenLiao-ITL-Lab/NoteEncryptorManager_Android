@@ -7,9 +7,9 @@
 ## 1. 開發環境需求
 
 * **JDK（Java Development Kit，Java 開發工具組）**：Java `17`
-* **Android SDK**：`compileSdk = 36`、`targetSdk = 36`、`minSdk = 29`
-* **Gradle / AGP**：Gradle Wrapper（`./gradlew`）+ Android Gradle Plugin `9.4.0`
-* **Android Studio**：建議使用支援 AGP 9.x 與 Kotlin `2.2.10` 的版本
+* **Android SDK**：`compileSdk = 37`、`targetSdk = 37`、`minSdk = 29`
+* **Gradle / AGP**：Gradle Wrapper（`./gradlew`，`9.7.1`）+ Android Gradle Plugin `9.5.2`
+* **Android Studio**：建議使用支援 AGP 9.5+ 與 Kotlin `2.2.10` 的版本
 
 > 確認專案根目錄存在 `local.properties` 並指向本機 Android SDK 路徑（此檔案已列入 `.gitignore`，不應提交至版控）。
 
