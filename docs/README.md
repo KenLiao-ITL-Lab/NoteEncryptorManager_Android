@@ -34,3 +34,4 @@
 | [data-and-security.md](./data-and-security.md) | Room 資料表結構、DataStore 設定鍵值、欄位加密機制、雜湊取樣演算法與生物辨識實作 |
 | [development-guide.md](./development-guide.md) | 開發環境設定、常用 Gradle 指令、Room 升版流程、測試與 Antigravity CLI（`agy`）協作規範 |
 | [ui-viewmodel-review.md](./ui-viewmodel-review.md) | UI 元件與 ViewModel 健檢問題清單、風險分級與修復追蹤 |
+| [sdk37-agp952-upgrade-checklist.md](./sdk37-agp952-upgrade-checklist.md) | SDK 37（Android 17）與 AGP 9.5.2 升級盤點與驗證清單 |
