@@ -58,15 +58,20 @@ flowchart LR
   * 清單為空時顯示空狀態提示文字。
   * 每筆卡片（`NoteListItem`）顯示：鎖頭圖示（僅在 `isPrivate == true` 且 App 與系統身份辨識皆啟用時顯示）、單行標題（過長省略）、建立／更新時間、最多兩行的備註預覽，以及右上角選單（編輯／刪除）。
   * 當 App 或系統尚未啟用身份辨識時，畫面底部固定顯示「尚未設定或開啟身份辨識」提示條，點擊可直接切換至「設定」分頁。
-* **刪除保護**：點擊「刪除」後會先跳出 `DeleteConfirmDialog` 二次確認；若該筆筆記啟用密語保護且全域生物辨識已開啟，確認後仍需通過生物辨識才會真正刪除。
+* **刪除保護**：點擊「刪除」後會先跳出 `DeleteConfirmDialog` 二次確認；若該筆筆記啟用密語保護且 `isBiometricEffective` 為真（App 與系統身份辨識皆啟用），確認後仍需通過生物辨識才會真正刪除。
 
 ### 2.3 設定頁（`SettingScreen`）
-* **雜湊演算法選擇**：透過 `ExposedDropdownMenuBox` 選擇 `SHA-256` 或 `SHA-512`，點擊「儲存」後寫入 DataStore 並重建 `HashTools` 實例；點擊「重設」則還原為已儲存的設定值。演算法變更僅影響後續新執行的雜湊轉換，不會自動重算已儲存筆記的既有密文。
+* **雜湊演算法選擇**：透過 `ExposedDropdownMenuBox` 選擇 `SHA-256` 或 `SHA-512`，點擊「儲存」後寫入 DataStore 並重建 `HashTools` 實例；點擊「重置」（重設）則還原為已儲存的設定值。演算法變更僅影響後續新執行的雜湊轉換，不會自動重算已儲存筆記的既有密文。
 * **生物辨識驗證開關**：
   * 切換 `Switch` 時不會直接變更狀態，而是先呼叫 `bioAuthManager.checkBiometricSupport()` 檢查硬體與設定狀態：
     * 硬體不支援或無法使用：顯示 `Toast` 提示。
     * 嘗試啟用但裝置尚未登錄生物辨識：顯示 `AlertDialog` 引導前往系統設定（API 30+ 開啟 `ACTION_BIOMETRIC_ENROLL`；API 29 開啟 `ACTION_SECURITY_SETTINGS`）。
-    * 裝置支援且已設定：紀錄 `PendingAuthAction.ToggleBiometric(targetState)` 並觸發身份驗證，通過後才儲存新狀態。
+    * **嘗試關閉（`targetState == false`）**：先呼叫 `MainViewModel.checkPrivateNoteCount()` 查詢資料庫中 `is_private = 1` 的筆記數量；若存在上鎖筆記（`privateCount > 0`），先彈出確認對話框告知受影響筆數，經使用者確認後才觸發 `BiometricPrompt` 驗證並關閉（資料庫既有 `is_private` 標記予以保留，重新開啟身份辨識後自動恢復保護）；若無上鎖筆記則直接觸發驗證。
+    * 嘗試啟用且裝置支援並已設定：紀錄 `PendingAuthAction.ToggleBiometric(true)` 並觸發身份驗證，通過後才儲存新狀態。
+
+### 2.4 系統身份辨識一致性自動偵測
+* `MainRoute` 於初次完成設定載入（`LaunchedEffect`）以及每次切回前台（`Lifecycle.Event.ON_RESUME`）時，皆會呼叫 `BiometricPromptManager.isSystemBiometricReady(context)` 檢查系統狀態並同步更新 `ScreenState.isSystemBiometricReady`。
+* 若偵測到 App 設定為已開啟（`isBiometricEnabled == true`），但系統已移除生物辨識／螢幕鎖定（`isSystemBiometricReady == false`），會自動呼叫 `MainViewModel.disableBiometricBecauseSystemRemoved()` 將 App 身份辨識關閉並清除 `pendingAuthAction`，同時跳出「身份辨識已關閉」提示對話框（提供「前往設定」與「確認」按鈕）。
 
 ---
 
@@ -76,22 +81,22 @@ flowchart LR
 
 | 動作型別 | 觸發條件 | 驗證成功後行為 |
 | :--- | :--- | :--- |
-| `OpenDetail(id)` | 筆記 `isPrivate == true` 且開啟生物辨識，點擊卡片 | 開啟 `DetailActivity` 並帶入 `ARG_ID` |
-| `EditNote(id)` | 筆記 `isPrivate == true` 且開啟生物辨識，點擊「編輯」 | 開啟 `EditorActivity`（編輯模式） |
-| `DeleteNote(id)` | 筆記 `isPrivate == true` 且開啟生物辨識，確認刪除 | 呼叫 `MainViewModel.deleteNoteInfoById(id)` |
-| `ToggleBiometric(targetState)` | 在設定頁切換生物辨識開關 | 更新並儲存 DataStore 生物辨識設定 |
+| `OpenDetail(id)` | 筆記 `isPrivate == true` 且 `isBiometricEffective == true`，點擊卡片 | 開啟 `DetailActivity` 並帶入 `ARG_ID` |
+| `EditNote(id)` | 筆記 `isPrivate == true` 且 `isBiometricEffective == true`，點擊「編輯」 | 開啟 `EditorActivity`（編輯模式） |
+| `DeleteNote(id)` | 筆記 `isPrivate == true` 且 `isBiometricEffective == true`，確認刪除 | 呼叫 `MainViewModel.deleteNoteInfoById(id)` |
+| `ToggleBiometric(targetState)` | 在設定頁切換生物辨識開關（關閉且有上鎖筆記時需先通過確認對話框） | 更新並儲存 DataStore 生物辨識設定 |
 
-`MainRoute` 透過 `LaunchedEffect(bioAuthManager)` 持續收集 `bioAuthManager.promptResult`，於收到 `BioAuthResult.AuthenticationSuccess` 時執行對應 `pendingAuthAction` 並清空該暫存狀態。
+`MainRoute` 透過 `LaunchedEffect(bioAuthManager)` 持續收集 `bioAuthManager.promptResult`，於收到 `BioAuthResult.AuthenticationSuccess` 時執行對應 `pendingAuthAction` 並清空該暫存狀態；驗證失敗或系統不支援時亦會清除 `pendingAuthAction` 並給予 `Toast` 或引導對話框回饋。
 
 ---
 
 ## 4. 筆記詳細與取樣頁（`DetailActivity`）
 
 * **傳入參數**：`DetailActivity.ARG_ID`（`Long`，筆記主鍵）。
-* **資料載入與刷新**：初次進入畫面時載入完整解密資料；當點擊右上角編輯並從 `EditorActivity` 返回 `RESULT_OK` 時，僅刷新筆記基本資訊（標題、時間、備註、`isPrivate`），避免在切回前台或旋轉螢幕時覆蓋使用者尚未送出的轉換／取樣輸入。
+* **資料載入與刷新**：初次進入畫面時透過 `loadNoteInfoIfNeeded(noteId)` 載入完整解密資料；當點擊右上角編輯並從 `EditorActivity` 返回 `RESULT_OK` 時，透過 `refreshNoteInfo(noteId)` 僅刷新筆記基本資訊（標題、時間、備註、`isPrivate`），避免在切回前台或旋轉螢幕時覆蓋使用者尚未送出的轉換／取樣輸入。每次 `ON_RESUME` 亦會刷新系統與 App 生物辨識啟用狀態。
 * **畫面區塊**：
   1. **標題列（`TitleFuncButtons`）**：左側返回、右側編輯（開啟 `EditorActivity` 編輯標題與備註）。
-  2. **筆記基本資訊卡（`NoteInfoDetailTable`）**：顯示鎖頭圖示（若為密語）、標題、時間與備註內容（長按備註可複製）。
+  2. **筆記基本資訊卡（`NoteInfoDetailTable`）**：顯示鎖頭圖示（僅在 `isPrivate == true` 且 `isBiometricEffective == true` 時顯示）、標題、時間與備註內容（長按備註可複製）。
   3. **轉換器區塊（`SimpleTable` 上半部）**：可檢視或修改原文（`input`，一般文字鍵盤）並重新轉換為雜湊結果（`output`，長按可複製），運算完成後會自動呼叫 `updateNoteSampleSetting()` 回存資料庫。
   4. **取樣設定區塊（`SimpleTable` 下半部）**：輸入「取樣起始（`sampleIndex`，0～99 整數）」與「取樣長度（`sampleSize`，1～99 整數，空白或 0 預設為 8）」，點擊「取樣」產生 `sampledMessage`（長按可複製）並自動寫入資料庫。
   5. **載入指示**：進行轉換或取樣期間，依 `DetailViewModel.uiState.isLoading` 顯示 `LoadingDialog`。
@@ -100,10 +105,10 @@ flowchart LR
 
 ## 5. 筆記新增／編輯頁（`EditorActivity`）
 
-* **兩種進入模式**（依據 Intent `ARG_ID` 判斷，且僅於首次初始化載入，旋轉螢幕時保留使用者編輯中狀態）：
-  * **新增模式**（`ARG_ID` 未傳入或為 `ARG_DEFAULT_ID = -1L`）：讀取 `ARG_INPUT`、`ARG_OUTPUT`，呼叫 `EditorViewModel.setNewInfo()`（將內部 `id` 設為 `0L`）。
-  * **編輯模式**（傳入既有 `ARG_ID`）：呼叫 `EditorViewModel.findNoteInfo(id)` 自資料庫讀取解密後的完整筆記（包含原始建立時間 `timeDesc`）。
-* **可編輯欄位**：標題（單行）、`是否啟用生物驗證`（`Switch`，對應 `isPrivate`；若 App 或系統尚未開啟身份辨識則反灰禁用，點擊以 `Toast` 提醒至設定選單開啟）、備註；下方以唯讀 `ContentTextCard` 顯示關聯的原文與雜湊密文（皆支援長按複製）。
+* **兩種進入模式**（依據 Intent `ARG_ID` 判斷，並透過 `EditorViewModel` 的 `isInitialized` 防護僅於首次載入，旋轉螢幕時保留使用者編輯中狀態）：
+  * **新增模式**（`ARG_ID` 未傳入或為 `ARG_DEFAULT_ID = -1L`）：讀取 `ARG_INPUT`、`ARG_OUTPUT`，呼叫 `EditorViewModel.setNewInfoIfNeeded()`（將內部 `id` 設為 `0L`）。
+  * **編輯模式**（傳入既有 `ARG_ID`）：呼叫 `EditorViewModel.findNoteInfoIfNeeded(id)` 自資料庫讀取解密後的完整筆記（包含原始建立時間 `timeDesc`）。
+* **可編輯欄位**：標題（單行）、`是否啟用生物驗證`（`Switch`，對應 `isPrivate`；每次 `ON_RESUME` 會刷新系統與 App 身份辨識狀態，若 `isBiometricEffective == false` 則反灰禁用，點擊以 `Toast` 提醒「請先至設定選單開啟身份辨識功能」）、備註；下方以唯讀 `ContentTextCard` 顯示關聯的原文與雜湊密文（皆支援長按複製）。
 * **儲存行為**：
   * `id == 0L`：建立新紀錄（時間格式為 `yyyy-MM-dd HH:mm`，語系 `Locale.TAIWAN`），寫入 Room 時自動加密敏感欄位。
   * `id != 0L`：以 `NoteInfoUpdate` 執行局部更新（更新標題、備註與 `isPrivate`，保留原始建立時間 `timeDesc` 及原本的原文、密文與取樣設定）。

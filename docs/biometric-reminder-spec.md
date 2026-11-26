@@ -2,7 +2,7 @@
 
 本文件定義 **NoteEncryptorManager（密語訊息筆記簿）** 的「系統身份辨識提醒功能」需求規格、狀態判斷邏輯、畫面互動流程與驗收條件，確保系統層級生物辨識設定、App 層級開關與單筆筆記密語標記之間維持一致且清楚的使用者體驗。
 
-> 規格版本：v1.0（已定案）｜更新日期：2026-11-22
+> 規格版本：v1.0（已實作完成）｜最後更新：2026-11-25
 
 ---
 
@@ -12,7 +12,7 @@
 
 | 狀態變數 | 來源 | 說明 |
 | :--- | :--- | :--- |
-| `systemBiometricReady` | `BiometricPromptManager.checkBiometricSupport() == AuthenticationSuccess` | 裝置支援生物辨識／裝置憑證且使用者已於系統完成設定 |
+| `systemBiometricReady` | `BiometricPromptManager.isSystemBiometricReady(context)`（等價於 `checkBiometricSupport() == AuthenticationSuccess`） | 裝置支援生物辨識／裝置憑證且使用者已於系統完成設定 |
 | `appBiometricEnabled` | DataStore（`setting_biometric_enabled`） | 使用者於 App「設定」頁開啟的身份辨識開關 |
 | `note.isPrivate` | Room（`noteInfoTable.is_private`） | 單筆筆記是否勾選啟用身份辨識保護 |
 
@@ -110,15 +110,15 @@ flowchart TD
   1. App 啟動並完成 DataStore 設定載入後。
   2. App 從背景返回前台（`Lifecycle.Event.ON_RESUME`），涵蓋使用者於 App 開啟狀態下切換至系統設定移除指紋／螢幕鎖定後再切回 App 的情境。
 * **偵測條件**：
-  * `appBiometricEnabled == true` **且** `bioAuthManager.checkBiometricSupport() != BioAuthResult.AuthenticationSuccess`（包含 `AuthenticationNotSet`、`HardwareUnavailable`、`FeatureUnavailable`）。
+  * `appBiometricEnabled == true` **且** `!BiometricPromptManager.isSystemBiometricReady(context)`（包含 `AuthenticationNotSet`、`HardwareUnavailable`、`FeatureUnavailable`）。
 * **處理動作**：
   1. 立即將 DataStore 的 `setting_biometric_enabled` 更新為 `false`，並清空 `MainViewModel.pendingAuthAction`。
   2. 顯示提示 `AlertDialog`：
-     * 建議標題：`身份辨識已關閉`
-     * 建議內文：`系統已取消身份辨識設定，應用程式的身份辨識功能已自動關閉。若需重新啟用，請先於系統設定完成後再開啟。`
+     * 標題：`身份辨識已關閉`（`R.string.dialog_system_biometric_removed_title`）
+     * 內文：`系統已取消身份辨識設定，應用程式的身份辨識功能已自動關閉。若需重新啟用，請先於系統設定完成後再開啟。`（`R.string.dialog_system_biometric_removed_message`）
      * 按鈕：
-       * **確認按鈕**：「前往系統設定」（API 30+ 導向 `Settings.ACTION_BIOMETRIC_ENROLL`；API 29 導向 `Settings.ACTION_SECURITY_SETTINGS`）
-       * **取消／關閉按鈕**：「確認」（關閉對話框）
+       * **確認按鈕**：「前往設定」（`R.string.biometric_enroll_dialog_go_settings`；API 30+ 導向 `Settings.ACTION_BIOMETRIC_ENROLL`，API 29 導向 `Settings.ACTION_SECURITY_SETTINGS`）
+       * **取消／關閉按鈕**：「確認」（`R.string.common_confirm`，關閉對話框）
   3. 狀態更新後自動聯動：清單下方顯示「尚未設定或開啟身份辨識」（需求 3）、所有筆記隱藏鎖定圖示（需求 4）、編輯頁開關轉為反灰不可用（需求 1）。
   4. **防重複彈窗**：因 `appBiometricEnabled` 已被寫回 `false`，後續再次 `ON_RESUME` 不會重複跳出同一提示。
 
@@ -143,19 +143,21 @@ sequenceDiagram
 
 ---
 
-## 3. 預計影響的模組與檔案
+## 3. 實際影響的模組與檔案
 
-| 層級 | 檔案 | 預計異動重點 |
+| 層級 | 檔案 | 異動重點 |
 | :--- | :--- | :--- |
-| Data / DAO | [NoteInfoDao.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/data/db/NoteInfoDao.kt) | 新增 `SELECT COUNT(*) FROM noteInfoTable WHERE is_private = 1` 查詢 |
+| Data / DAO | [NoteInfoDao.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/data/db/NoteInfoDao.kt) | 新增 `countPrivateNotes()`（`SELECT COUNT(*) FROM noteInfoTable WHERE is_private = 1`） |
 | Repository | [MainRepositoryInterface.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/repository/MainRepositoryInterface.kt)、[MainRepository.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/repository/MainRepository.kt) | 暴露 `getPrivateNoteCount(): Int` |
-| ViewModel | [MainViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/main/MainViewModel.kt)、[ScreenState.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/main/ScreenState.kt) | 追蹤設定是否已載入、保存 `isSystemBiometricReady` 與 `privateNoteCount`、提供自動關閉身份辨識方法 |
-| ViewModel | [EditorViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/editor/EditorViewModel.kt)、[DetailViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/detail/DetailViewModel.kt) | 讀取 `settingInfo.isBiometricEnabled`，供 UI 判斷開關啟用與鎖頭圖示顯示 |
-| UI | [EditorActivity.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/editor/EditorActivity.kt) | `Checkbox` 改為 `Switch`，未啟用時反灰並攔截點擊顯示提醒 |
-| UI | [NoteListScreen.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/main/NoteListScreen.kt) | 傳入 `isBiometricEffective`，控制鎖頭圖示顯示與底部「尚未設定或開啟身份辨識」提示條 |
-| UI | [DetailActivity.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/detail/DetailActivity.kt) | 結合 `BiometricPromptManager`（或 `BiometricManager`）與 `isBiometricEnabled` 控制鎖頭圖示顯示 |
-| UI | [MainRoute.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/main/route/MainRoute.kt) | 實作啟動／回前景系統偵測自動關閉 Dialog，以及設定頁取消時的「已有上鎖資料」確認 Dialog |
+| Manager | [BiometricPromptManager.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/manager/BiometricPromptManager.kt) | 新增伴生物件函式 `allowedAuthenticators()` 與 `isSystemBiometricReady(context)` 供各畫面共用 |
+| ViewModel | [MainViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/main/MainViewModel.kt)、[ScreenState.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/main/ScreenState.kt) | 新增 `isSettingLoaded`、`isSystemBiometricReady` 與衍生屬性 `isBiometricEffective`，並提供 `updateSystemBiometricReady()`、`disableBiometricBecauseSystemRemoved()` 與 `checkPrivateNoteCount()` |
+| ViewModel | [EditorViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/editor/EditorViewModel.kt)、[DetailViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/detail/DetailViewModel.kt) | 新增 `isAppBiometricEnabled` 與 `refreshBiometricSetting()`，供 UI 判斷開關啟用與鎖頭圖示顯示 |
+| UI | [EditorActivity.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/editor/EditorActivity.kt) | `Checkbox` 改為 `Switch`，未啟用時反灰並攔截點擊顯示 `Toast` 提醒，且於 `ON_RESUME` 刷新身份辨識狀態 |
+| UI | [NoteListScreen.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/main/NoteListScreen.kt) | 傳入 `isBiometricEffective`，控制鎖頭圖示顯示與底部「尚未設定或開啟身份辨識」可點擊提示條 |
+| UI | [DetailActivity.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/detail/DetailActivity.kt) | 結合 `BiometricPromptManager.isSystemBiometricReady(context)` 與 `isAppBiometricEnabled` 控制鎖頭圖示顯示，並於 `ON_RESUME` 刷新 |
+| UI | [MainRoute.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/main/route/MainRoute.kt) | 實作啟動／回前景系統偵測自動關閉 Dialog，以及設定頁關閉時的「已有上鎖資料」確認 Dialog（以 `disableBiometricPrivateCount` 控制） |
 | 資源 | [strings.xml](../app/src/main/res/values/strings.xml) | 集中新增所有提示文字、對話框標題與按鈕文案 |
+| 測試 | [UiStateAndRegexUnitTest.kt](../app/src/test/java/com/itl/kglab/noteEncryptorManager/UiStateAndRegexUnitTest.kt)、[AppUiFlowInstrumentedTest.kt](../app/src/androidTest/java/com/itl/kglab/noteEncryptorManager/AppUiFlowInstrumentedTest.kt) | 補齊 `ScreenState.isBiometricEffective` 單元測試，以及 AC-1／AC-4 儀器測試 |
 
 ---
 
@@ -164,15 +166,15 @@ sequenceDiagram
 1. **需求 1（編輯頁反灰開關點擊提醒形式）**：使用 `Toast` 提示使用者至設定選單開啟身份辨識。
 2. **需求 2（關閉 App 身份辨識後的既有筆記狀態）**：保留資料庫原 `is_private` 標記，待重新開啟身份辨識後自動恢復上鎖保護與鎖頭顯示。
 3. **需求 3（筆記清單底部提示列互動）**：點擊該提示列直接切換至「設定」分頁。
-4. **需求 5（系統取消身份辨識提示 Dialog 按鈕）**：同時提供「前往系統設定」與「確認」按鈕。
+4. **需求 5（系統取消身份辨識提示 Dialog 按鈕）**：同時提供「前往設定」與「確認」按鈕。
 
 ---
 
 ## 5. 驗收測試情境清單（Acceptance Criteria）
 
-* **AC-1**：App 未開啟身份辨識時進入新增／編輯筆記頁，身份辨識 `Switch` 呈現反灰不可切換，點擊後顯示 `Toast` 提醒。
+* **AC-1**（已納入儀器測試）：App 未開啟身份辨識時進入新增／編輯筆記頁，身份辨識 `Switch` 呈現反灰不可切換，點擊後顯示 `Toast` 提醒。
 * **AC-2**：App 已開啟身份辨識且資料庫存在至少 1 筆 `isPrivate = true` 筆記時，在設定頁點選關閉開關會先跳出確認 Dialog；點「取消」維持開啟，點「確認」後進行驗證並成功關閉，且資料庫既有 `is_private` 標記仍保留（重開後自動恢復上鎖）。
 * **AC-3**：App 已開啟身份辨識且資料庫無任何 `isPrivate = true` 筆記時，在設定頁關閉開關不顯示額外警告 Dialog，直接走驗證關閉。
-* **AC-4**：App 未開啟身份辨識時，筆記清單（無論空清單或有資料）底部皆顯示「尚未設定或開啟身份辨識」提示，點擊後直接切換至「設定」分頁；開啟後該提示自動消失。
-* **AC-5**：資料庫存在 `isPrivate = true` 筆記，但 App 或系統未開啟身份辨識時，筆記清單與詳細頁均不顯示鎖定圖示；兩者皆開啟時才顯示鎖定圖示。
-* **AC-6**：原先系統與 App 皆開啟身份辨識，於系統設定移除螢幕鎖定／生物辨識後重新開啟或切回 App，立即跳出「身份辨識已關閉」提醒 Dialog（含「前往系統設定」與「確認」按鈕），並自動將 App 設定改為關閉（再次重開不重複彈窗）。
+* **AC-4**（已納入儀器測試）：App 未開啟身份辨識時，筆記清單（無論空清單或有資料）底部皆顯示「尚未設定或開啟身份辨識」提示，點擊後直接切換至「設定」分頁；開啟後該提示自動消失。
+* **AC-5**（已納入 `isBiometricEffective` 單元測試）：資料庫存在 `isPrivate = true` 筆記，但 App 或系統未開啟身份辨識時，筆記清單與詳細頁均不顯示鎖定圖示；兩者皆開啟時才顯示鎖定圖示。
+* **AC-6**：原先系統與 App 皆開啟身份辨識，於系統設定移除螢幕鎖定／生物辨識後重新開啟或切回 App，立即跳出「身份辨識已關閉」提醒 Dialog（含「前往設定」與「確認」按鈕），並自動將 App 設定改為關閉（再次重開不重複彈窗）。

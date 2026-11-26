@@ -6,6 +6,7 @@
 - **Tech Stack**: Kotlin (`2.2.10`), Jetpack Compose + Material 3, Android Gradle Plugin (`9.5.2`), KSP, Hilt, Room (`exportSchema = true`), DataStore, BiometricPrompt, Kotlinx Serialization
 - **SDK & Toolchain**: `minSdk = 29`, `compileSdk = 37`, `targetSdk = 37`, Java `17`, `kotlin.code.style=official`
 - **Version Catalog**: [gradle/libs.versions.toml](gradle/libs.versions.toml)
+- **Project Docs**: [docs/README.md](docs/README.md)
 
 ## Architecture & Directory Map
 

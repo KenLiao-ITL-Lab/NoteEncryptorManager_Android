@@ -31,6 +31,7 @@
 
 * **[NoteInfoUpdate.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/data/db/updateInfo/NoteInfoUpdate.kt)**（由 `EditorViewModel` 使用）：更新 `title`、`time_desc`、`note`（自動加密）、`is_private`。
 * **[InfoSettingUpdate.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/data/db/updateInfo/InfoSettingUpdate.kt)**（由 `DetailViewModel` 使用）：更新 `input_text`、`output_text`、`sampled_message`（三者皆自動加密）、`sample_size`、`sample_index`。
+* 另提供 `countPrivateNotes()`（`SELECT COUNT(*) FROM noteInfoTable WHERE is_private = 1`），供設定頁關閉身份辨識前檢查是否仍有上鎖筆記。
 
 ---
 
@@ -103,7 +104,10 @@ flowchart LR
 
 * **允許的驗證器（Authenticators）**：
   * **Android 11+（API 30 以上）**：`BIOMETRIC_STRONG or DEVICE_CREDENTIAL`（允許強生物辨識或裝置 PIN／圖形／密碼，依 Android 規範不額外設定負面按鈕文字）。
-  * **Android 10（API 29）**：`BIOMETRIC_STRONG`，並設定負面按鈕文字為 `"取消"`。
+  * **Android 10（API 29）**：`BIOMETRIC_STRONG`，因未包含 `DEVICE_CREDENTIAL`，會以字串資源 `R.string.common_cancel`（「取消」）設定負面按鈕文字。
+* **狀態檢查介面**：
+  * 實例方法 `checkBiometricSupport(): BioAuthResult`：區分支援成功、硬體暫不可用、無硬體功能或尚未登錄。
+  * 靜態輔助方法 `BiometricPromptManager.allowedAuthenticators()` 與 `BiometricPromptManager.isSystemBiometricReady(context)`：供 `MainRoute`、`DetailActivity`、`EditorActivity` 統一判斷系統是否已完成身份辨識設定。
 * **結果狀態模型（`BioAuthResult`）**：
   * `Init`（重設狀態用）
   * `HardwareUnavailable`、`FeatureUnavailable`、`AuthenticationNotSet`

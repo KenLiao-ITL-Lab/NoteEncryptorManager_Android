@@ -38,7 +38,9 @@ flowchart TD
     MainAct --> MainVM
     MainAct --> BioMgr
     DetailAct --> DetailVM
+    DetailAct -.-> BioMgr
     EditorAct --> EditorVM
+    EditorAct -.-> BioMgr
 
     MainVM --> MainRepo
     MainVM --> Hash
@@ -53,7 +55,7 @@ flowchart TD
 
 ### 各層職責
 
-* **UI 層（`ui/`、`manager/`）**：負責畫面繪製、接收使用者操作、啟動 Activity 跳轉、剪貼簿操作，以及透過 `BiometricPromptManager` 觸發系統生物辨識對話框。
+* **UI 層（`ui/`、`manager/`）**：負責畫面繪製、接收使用者操作、啟動 Activity 跳轉、剪貼簿操作，以及透過 `BiometricPromptManager` 觸發系統生物辨識對話框或檢查系統身份辨識可用狀態（`isSystemBiometricReady`）。
 * **ViewModel 層（`viewmodel/`）**：透過 Jetpack Compose 的 `mutableStateOf` 維護畫面狀態，呼叫 `MainRepository` 與 `HashTools` 完成資料讀寫、雜湊與取樣運算。
 * **Repository 層（`repository/`）**：統一對外提供資料介面（`MainRepositoryInterface`），在寫入與讀取 Room 資料時自動進行敏感欄位加解密，並將 I/O 操作切換至背景執行緒。
 * **資料來源層（`data/`）**：封裝 Room SQLite 資料庫與 DataStore Preferences（偏好設定資料存放區）。
@@ -75,7 +77,7 @@ flowchart TD
 | `manager/` | `BiometricPromptManager`（封裝系統生物辨識與裝置憑證驗證） |
 | `repository/` | `MainRepositoryInterface` 與實作類別 `MainRepository` |
 | `tools/` | `CryptographicUtility`、`HashTools`、`SettingInfo`、`SettingInputRegex` |
-| `ui/screen/main/` | `MainActivity`、`ConverterScreen`、`NoteListScreen`、`SettingScreen`、底部導覽與路由 `route/` |
+| `ui/screen/main/` | `MainActivity`、`ConverterScreen`、`NoteListScreen`、`SettingScreen`、設定畫面模型 `data/`、底部導覽與路由 `route/` |
 | `ui/screen/detail/` | `DetailActivity`（筆記檢視、轉換與取樣畫面） |
 | `ui/screen/editor/` | `EditorActivity`（筆記新增／編輯畫面） |
 | `ui/component/` | 共用 Compose 元件（`ContentTextCard`、`DescInputItem`、`OutlinedStyleButton`、`TableDivider`、`TitleFuncButtons`） |
@@ -107,3 +109,4 @@ flowchart TD
 * **事件流傳遞**：
   * DataStore 設定透過 Kotlin `Flow<SettingInfo>` 對外提供。
   * `BiometricPromptManager` 透過 `Channel<BioAuthResult>` 搭配 `receiveAsFlow()` 發送一次性驗證事件，由 `MainRoute` 內的 `LaunchedEffect` 收集（collect）處理，避免狀態重組時重複觸發。
+  * `EditorViewModel` 透過 `Channel<Unit>(Channel.BUFFERED)` 搭配 `receiveAsFlow()`（`saveCompleted`）於資料庫非同步寫入完成後通知 `EditorActivity` 回傳 `RESULT_OK` 並關閉頁面。

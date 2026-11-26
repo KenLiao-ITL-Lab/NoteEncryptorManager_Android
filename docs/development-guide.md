@@ -59,16 +59,19 @@
 
 ---
 
-## 5. 測試建議
+## 5. 測試現況與建議
 
-目前測試目錄位於：
-* **單元測試**：`app/src/test/java/com/itl/kglab/noteEncryptorManager/`
-* **儀器測試**：`app/src/androidTest/java/com/itl/kglab/noteEncryptorManager/`
+目前測試目錄與現有測試檔案：
+* **單元測試**（`app/src/test/java/com/itl/kglab/noteEncryptorManager/`）：
+  * [UiStateAndRegexUnitTest.kt](../app/src/test/java/com/itl/kglab/noteEncryptorManager/UiStateAndRegexUnitTest.kt)：驗證 `EditorViewState` 狀態保存、`SettingInputRegex` 數字位數檢核、`DetailScreenUiState` 預設狀態，以及 `ScreenState.isBiometricEffective` 衍生條件。
+  * [ExampleUnitTest.kt](../app/src/test/java/com/itl/kglab/noteEncryptorManager/ExampleUnitTest.kt)：範本單元測試。
+* **儀器測試**（`app/src/androidTest/java/com/itl/kglab/noteEncryptorManager/`）：
+  * [AppUiFlowInstrumentedTest.kt](../app/src/androidTest/java/com/itl/kglab/noteEncryptorManager/AppUiFlowInstrumentedTest.kt)：涵蓋底部導覽選中狀態、訊息轉換與清除、筆記清單未開啟身份辨識提示條點擊跳轉，以及完整的新增筆記、詳細頁檢視、空取樣欄位轉換、取樣運算與編輯保留原始時間流程。
+  * [ExampleInstrumentedTest.kt](../app/src/androidTest/java/com/itl/kglab/noteEncryptorManager/ExampleInstrumentedTest.kt)：範本儀器測試。
 
-建議優先針對以下核心邏輯補充與維護 JUnit 單元測試：
+後續建議持續針對以下核心邏輯補充 JUnit 單元測試：
 * `HashTools` 的雜湊輸出與循環取樣邊界條件（例如 `size = 0`、索引大於字串長度、含換行字元）。
-* `SettingInputRegex` 的合法與非法輸入檢核。
-* `MainRepository`（搭配 Fake DAO 與 Dispatcher）與各 ViewModel 的狀態更新流程。
+* `MainRepository`（搭配 Fake DAO 與 Dispatcher）與各 ViewModel 的完整狀態更新與異常處理流程。
 
 ---
 

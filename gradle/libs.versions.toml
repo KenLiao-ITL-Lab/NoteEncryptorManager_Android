@@ -20,7 +20,7 @@ hilt = "2.60.1"
 
 biometric = "1.4.0-alpha02"
 
-# Serialization 1.6.3 支援 Kotlin 1.9.23
+# Serialization 版本須與 Kotlin 版本相容
 serialization = "1.9.0"
 
 [libraries]

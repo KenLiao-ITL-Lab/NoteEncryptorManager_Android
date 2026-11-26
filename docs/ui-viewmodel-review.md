@@ -2,7 +2,7 @@
 
 本文件記錄針對 `com.itl.kglab.noteEncryptorManager.ui` 與 `com.itl.kglab.noteEncryptorManager.viewmodel` 進行程式碼檢視後所整理的潛在問題、狀態管理缺陷與改善建議，依風險等級分級並提供追蹤勾選清單。
 
-> 檢視日期：2026-11-22｜最後更新：2026-11-22
+> 檢視日期：2026-11-22｜最後更新：2026-11-25（全部 15 項問題皆已修正完成）
 
 ---
 
@@ -131,4 +131,4 @@
 ### - [x] #15 ViewModel 依賴介面化與未使用程式碼清理
 
 * **影響檔案**：[RepositoryProviderModule.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/di/RepositoryProviderModule.kt)、[MainViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/main/MainViewModel.kt)、[DetailViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/detail/DetailViewModel.kt)、[EditorViewModel.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/viewmodel/editor/EditorViewModel.kt)、[MainRoute.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/main/route/MainRoute.kt)、[DetailActivity.kt](../app/src/main/java/com/itl/kglab/noteEncryptorManager/ui/screen/detail/DetailActivity.kt)
-* **修復方式**：已改用 Hilt `@Binds` 綁定 `MainRepositoryInterface` 供三個 ViewModel 注入，清理未使用的 `clearPreviousPreferences()`、`BackTextButton` 與已棄用的 `LocalClipboardManager` 匯入，並新增 [UiStateAndRegexUnitTest.kt](../app/src/test/java/com/itl/kglab/noteEncryptorManager/UiStateAndRegexUnitTest.kt)。
+* **修復方式**：已改用 Hilt `@Binds` 綁定 `MainRepositoryInterface` 供三個 ViewModel 注入，清理 `MainViewModel` 未使用的 `clearPreviousPreferences()` 包裝方法、`BackTextButton` 與已棄用的 `LocalClipboardManager` 匯入，並新增 [UiStateAndRegexUnitTest.kt](../app/src/test/java/com/itl/kglab/noteEncryptorManager/UiStateAndRegexUnitTest.kt)。
